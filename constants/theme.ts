@@ -4,8 +4,7 @@
  */
 
 import { useFonts } from "expo-font";
-import { Platform } from "react-native";
-import { red } from "react-native-reanimated/lib/typescript/Colors";
+import { Platform, StyleSheet } from "react-native";
 
 export const Colors = {
   general: {
@@ -70,6 +69,45 @@ export const Fonts = Platform.select({
     rounded:
       "Inter, 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
     mono: "Inter, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+  },
+});
+
+export const typography = StyleSheet.create({
+  mediumL: {
+    fontSize: 18,
+    lineHeight: 18 * 1.2,
+    fontWeight: "500",
+    fontFamily: Fonts.sans,
+  },
+  mediumM: {
+    fontSize: 16,
+    lineHeight: 16 * 1.25,
+    fontWeight: "500",
+    fontFamily: Fonts.sans,
+  },
+  mediumS: {
+    fontSize: 14,
+    lineHeight: 14 * 1.25,
+    fontWeight: "500",
+    fontFamily: Fonts.sans,
+  },
+  regularL: {
+    fontSize: 18,
+    lineHeight: 18 * 1.2,
+    fontWeight: "400",
+    fontFamily: Fonts.sans,
+  },
+  regularM: {
+    fontSize: 16,
+    lineHeight: 16 * 1.25,
+    fontWeight: "400",
+    fontFamily: Fonts.sans,
+  },
+  regularS: {
+    fontSize: 14,
+    lineHeight: 14 * 1.25,
+    fontWeight: "400",
+    fontFamily: Fonts.sans,
   },
 });
 
