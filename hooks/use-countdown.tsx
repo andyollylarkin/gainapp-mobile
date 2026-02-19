@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type TimeLeft = {
   hours: number;
@@ -15,17 +15,17 @@ export default function useCountdown(targetSeconds: number): TimeLeft {
     real: targetSeconds,
   });
 
-  useEffect(() => {
-    const toTimeLeft = (remainingSeconds: number): TimeLeft => {
-      const clamped = Math.max(remainingSeconds, 0);
-      const hours = Math.floor(clamped / 3600);
-      const minutes = Math.floor((clamped % 3600) / 60);
-      const seconds = Math.floor(clamped % 60);
-      return { hours, minutes, seconds, real: clamped };
-    };
+  const timeToLeft = useCallback((remainingSeconds: number): TimeLeft => {
+    const clamped = Math.max(remainingSeconds, 0);
+    const hours = Math.floor(clamped / 3600);
+    const minutes = Math.floor((clamped % 3600) / 60);
+    const seconds = Math.floor(clamped % 60);
+    return { hours, minutes, seconds, real: clamped };
+  }, []);
 
+  useEffect(() => {
     let remaining = Math.max(Math.floor(targetSeconds), 0);
-    setTimeLeft(toTimeLeft(remaining));
+    setTimeLeft(timeToLeft(remaining));
 
     const interval = setInterval(() => {
       remaining -= 1;
@@ -34,11 +34,11 @@ export default function useCountdown(targetSeconds: number): TimeLeft {
         setTimeLeft({ hours: 0, minutes: 0, seconds: 0, real: 0 });
         return;
       }
-      setTimeLeft(toTimeLeft(remaining));
+      setTimeLeft(timeToLeft(remaining));
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [targetSeconds]);
+  }, [targetSeconds, timeToLeft]);
 
   return timeLeft;
 }

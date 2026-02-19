@@ -24,15 +24,15 @@ export const Colors = {
         muted40: "#666666",
         muted30: "#4D4D4D",
       },
-      done: {
-        doneMain: "#00E552",
-        doneBg: "#003312",
-        doneBgLight: "#004D1B",
+      greenTones: {
+        greenMain: "#00E552",
+        greenBg: "#003312",
+        greenBgLight: "#004D1B",
       },
-      orangeTones: {
-        prMain: "#E55400",
-        prBgLight: "#4D1C00",
-        prBg: "#331300",
+      goldTones: {
+        goldMain: "#E7B500",
+        goldBgLight: "#332800",
+        goldBg: "#332800",
       },
       redTones: {
         redMain: "#E51300",
@@ -44,7 +44,7 @@ export const Colors = {
       },
     },
   },
-};
+} as const;
 
 export const Fonts = Platform.select({
   ios: {

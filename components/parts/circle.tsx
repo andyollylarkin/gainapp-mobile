@@ -1,4 +1,5 @@
-import { Fonts } from "@/constants/theme";
+import { typography } from "@/constants/theme";
+import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
 import { ReactElement } from "react";
 import { Text, View } from "react-native";
 import { SvgProps } from "react-native-svg";
@@ -16,10 +17,7 @@ export function CircleTextContent({
     <Text
       style={{
         color: textColor,
-        fontFamily: Fonts.sans,
-        fontSize: 16,
-        lineHeight: 20,
-        fontWeight: "500",
+        ...typography.mediumM,
       }}
     >
       {children}
@@ -31,7 +29,6 @@ type AppSvgProps = Omit<SvgProps, "width" | "height"> & {
   width?: 18;
   height?: 18;
   color?: string;
-  suka?: string;
 };
 
 export type AppSvgComponent = (props: AppSvgProps) => React.ReactElement;
@@ -45,24 +42,49 @@ export function CircleIconContent({ children }: CircleIconContentProps) {
 }
 
 export interface CircleProps {
-  bgColor: string;
+  bgColor?: string;
   children:
     | ReactElement<typeof CircleTextContent>
     | ReactElement<typeof CircleIconContent>;
+  gradient?: LinearGradientProps & { angle?: number };
 }
 
-export default function Circle({ bgColor, children }: CircleProps) {
+export default function Circle({ bgColor, children, gradient }: CircleProps) {
+  const circleStyle = {
+    width: "100%" as const,
+    aspectRatio: 1,
+    transform: [{ rotate: `${gradient?.angle ?? 0}deg` }],
+    borderRadius: 9999,
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
+    maxWidth: 30,
+    maxHeight: 30,
+  };
+
+  if (gradient) {
+    return (
+      <LinearGradient {...gradient} style={circleStyle}>
+        <View
+          style={{
+            transform: [
+              {
+                rotate:
+                  (gradient?.angle ?? 0) > 0 ? `-${gradient.angle}deg` : "0deg",
+              },
+            ],
+          }}
+        >
+          {children}
+        </View>
+      </LinearGradient>
+    );
+  }
+
   return (
     <View
       style={{
-        width: "100%",
-        aspectRatio: 1,
-        borderRadius: 9999,
+        ...circleStyle,
         backgroundColor: bgColor,
-        justifyContent: "center",
-        alignItems: "center",
-        maxWidth: 30,
-        maxHeight: 30,
       }}
     >
       {children}
