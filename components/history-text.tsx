@@ -1,28 +1,28 @@
-import { Colors } from "@/constants/theme";
+import { Colors, typography } from "@/constants/theme";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import MultiplyIcon from "./icons/multiply-icon";
+import CrossIcon from "./icons/cross";
 
 export interface HistoryTextProps {
-  firstText: string;
-  secondText: string;
-  delimiter: string | React.ReactElement<typeof MultiplyIcon>;
+  firstText: string | number;
+  secondText: string | number;
+  delimiter:
+    | string
+    | React.ReactElement<
+        typeof MultiplyIcon | React.ReactElement<typeof CrossIcon>
+      >;
   color: string;
 }
 export default function HistoryText({
   firstText,
   secondText,
   delimiter,
-  color,
 }: HistoryTextProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>{firstText}</Text>
-      {typeof delimiter === "string" ? (
-        <Text style={[styles.delimiter, { color }]}>{delimiter}</Text>
-      ) : (
-        delimiter
-      )}
+      <View style={styles.delimiter}>{delimiter}</View>
       <Text style={styles.text}>{secondText}</Text>
     </View>
   );
@@ -30,18 +30,19 @@ export default function HistoryText({
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
   },
   text: {
-    fontSize: 16,
-    fontWeight: "500",
-    lineHeight: 20,
+    ...typography.mediumM,
     color: Colors.general.color.grayTones.muted40,
-    marginHorizontal: 12,
-    marginVertical: 8,
+    textAlign: "center",
   },
   delimiter: {
-    marginHorizontal: 4,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

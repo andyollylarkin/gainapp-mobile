@@ -31,7 +31,7 @@ export const Colors = {
       },
       goldTones: {
         goldMain: "#E7B500",
-        goldBgLight: "#332800",
+        goldBgLight: "#4D3C00",
         goldBg: "#332800",
       },
       redTones: {

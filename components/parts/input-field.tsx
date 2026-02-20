@@ -1,4 +1,4 @@
-import { Colors, typography, useAppFonts } from "@/constants/theme";
+import { Colors, typography } from "@/constants/theme";
 import { useState } from "react";
 import { StyleSheet, TextInput } from "react-native";
 
@@ -26,6 +26,8 @@ export interface InputFieldProps {
   value?: string;
   type?: "text" | "number" | "password";
   placeholder?: string;
+  maxLength?: number;
+  maxNumberValue?: number;
   onChange?: (value: string) => void;
   onClick?: () => void;
   onFocus?: () => void;
@@ -33,12 +35,45 @@ export interface InputFieldProps {
 
 export default function InputField(props: InputFieldProps) {
   const fieldType = props.type || "text";
-  useAppFonts();
   const [selectedField, setSelectedField] = useState<boolean>(false);
+  const [innerValue, setInnerValue] = useState<string>(props.value ?? "");
+
+  const isControlled = props.value !== undefined;
+  const displayValue = isControlled ? props.value : innerValue;
+
+  const sanitizeNumberValue = (value: string) => {
+    const normalized = value.replace(/,/g, ".").replace(/[^\d.]/g, "");
+    const firstDotIndex = normalized.indexOf(".");
+
+    if (firstDotIndex === -1) {
+      return normalized;
+    }
+
+    const integerPart = normalized.slice(0, firstDotIndex);
+    const decimalPart = normalized.slice(firstDotIndex + 1).replace(/\./g, "");
+    return `${integerPart}.${decimalPart}`;
+  };
+
+  const handleChangeText = (value: string) => {
+    let nextValue = fieldType === "number" ? sanitizeNumberValue(value) : value;
+
+    if (fieldType === "number" && props.maxNumberValue !== undefined) {
+      const numericValue = parseFloat(nextValue);
+      if (!isNaN(numericValue) && numericValue > props.maxNumberValue) {
+        nextValue = props.maxNumberValue.toString();
+      }
+    }
+
+    if (!isControlled) {
+      setInnerValue(nextValue);
+    }
+
+    props.onChange?.(nextValue);
+  };
 
   return (
     <TextInput
-      value={props.value}
+      value={displayValue}
       onFocus={() => {
         setSelectedField(true);
         if (props.onFocus) {
@@ -48,11 +83,12 @@ export default function InputField(props: InputFieldProps) {
       onBlur={(e) => {
         setSelectedField(false);
       }}
-      onChangeText={props.onChange}
+      onChangeText={handleChangeText}
       keyboardType={fieldType === "number" ? "numeric" : "default"}
       placeholder={props.placeholder}
       secureTextEntry={fieldType === "password"}
       placeholderTextColor={props.textColor}
+      maxLength={props.maxLength}
       style={[
         styles.input,
         {
@@ -68,10 +104,12 @@ export default function InputField(props: InputFieldProps) {
 const styles = StyleSheet.create({
   input: {
     width: "100%",
+    height: "100%",
     borderRadius: 11,
     paddingHorizontal: 12,
     paddingVertical: 8,
     textAlign: "center",
+    textAlignVertical: "center",
     ...typography.mediumM,
   },
 });

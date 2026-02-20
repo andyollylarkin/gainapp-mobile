@@ -1,12 +1,12 @@
 import { Colors } from "@/constants/theme";
-import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import CrossIcon from "../icons/cross";
 import MultiplyIcon from "../icons/multiply-icon";
 import InputField, { BgColor, TextColor } from "../parts/input-field";
-import CrossIcon from "../icons/cross";
 
 export interface TwoFieldProps {
   delimiter: "x" | "|";
+  delimiterColor?: string;
   fieldColor: BgColor;
   textColor: TextColor;
   selectColor: BgColor;
@@ -17,42 +17,61 @@ export default function TwoField(props: TwoFieldProps) {
   const delimiter =
     props.delimiter === "x" ? (
       <MultiplyIcon
-        color={Colors.general.color.grayTones.muted50}
-        width={16}
-        height={16}
+        color={props.delimiterColor || Colors.general.color.grayTones.muted50}
       />
     ) : (
       <CrossIcon
-        color={Colors.general.color.grayTones.muted50}
-        width={16}
-        height={16}
+        color={props.delimiterColor || Colors.general.color.grayTones.muted50}
       />
     );
   return (
     <View style={styles.container}>
-      <InputField
-        bgColor={props.fieldColor}
-        textColor={props.textColor}
-        selectColor={props.selectColor}
-        selectTextColor={props.selectTextColor}
-      />
-      {delimiter}
-      <InputField
-        bgColor={props.fieldColor}
-        textColor={props.textColor}
-        selectColor={props.selectColor}
-        selectTextColor={props.selectTextColor}
-      />
+      <View style={styles.inputWrapper}>
+        <InputField
+          type="number"
+          maxNumberValue={100}
+          bgColor={props.fieldColor}
+          textColor={props.textColor}
+          selectColor={props.selectColor}
+          selectTextColor={props.selectTextColor}
+        />
+      </View>
+      <View style={styles.delimiterContainer}>{delimiter}</View>
+      <View style={styles.inputWrapper}>
+        <InputField
+          type="number"
+          maxNumberValue={100}
+          bgColor={props.fieldColor}
+          textColor={props.textColor}
+          selectColor={props.selectColor}
+          selectTextColor={props.selectTextColor}
+        />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    width: "100%",
     maxWidth: 139,
+    height: 32,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    alignSelf: "center",
+  },
+  inputWrapper: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100%",
+    minWidth: 0,
+  },
+  delimiterContainer: {
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 4,
   },
 });

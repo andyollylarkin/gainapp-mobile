@@ -2,9 +2,9 @@ import IconProps from "./props";
 import { Svg, Path } from "react-native-svg";
 
 export default function MultiplyIcon({
-  width = 18,
-  height = 18,
-  color = "#003312",
+  width = 16,
+  height = 16,
+  color = "#E7B500",
 }: IconProps) {
   return (
     <Svg width={width} height={height} viewBox="0 0 16 16" fill="none">
