@@ -1,4 +1,4 @@
-import SetItem from "@/components/build-components/composite/set";
+import SetItem from "@/components/build-components/composite/set-item";
 import MultiplyIcon from "@/components/icons/multiply-icon";
 import { Colors } from "@/constants/theme";
 import { View } from "react-native";
