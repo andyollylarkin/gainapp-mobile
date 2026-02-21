@@ -54,6 +54,7 @@ export default function InputField(props: InputFieldProps) {
     return `${integerPart}.${decimalPart}`;
   };
 
+
   const handleChangeText = (value: string) => {
     let nextValue = fieldType === "number" ? sanitizeNumberValue(value) : value;
 
@@ -80,6 +81,7 @@ export default function InputField(props: InputFieldProps) {
           props.onFocus();
         }
       }}
+      defaultValue={props.placeholder}
       onBlur={(e) => {
         setSelectedField(false);
       }}

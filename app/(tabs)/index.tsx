@@ -1,5 +1,7 @@
-import SetItem from "@/components/build-components/composite/set-item";
+import type { SetItemProps } from "@/components/build-components/composite/set-item";
+import SwipeableSet from "@/components/build-components/composite/swipable-set";
 import MultiplyIcon from "@/components/icons/multiply-icon";
+import DelayedPressable from "@/components/parts/delayed-pressable";
 import { Colors } from "@/constants/theme";
 import { View } from "react-native";
 
@@ -14,18 +16,30 @@ export default function HomeScreen() {
         width: "100%",
       }}
     >
-      <SetItem
-        type="pr_record"
-        history={{
-          delimiter: (
-            <MultiplyIcon color={Colors.general.color.grayTones.muted40} />
-          ),
-          firstText: 20,
-          secondText: 20,
+      <DelayedPressable
+        delay={1000}
+        onPress={(
+          _state: Parameters<NonNullable<SetItemProps["onPress"]>>[0],
+          nextState: Parameters<NonNullable<SetItemProps["onPress"]>>[1],
+        ) => {
+          if (_state === "progress") {
+            nextState("done");
+          }
         }}
-        checkValue={"W"}
-        maxInputValue={100}
-      />
+      >
+        <SwipeableSet
+          initialState="progress"
+          history={{
+            delimiter: (
+              <MultiplyIcon color={Colors.general.color.grayTones.muted40} />
+            ),
+            firstText: 20,
+            secondText: 20,
+          }}
+          excerciseOrder="W"
+          maxInputValue={100}
+        />
+      </DelayedPressable>
     </View>
   );
 }

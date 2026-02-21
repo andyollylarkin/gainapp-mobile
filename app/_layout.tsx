@@ -5,6 +5,7 @@ import {
 } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 
 import { Colors, useAppFonts } from "@/constants/theme";
@@ -32,19 +33,23 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={appTheme}>
-      <Stack
-        screenOptions={{
-          contentStyle: { backgroundColor: Colors.general.color.darkTones.bg },
-        }}
-      >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="modal"
-          options={{ presentation: "modal", title: "Modal" }}
-        />
-      </Stack>
-      <StatusBar style="light" />
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider value={appTheme}>
+        <Stack
+          screenOptions={{
+            contentStyle: {
+              backgroundColor: Colors.general.color.darkTones.bg,
+            },
+          }}
+        >
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="modal"
+            options={{ presentation: "modal", title: "Modal" }}
+          />
+        </Stack>
+        <StatusBar style="light" />
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 }

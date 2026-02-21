@@ -2,12 +2,15 @@ import HistoryText from "@/components/history-text";
 import CrossIcon from "@/components/icons/cross";
 import MultiplyIcon from "@/components/icons/multiply-icon";
 import { Colors } from "@/constants/theme";
+import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import CheckDark from "../check-dark";
 import CheckGold from "../check-gold";
 import CheckGreen from "../check-green";
 import SetNumberWarpup from "../set-number-warpup";
 import TwoField from "../two-field";
+
+type SetState = "pr_record" | "done" | "progress" | "current";
 
 export interface SetItemProps {
   history: {
@@ -19,9 +22,13 @@ export interface SetItemProps {
           typeof MultiplyIcon | React.ReactElement<typeof CrossIcon>
         >;
   };
-  checkValue: "W" | number;
+  excerciseOrder: "W" | number;
   maxInputValue: number;
-  type: "pr_record" | "done" | "progress" | "current";
+  initialState: SetState;
+  onPress?: (
+    currentState: SetState,
+    setNextState: (newState: keyof typeof colorSchemes) => void,
+  ) => void;
 }
 
 const colorSchemes = {
@@ -69,28 +76,26 @@ const colorSchemes = {
     selectColor: Colors.general.color.darkTones.bgMiddle,
     selectTextColor: Colors.general.color.grayTones.main,
   },
-};
+} as const;
 
 export default function SetItem(props: SetItemProps) {
-  const {
-    checkItem: CheckItem,
-    warpupColor,
-    warpupTextColor,
-    bgColor,
-    inputFieldColor,
-    inputFieldTextColor,
-    selectColor,
-    selectTextColor,
-  } = colorSchemes[props.type];
+  const [state, setState] = useState(colorSchemes[props.initialState]);
 
   return (
-    <View style={[styles.container, { backgroundColor: bgColor }]}>
+    <View
+      style={[styles.container, { backgroundColor: state.bgColor }]}
+      onTouchStart={() => {
+        props.onPress?.(props.initialState, (newState) =>
+          setState(colorSchemes[newState]),
+        );
+      }}
+    >
       <View style={styles.innerContainer}>
         <View style={[styles.partContainer, styles.leftPartContainer]}>
           <SetNumberWarpup
-            text={props.checkValue}
-            color={warpupColor}
-            textColor={warpupTextColor}
+            text={props.excerciseOrder}
+            color={state.warpupColor}
+            textColor={state.warpupTextColor}
           />
           <HistoryText
             color={Colors.general.color.grayTones.muted40}
@@ -101,14 +106,15 @@ export default function SetItem(props: SetItemProps) {
         </View>
         <View style={[styles.partContainer, styles.rightPartContainer]}>
           <TwoField
+            defaultValue={"0"}
             delimiter="x"
-            delimiterColor={inputFieldTextColor}
-            fieldColor={inputFieldColor}
-            textColor={inputFieldTextColor}
-            selectColor={selectColor}
-            selectTextColor={selectTextColor}
+            delimiterColor={state.inputFieldTextColor}
+            fieldColor={state.inputFieldColor}
+            textColor={state.inputFieldTextColor}
+            selectColor={state.selectColor}
+            selectTextColor={state.selectTextColor}
           />
-          <CheckItem />
+          <state.checkItem />
         </View>
       </View>
     </View>
