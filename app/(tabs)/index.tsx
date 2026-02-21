@@ -29,6 +29,7 @@ export default function HomeScreen() {
       >
         <SwipeableSet
           initialState="progress"
+          onSwipeEnd={() => {}}
           history={{
             delimiter: (
               <MultiplyIcon color={Colors.general.color.grayTones.muted40} />

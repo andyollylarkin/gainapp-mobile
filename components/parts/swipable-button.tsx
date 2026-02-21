@@ -29,6 +29,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     maxHeight: 44,
-    maxWidth: 150,
   },
 });

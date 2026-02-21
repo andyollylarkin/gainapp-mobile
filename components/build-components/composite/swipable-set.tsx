@@ -5,17 +5,26 @@ import { StyleSheet } from "react-native";
 import Swipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import SetItem, { SetItemProps } from "./set-item";
 
-export default function SwipeableSet(props: SetItemProps) {
+export default function SwipeableSet(
+  props: SetItemProps & { onSwipeEnd?: (direction: "left" | "right") => void },
+) {
+  const { onSwipeEnd, ...setItemProps } = props;
+
   return (
     <Swipeable
       containerStyle={styles.swipeable}
       friction={2}
       enableTrackpadTwoFingerGesture
       rightThreshold={80}
+      onSwipeableOpen={(direction) => {
+        if (onSwipeEnd) {
+          onSwipeEnd(direction);
+          console.log("Swipeable opened to the", direction);
+        }
+      }}
       renderRightActions={() => (
         <SwipeableButton
           color={Colors.general.color.redTones.redBgLight}
-          onPress={() => console.info("click trash button")}
           icon={
             <TrashIcon
               width={18}
@@ -26,7 +35,7 @@ export default function SwipeableSet(props: SetItemProps) {
         />
       )}
     >
-      <SetItem {...props} />
+      <SetItem {...setItemProps} />
     </Swipeable>
   );
 }
