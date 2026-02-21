@@ -9,6 +9,7 @@ import CheckGold from "../check-gold";
 import CheckGreen from "../check-green";
 import SetNumberWarpup from "../set-number-warpup";
 import TwoField from "../two-field";
+import CheckGray from "../check-gray";
 
 type SetState = "pr_record" | "done" | "progress" | "current";
 
@@ -56,7 +57,7 @@ const colorSchemes = {
   },
   progress: {
     bgColor: Colors.general.color.darkTones.bgTray,
-    textColor: "",
+    textColor: Colors.general.color.grayTones.main,
     checkItem: CheckDark,
     warpupColor: Colors.general.color.darkTones.bgMiddle,
     warpupTextColor: Colors.general.color.grayTones.muted50,
@@ -66,14 +67,14 @@ const colorSchemes = {
     selectTextColor: Colors.general.color.grayTones.main,
   },
   current: {
-    bgColor: Colors.general.color.darkTones.bgTray,
-    textColor: "",
-    checkItem: CheckDark,
-    warpupColor: Colors.general.color.darkTones.bgMiddle,
+    bgColor: Colors.general.color.darkTones.bgMiddle,
+    textColor: Colors.general.color.grayTones.main,
+    checkItem: CheckGray,
+    warpupColor: Colors.general.color.darkTones.bgLight,
     warpupTextColor: Colors.general.color.grayTones.muted50,
-    inputFieldColor: Colors.general.color.darkTones.bgMiddle,
+    inputFieldColor: Colors.general.color.darkTones.bgLight,
     inputFieldTextColor: Colors.general.color.grayTones.main,
-    selectColor: Colors.general.color.darkTones.bgMiddle,
+    selectColor: Colors.general.color.darkTones.bgLight,
     selectTextColor: Colors.general.color.grayTones.main,
   },
 } as const;

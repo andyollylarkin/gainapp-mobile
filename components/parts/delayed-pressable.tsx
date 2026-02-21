@@ -1,8 +1,8 @@
 import React, {
-	type ReactElement,
-	useCallback,
-	useEffect,
-	useRef,
+  type ReactElement,
+  useCallback,
+  useEffect,
+  useRef,
 } from "react";
 import { Pressable } from "react-native";
 
@@ -11,6 +11,12 @@ export interface DelayedPressableProps<TArgs extends unknown[]> {
   delay: number;
   children: ReactElement<{ onPress?: (...args: TArgs) => void }>;
 }
+
+/**
+ * A wrapper component that adds a delay to the onPress event of its child component.
+ * The onPress event will only be triggered if the user presses and holds the child component for the specified delay duration.
+ * If the user releases the press before the delay, the onPress event will not be triggered.
+ */
 export default function DelayedPressable<TArgs extends unknown[]>(
   props: DelayedPressableProps<TArgs>,
 ) {

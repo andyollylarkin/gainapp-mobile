@@ -8,7 +8,8 @@ export type BgColor =
   | (typeof Colors)["general"]["color"]["greenTones"]["greenMain"]
   | (typeof Colors)["general"]["color"]["greenTones"]["greenBgLight"]
   | (typeof Colors)["general"]["color"]["goldTones"]["goldMain"]
-  | (typeof Colors)["general"]["color"]["goldTones"]["goldBgLight"];
+  | (typeof Colors)["general"]["color"]["goldTones"]["goldBgLight"]
+  | (typeof Colors)["general"]["color"]["darkTones"]["bgLight"];
 
 export type TextColor =
   | (typeof Colors)["general"]["color"]["grayTones"]["main"]

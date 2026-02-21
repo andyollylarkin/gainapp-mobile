@@ -7,7 +7,8 @@ export interface SetNumberWarpupProps {
   color:
     | (typeof Colors)["general"]["color"]["greenTones"]["greenMain"]
     | (typeof Colors)["general"]["color"]["darkTones"]["bgMiddle"]
-    | (typeof Colors)["general"]["color"]["goldTones"]["goldMain"];
+    | (typeof Colors)["general"]["color"]["goldTones"]["goldMain"]
+    | (typeof Colors)["general"]["color"]["darkTones"]["bgLight"];
   textColor:
     | (typeof Colors)["general"]["color"]["greenTones"]["greenBgLight"]
     | (typeof Colors)["general"]["color"]["darkTones"]["bgLight"]
