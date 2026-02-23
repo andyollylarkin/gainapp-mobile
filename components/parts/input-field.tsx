@@ -105,6 +105,7 @@ export default function InputField(props: InputFieldProps) {
 
 const styles = StyleSheet.create({
   input: {
+    width: "100%",
     height: "100%",
     borderRadius: 11,
     paddingHorizontal: 12,

@@ -26,35 +26,28 @@ export default function HomeScreen() {
         icon2Click={() => console.log("2 click")}
       />
       <ColumnDescription items={["Set", "Previous", "kg", "Reps"]} />
-      <DelayedPressable
-        delay={1000}
-        onPress={(
-          _state: Parameters<NonNullable<SetItemProps["onPress"]>>[0],
-          nextState: Parameters<NonNullable<SetItemProps["onPress"]>>[1],
-        ) => {
-          if (_state === "progress") {
-            nextState("done");
+      <SwipeableSet
+        initialState="progress"
+        onPress={(currentState, transferState) => {
+          if (currentState === "progress") {
+            transferState("done");
           }
         }}
-      >
-        <SwipeableSet
-          initialState="progress"
-          onSwipeEnd={() => {}}
-          input={{
-            field1: "99",
-            field2: "100",
-          }}
-          history={{
-            delimiter: (
-              <MultiplyIcon color={Colors.general.color.grayTones.muted40} />
-            ),
-            firstText: 20,
-            secondText: 20,
-          }}
-          excerciseOrder="W"
-          maxInputValue={100}
-        />
-      </DelayedPressable>
+        onSwipeEnd={() => {}}
+        input={{
+          field1: "99",
+          field2: "100",
+        }}
+        history={{
+          delimiter: (
+            <MultiplyIcon color={Colors.general.color.grayTones.muted40} />
+          ),
+          firstText: 20,
+          secondText: 20,
+        }}
+        excerciseOrder="W"
+        maxInputValue={100}
+      />
     </View>
   );
 }

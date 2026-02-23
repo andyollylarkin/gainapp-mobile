@@ -11,6 +11,7 @@ import CheckGray from "../check-gray";
 import CheckGreen from "../check-green";
 import SetNumberWarpup from "../set-number-warpup";
 import TwoField from "../two-field";
+import DelayedPressable from "@/components/parts/delayed-pressable";
 
 type SetState = "pr_record" | "done" | "progress" | "current";
 
@@ -33,7 +34,7 @@ export interface SetItemProps {
   };
   onPress?: (
     currentState: SetState,
-    setNextState: (newState: keyof typeof colorSchemes) => void,
+    setNextState: (newState: SetState) => void,
   ) => void;
 }
 
@@ -85,17 +86,16 @@ const colorSchemes = {
 } as const;
 
 export default function SetItem(props: SetItemProps) {
-  const [state, setState] = useState(colorSchemes[props.initialState]);
+  const [state, setState] = useState(colorSchemes[props.initialState]); // TODO: use state machine
+  const [currentState, setCurrentState] = useState(props.initialState);
+
+  const stateTransition = (newState: SetState) => {
+    setState(colorSchemes[newState]);
+    setCurrentState(newState);
+  };
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: state.bgColor }]}
-      onTouchStart={() => {
-        props.onPress?.(props.initialState, (newState) =>
-          setState(colorSchemes[newState]),
-        );
-      }}
-    >
+    <View style={[styles.container, { backgroundColor: state.bgColor }]}>
       <View style={styles.innerContainer}>
         <View style={[styles.partContainer, styles.leftPartContainer]}>
           <SetNumberWarpup
@@ -137,7 +137,12 @@ export default function SetItem(props: SetItemProps) {
               />
             </View>
           )}
-          <state.checkItem />
+          <DelayedPressable
+            delay={200}
+            onPress={() => props.onPress?.(currentState, stateTransition)}
+          >
+            <state.checkItem />
+          </DelayedPressable>
         </View>
       </View>
     </View>
