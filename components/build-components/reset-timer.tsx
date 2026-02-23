@@ -1,6 +1,6 @@
 import useCountdown from "@/hooks/use-countdown";
 import { StyleSheet, View, Text } from "react-native";
-import TextButton from "./parts/text-button";
+import TextButton from "../parts/text-button";
 import { Colors, Fonts, typography } from "@/constants/theme";
 import { useEffect, useState } from "react";
 

@@ -27,9 +27,9 @@ export default function HomeScreen() {
       />
       <ColumnDescription items={["Set", "Previous", "kg", "Reps"]} />
       <SwipeableSet
-        initialState="progress"
+        initialState="current"
         onPress={(currentState, transferState) => {
-          if (currentState === "progress") {
+          if (currentState === "current") {
             transferState("done");
           }
         }}
