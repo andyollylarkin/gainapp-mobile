@@ -77,37 +77,37 @@ export const typography = StyleSheet.create({
     fontSize: 18,
     lineHeight: 18 * 1.2,
     fontWeight: "500",
-    fontFamily: Fonts.sans,
+    fontFamily: "Inter-Medium",
   },
   mediumM: {
     fontSize: 16,
     lineHeight: 16 * 1.25,
     fontWeight: "500",
-    fontFamily: Fonts.sans,
+    fontFamily: "Inter-Medium",
   },
   mediumS: {
     fontSize: 14,
     lineHeight: 14 * 1.25,
     fontWeight: "500",
-    fontFamily: Fonts.sans,
+    fontFamily: "Inter-Medium",
   },
   regularL: {
     fontSize: 18,
     lineHeight: 18 * 1.2,
     fontWeight: "400",
-    fontFamily: Fonts.sans,
+    fontFamily: "Inter-Regular",
   },
   regularM: {
     fontSize: 16,
     lineHeight: 16 * 1.25,
     fontWeight: "400",
-    fontFamily: Fonts.sans,
+    fontFamily: "Inter-Regular",
   },
   regularS: {
     fontSize: 14,
     lineHeight: 14 * 1.25,
     fontWeight: "400",
-    fontFamily: Fonts.sans,
+    fontFamily: "Inter-Regular",
   },
 });
 

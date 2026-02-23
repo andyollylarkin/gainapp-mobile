@@ -1,15 +1,16 @@
 import HistoryText from "@/components/history-text";
 import CrossIcon from "@/components/icons/cross";
 import MultiplyIcon from "@/components/icons/multiply-icon";
+import InputField from "@/components/parts/input-field";
 import { Colors } from "@/constants/theme";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import CheckDark from "../check-dark";
 import CheckGold from "../check-gold";
+import CheckGray from "../check-gray";
 import CheckGreen from "../check-green";
 import SetNumberWarpup from "../set-number-warpup";
 import TwoField from "../two-field";
-import CheckGray from "../check-gray";
 
 type SetState = "pr_record" | "done" | "progress" | "current";
 
@@ -26,6 +27,10 @@ export interface SetItemProps {
   excerciseOrder: "W" | number;
   maxInputValue: number;
   initialState: SetState;
+  input: {
+    field1: NonNullable<string>;
+    field2: string | null;
+  };
   onPress?: (
     currentState: SetState,
     setNextState: (newState: keyof typeof colorSchemes) => void,
@@ -106,15 +111,32 @@ export default function SetItem(props: SetItemProps) {
           />
         </View>
         <View style={[styles.partContainer, styles.rightPartContainer]}>
-          <TwoField
-            defaultValue={"0"}
-            delimiter="x"
-            delimiterColor={state.inputFieldTextColor}
-            fieldColor={state.inputFieldColor}
-            textColor={state.inputFieldTextColor}
-            selectColor={state.selectColor}
-            selectTextColor={state.selectTextColor}
-          />
+          {props.input.field2 !== null ? (
+            <TwoField
+              defaultValue={"0"}
+              delimiter="x"
+              delimiterColor={state.inputFieldTextColor}
+              firstFieldValue={props.input.field1}
+              secondFieldValue={props.input.field2}
+              fieldColor={state.inputFieldColor}
+              textColor={state.inputFieldTextColor}
+              selectColor={state.selectColor}
+              selectTextColor={state.selectTextColor}
+            />
+          ) : (
+            <View style={styles.singleInputContainer}>
+              <InputField
+                bgColor={state.inputFieldColor}
+                textColor={state.inputFieldTextColor}
+                selectColor={state.selectColor}
+                selectTextColor={state.selectTextColor}
+                type="number"
+                placeholder="0"
+                value={props.input.field1}
+                maxNumberValue={props.maxInputValue}
+              />
+            </View>
+          )}
           <state.checkItem />
         </View>
       </View>
@@ -148,5 +170,11 @@ const styles = StyleSheet.create({
   },
   rightPartContainer: {
     gap: 12,
+  },
+  singleInputContainer: {
+    width: 139,
+    height: 32,
+    justifyContent: "center",
+    alignItems: "stretch",
   },
 });

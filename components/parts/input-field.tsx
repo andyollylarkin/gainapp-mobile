@@ -1,5 +1,5 @@
 import { Colors, typography } from "@/constants/theme";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, TextInput } from "react-native";
 
 export type BgColor =
@@ -39,8 +39,11 @@ export default function InputField(props: InputFieldProps) {
   const [selectedField, setSelectedField] = useState<boolean>(false);
   const [innerValue, setInnerValue] = useState<string>(props.value ?? "");
 
-  const isControlled = props.value !== undefined;
-  const displayValue = isControlled ? props.value : innerValue;
+  useEffect(() => {
+    if (props.value !== undefined) {
+      setInnerValue(props.value);
+    }
+  }, [props.value]);
 
   const sanitizeNumberValue = (value: string) => {
     const normalized = value.replace(/,/g, ".").replace(/[^\d.]/g, "");
@@ -55,7 +58,6 @@ export default function InputField(props: InputFieldProps) {
     return `${integerPart}.${decimalPart}`;
   };
 
-
   const handleChangeText = (value: string) => {
     let nextValue = fieldType === "number" ? sanitizeNumberValue(value) : value;
 
@@ -66,23 +68,20 @@ export default function InputField(props: InputFieldProps) {
       }
     }
 
-    if (!isControlled) {
-      setInnerValue(nextValue);
-    }
+    setInnerValue(nextValue);
 
     props.onChange?.(nextValue);
   };
 
   return (
     <TextInput
-      value={displayValue}
+      value={innerValue}
       onFocus={() => {
         setSelectedField(true);
         if (props.onFocus) {
           props.onFocus();
         }
       }}
-      defaultValue={props.placeholder}
       onBlur={(e) => {
         setSelectedField(false);
       }}
@@ -106,7 +105,6 @@ export default function InputField(props: InputFieldProps) {
 
 const styles = StyleSheet.create({
   input: {
-    width: "100%",
     height: "100%",
     borderRadius: 11,
     paddingHorizontal: 12,

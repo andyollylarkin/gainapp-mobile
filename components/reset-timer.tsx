@@ -66,7 +66,8 @@ const styles = StyleSheet.create({
   element: {
     width: "100%",
     borderRadius: 38,
-    backgroundColor: Colors["general"].color.darkTones.bgMiddle,
+    backgroundColor: Colors.general.color.darkTones.bgMiddle,
+    height: 52,
     maxHeight: 52,
     flex: 1,
     flexDirection: "row",
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 6,
     paddingVertical: 6,
-    fontFamily: Fonts.sans,
+    ...typography.mediumL
   },
   text: {
     ...typography.mediumL,

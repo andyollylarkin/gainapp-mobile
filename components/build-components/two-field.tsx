@@ -12,6 +12,8 @@ export interface TwoFieldProps {
   selectColor: BgColor;
   selectTextColor: TextColor;
   defaultValue?: string;
+  firstFieldValue?: string;
+  secondFieldValue?: string;
 }
 
 export default function TwoField(props: TwoFieldProps) {
@@ -32,6 +34,7 @@ export default function TwoField(props: TwoFieldProps) {
         <InputField
           type="number"
           placeholder={props.defaultValue}
+          value={props.firstFieldValue}
           maxNumberValue={100}
           bgColor={props.fieldColor}
           textColor={props.textColor}
@@ -44,6 +47,7 @@ export default function TwoField(props: TwoFieldProps) {
         <InputField
           type="number"
           placeholder={props.defaultValue}
+          value={props.secondFieldValue}
           maxNumberValue={100}
           bgColor={props.fieldColor}
           textColor={props.textColor}
