@@ -12,6 +12,8 @@ import ExcerciseTitle, { ExcerciseTitleProps } from "../excercise-title";
 import { SetItemProps } from "./set-item";
 import SwipeableSet from "./swipable-set";
 
+type ExerciseWithId = SetItemProps & { _id: string };
+
 export interface ExcerciseTrayProps {
   title: ExcerciseTitleProps;
   description: ColumnDescriptionProps;
@@ -21,16 +23,22 @@ export interface ExcerciseTrayProps {
 
 export default function ExcerciseTray(props: ExcerciseTrayProps) {
   const [excercises, addOrRemoveExcercises] = React.useState<
-    NonEmptyArray<SetItemProps>
-  >(props.excercises);
+    NonEmptyArray<ExerciseWithId>
+  >(
+    () =>
+      props.excercises.map((ex, i) => ({
+        ...ex,
+        _id: `exercise-${Date.now()}-${i}`,
+      })) as NonEmptyArray<ExerciseWithId>,
+  );
   const [currentActiveIndex, setCurrentActiveIndex] = React.useState<number>(0);
 
   useEffect(() => {}, [currentActiveIndex]);
 
-  const createDefaultExcercise = (base: SetItemProps): SetItemProps => ({
+  const createDefaultExcercise = (base: ExerciseWithId): ExerciseWithId => ({
     ...base,
+    _id: `exercise-${Date.now()}-${Math.random()}`,
     initialState: "progress",
-    history: props.history,
   });
 
   return (
@@ -38,7 +46,7 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
       <ExcerciseTitle {...props.title} />
       <ColumnDescription {...props.description} />
       {excercises.map((excercise, index) => (
-        <View key={index} style={styles.exerciseRow}>
+        <View key={excercise._id} style={styles.exerciseRow}>
           <SwipeableSet
             onPressEnd={() => {
               if (index !== currentActiveIndex) return;
@@ -50,9 +58,12 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
             onSwipeEnd={() => {
               addOrRemoveExcercises((current) => {
                 if (index === 0) return current;
-                return current.filter(
-                  (_, i) => i !== index,
-                ) as NonEmptyArray<SetItemProps>;
+                const filtered = current.filter(
+                  (ex) => ex._id !== excercise._id,
+                );
+                return (
+                  filtered.length > 0 ? filtered : current
+                ) as NonEmptyArray<ExerciseWithId>;
               });
             }}
             {...excercise}
@@ -65,6 +76,16 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
               });
               if (index !== currentActiveIndex) return;
               excercise.onPress?.(initialState, stateTransition);
+            }}
+            onInputChange={(field1, field2) => {
+              addOrRemoveExcercises((current) => {
+                const updated = current.map((ex) =>
+                  ex._id === excercise._id
+                    ? { ...ex, input: { field1, field2 } }
+                    : ex,
+                );
+                return updated as NonEmptyArray<ExerciseWithId>;
+              });
             }}
             excerciseOrder={index === 0 ? "W" : index}
           />
@@ -96,7 +117,7 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
                 return [
                   ...current,
                   nextExcercise,
-                ] as NonEmptyArray<SetItemProps>;
+                ] as NonEmptyArray<ExerciseWithId>;
               });
             }}
             bgColor={Colors.general.color.darkTones.bgMiddle}

@@ -14,6 +14,8 @@ export interface TwoFieldProps {
   defaultValue?: string;
   firstFieldValue?: string;
   secondFieldValue?: string;
+  onFirstFieldChange?: (value: string) => void;
+  onSecondFieldChange?: (value: string) => void;
 }
 
 export default function TwoField(props: TwoFieldProps) {
@@ -40,6 +42,7 @@ export default function TwoField(props: TwoFieldProps) {
           textColor={props.textColor}
           selectColor={props.selectColor}
           selectTextColor={props.selectTextColor}
+          onChange={props.onFirstFieldChange}
         />
       </View>
       <View style={styles.delimiterContainer}>{delimiter}</View>
@@ -53,6 +56,7 @@ export default function TwoField(props: TwoFieldProps) {
           textColor={props.textColor}
           selectColor={props.selectColor}
           selectTextColor={props.selectTextColor}
+          onChange={props.onSecondFieldChange}
         />
       </View>
     </View>

@@ -37,6 +37,7 @@ export interface SetItemProps {
     setNextState: (newState: SetState) => void,
   ) => void;
   onPressEnd?: () => void;
+  onInputChange?: (field1: string, field2: string | null) => void;
 }
 
 const colorSchemes = {
@@ -131,6 +132,12 @@ export default function SetItem(props: SetItemProps) {
               textColor={state.inputFieldTextColor}
               selectColor={state.selectColor}
               selectTextColor={state.selectTextColor}
+              onFirstFieldChange={(value) =>
+                props.onInputChange?.(value, props.input.field2)
+              }
+              onSecondFieldChange={(value) =>
+                props.onInputChange?.(props.input.field1, value)
+              }
             />
           ) : (
             <View style={styles.singleInputContainer}>
@@ -143,6 +150,7 @@ export default function SetItem(props: SetItemProps) {
                 placeholder="0"
                 value={props.input.field1}
                 maxNumberValue={props.maxInputValue}
+                onChange={(value) => props.onInputChange?.(value, null)}
               />
             </View>
           )}
