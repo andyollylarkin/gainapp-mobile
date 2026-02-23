@@ -54,7 +54,7 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
                 return current + 1;
               });
             }}
-            disabledSwipe={index === 0}
+            disabledSwipe={index === 0 || currentActiveIndex > index}
             onSwipeEnd={() => {
               addOrRemoveExcercises((current) => {
                 if (index === 0) return current;
