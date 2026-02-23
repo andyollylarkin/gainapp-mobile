@@ -52,7 +52,6 @@ const styles = StyleSheet.create({
     minWidth: 0,
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 4,
     paddingHorizontal: 12,
     backgroundColor: Colors.general.color.darkTones.bgTray,
     height: 32,

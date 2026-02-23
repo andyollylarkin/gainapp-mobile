@@ -1,4 +1,5 @@
 import ColumnDescription from "@/components/build-components/column-description";
+import ExcerciseTray from "@/components/build-components/composite/excercise-tray";
 import type { SetItemProps } from "@/components/build-components/composite/set-item";
 import SwipeableSet from "@/components/build-components/composite/swipable-set";
 import ExcerciseTitle from "@/components/build-components/excercise-title";
@@ -17,36 +18,47 @@ export default function HomeScreen() {
         paddingTop: 250,
       }}
     >
-      <ExcerciseTitle
-        type="Barbell"
-        title="Bench Press"
-        backgroundColor={"#1A1A1A"}
-        iconsColor="#262626"
-        icon1Click={() => console.log("1 click")}
-        icon2Click={() => console.log("2 click")}
-      />
-      <ColumnDescription items={["Set", "Previous", "kg", "Reps"]} />
-      <SwipeableSet
-        initialState="current"
-        onPress={(currentState, transferState) => {
-          if (currentState === "current") {
-            transferState("done");
-          }
-        }}
-        onSwipeEnd={() => {}}
-        input={{
-          field1: "99",
-          field2: "100",
+      <ExcerciseTray
+        title={{
+          type: "Barbell",
+          title: "Bench Press",
+          backgroundColor: "#1A1A1A",
+          iconsColor: "#262626",
+          icon1Click: () => console.log("1 click"),
+          icon2Click: () => console.log("2 click"),
         }}
         history={{
+          firstText: 20,
+          secondText: 20,
           delimiter: (
             <MultiplyIcon color={Colors.general.color.grayTones.muted40} />
           ),
-          firstText: 20,
-          secondText: 20,
+          color: Colors.general.color.grayTones.muted40,
         }}
-        excerciseOrder="W"
-        maxInputValue={100}
+        description={{ items: ["Set", "Previous", "kg", "Reps"] }}
+        excercises={[
+          {
+            initialState: "progress",
+            onPress: (currentState, transferState) => {
+              if (currentState === "progress") {
+                transferState("done");
+              }
+            },
+            history: {
+              firstText: 20,
+              secondText: 20,
+              delimiter: (
+                <MultiplyIcon color={Colors.general.color.grayTones.muted40} />
+              ),
+            },
+            excerciseOrder: "W",
+            maxInputValue: 100,
+            input: {
+              field1: "70",
+              field2: "80",
+            },
+          },
+        ]}
       />
     </View>
   );

@@ -1,7 +1,7 @@
 import { Svg, Path } from "react-native-svg";
 import IconProps from "./props";
 
-export default function Timer(props: IconProps) {
+export default function TimerIcon(props: IconProps) {
   return (
     <Svg
       width={props.width ?? 20}
