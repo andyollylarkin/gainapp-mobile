@@ -11,12 +11,16 @@ import Animated, {
 import SetItem, { SetItemProps } from "./set-item";
 
 export default function SwipeableSet(
-  props: SetItemProps & { onSwipeEnd?: (direction: "left" | "right") => void },
+  props: SetItemProps & {
+    onSwipeEnd?: (direction: "left" | "right") => void;
+    disabled?: boolean;
+  },
 ) {
-  const { onSwipeEnd, ...setItemProps } = props;
+  const { onSwipeEnd, disabled, ...setItemProps } = props;
 
   return (
     <Swipeable
+      enabled={!disabled}
       containerStyle={styles.swipeable}
       friction={1}
       enableTrackpadTwoFingerGesture
@@ -26,7 +30,11 @@ export default function SwipeableSet(
           onSwipeEnd(direction);
         }
       }}
-      renderRightActions={(progress, dragX) => <RightAction dragX={dragX} />}
+      renderRightActions={
+        disabled
+          ? undefined
+          : (progress, dragX) => <RightAction dragX={dragX} />
+      }
     >
       <SetItem {...setItemProps} />
     </Swipeable>

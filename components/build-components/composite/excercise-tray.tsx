@@ -2,6 +2,7 @@ import { HistoryTextProps } from "@/components/history-text";
 import TimerIcon from "@/components/icons/timer";
 import TextButton from "@/components/parts/text-button";
 import { Colors } from "@/constants/theme";
+import { NonEmptyArray } from "@/types";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import ColumnDescription, {
@@ -10,7 +11,6 @@ import ColumnDescription, {
 import ExcerciseTitle, { ExcerciseTitleProps } from "../excercise-title";
 import { SetItemProps } from "./set-item";
 import SwipeableSet from "./swipable-set";
-import { NonEmptyArray } from "@/types";
 
 export interface ExcerciseTrayProps {
   title: ExcerciseTitleProps;
@@ -20,9 +20,9 @@ export interface ExcerciseTrayProps {
 }
 
 export default function ExcerciseTray(props: ExcerciseTrayProps) {
-  const [excercises, addExcercises] = React.useState<NonEmptyArray<SetItemProps>>(
-    props.excercises,
-  );
+  const [excercises, addOrRemoveExcercises] = React.useState<
+    NonEmptyArray<SetItemProps>
+  >(props.excercises);
 
   const createDefaultExcercise = (base: SetItemProps): SetItemProps => ({
     ...base,
@@ -37,6 +37,15 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
       {excercises.map((excercise, index) => (
         <View key={index} style={styles.exerciseRow}>
           <SwipeableSet
+            disabled={index === 0}
+            onSwipeEnd={() => {
+              addOrRemoveExcercises((current) => {
+                if (index === 0) return current;
+                return current.filter(
+                  (_, i) => i !== index,
+                ) as NonEmptyArray<SetItemProps>;
+              });
+            }}
             {...excercise}
             excerciseOrder={index === 0 ? "W" : index}
           />
@@ -61,11 +70,14 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
           <TextButton
             text={"Add Set"}
             onClick={() => {
-              addExcercises((current) => {
+              addOrRemoveExcercises((current) => {
                 const nextExcercise = createDefaultExcercise(
                   current[current.length - 1],
                 );
-                return [...current, nextExcercise] as NonEmptyArray<SetItemProps>;
+                return [
+                  ...current,
+                  nextExcercise,
+                ] as NonEmptyArray<SetItemProps>;
               });
             }}
             bgColor={Colors.general.color.darkTones.bgMiddle}
