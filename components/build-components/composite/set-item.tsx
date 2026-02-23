@@ -1,9 +1,10 @@
 import HistoryText from "@/components/history-text";
 import CrossIcon from "@/components/icons/cross";
 import MultiplyIcon from "@/components/icons/multiply-icon";
+import DelayedPressable from "@/components/parts/delayed-pressable";
 import InputField from "@/components/parts/input-field";
 import { Colors } from "@/constants/theme";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import CheckDark from "../check-dark";
 import CheckGold from "../check-gold";
@@ -11,7 +12,6 @@ import CheckGray from "../check-gray";
 import CheckGreen from "../check-green";
 import SetNumberWarpup from "../set-number-warpup";
 import TwoField from "../two-field";
-import DelayedPressable from "@/components/parts/delayed-pressable";
 
 type SetState = "pr_record" | "done" | "progress" | "current";
 
@@ -36,6 +36,7 @@ export interface SetItemProps {
     currentState: SetState,
     setNextState: (newState: SetState) => void,
   ) => void;
+  onPressEnd?: () => void;
 }
 
 const colorSchemes = {
@@ -94,6 +95,14 @@ export default function SetItem(props: SetItemProps) {
     setCurrentState(newState);
   };
 
+  useEffect(() => {
+    if (currentState === "done") return;
+    if (props.initialState !== currentState) {
+      setState(colorSchemes[props.initialState]);
+      setCurrentState(props.initialState);
+    }
+  }, [currentState, props.initialState]);
+
   return (
     <View style={[styles.container, { backgroundColor: state.bgColor }]}>
       <View style={styles.innerContainer}>
@@ -140,6 +149,7 @@ export default function SetItem(props: SetItemProps) {
           <DelayedPressable
             delay={200}
             onPress={() => props.onPress?.(currentState, stateTransition)}
+            onPressEnd={() => props.onPressEnd && props.onPressEnd()}
           >
             <state.checkItem />
           </DelayedPressable>

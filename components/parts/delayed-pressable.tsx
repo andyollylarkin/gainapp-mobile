@@ -8,6 +8,7 @@ import { Pressable } from "react-native";
 
 export interface DelayedPressableProps<TArgs extends unknown[]> {
   onPress: (...args: TArgs) => void;
+  onPressEnd?: () => void;
   delay: number;
   children: ReactElement<{ onPress?: (...args: TArgs) => void }>;
 }
@@ -20,7 +21,7 @@ export interface DelayedPressableProps<TArgs extends unknown[]> {
 export default function DelayedPressable<TArgs extends unknown[]>(
   props: DelayedPressableProps<TArgs>,
 ) {
-  const { onPress, delay, children } = props;
+  const { onPress, onPressEnd, delay, children } = props;
   const originalChildOnPress = children.props.onPress;
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -37,6 +38,7 @@ export default function DelayedPressable<TArgs extends unknown[]>(
 
       timeoutRef.current = setTimeout(() => {
         onPress(...args);
+        onPressEnd && onPressEnd();
         timeoutRef.current = null;
       }, delay);
     },
@@ -58,7 +60,12 @@ export default function DelayedPressable<TArgs extends unknown[]>(
   });
 
   return (
-    <Pressable onPressOut={clearTimer} style={{ alignSelf: "stretch" }}>
+    <Pressable
+      onPressOut={() => {
+        clearTimer();
+      }}
+      style={{ alignSelf: "stretch" }}
+    >
       {childWithOnPress}
     </Pressable>
   );

@@ -13,10 +13,10 @@ import SetItem, { SetItemProps } from "./set-item";
 export default function SwipeableSet(
   props: SetItemProps & {
     onSwipeEnd?: (direction: "left" | "right") => void;
-    disabled?: boolean;
+    disabledSwipe?: boolean;
   },
 ) {
-  const { onSwipeEnd, disabled, ...setItemProps } = props;
+  const { onSwipeEnd, disabledSwipe: disabled, ...setItemProps } = props;
 
   return (
     <Swipeable

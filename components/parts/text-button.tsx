@@ -32,7 +32,7 @@ export default function TextButton({
 const styles = StyleSheet.create({
   button: {
     borderRadius: 38,
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
     paddingVertical: 8,
     alignItems: "center",
     justifyContent: "center",

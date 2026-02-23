@@ -3,7 +3,7 @@ import TimerIcon from "@/components/icons/timer";
 import TextButton from "@/components/parts/text-button";
 import { Colors } from "@/constants/theme";
 import { NonEmptyArray } from "@/types";
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
 import ColumnDescription, {
   ColumnDescriptionProps,
@@ -23,6 +23,9 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
   const [excercises, addOrRemoveExcercises] = React.useState<
     NonEmptyArray<SetItemProps>
   >(props.excercises);
+  const [currentActiveIndex, setCurrentActiveIndex] = React.useState<number>(0);
+
+  useEffect(() => {}, [currentActiveIndex]);
 
   const createDefaultExcercise = (base: SetItemProps): SetItemProps => ({
     ...base,
@@ -37,7 +40,13 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
       {excercises.map((excercise, index) => (
         <View key={index} style={styles.exerciseRow}>
           <SwipeableSet
-            disabled={index === 0}
+            onPressEnd={() => {
+              if (index !== currentActiveIndex) return;
+              setCurrentActiveIndex((current) => {
+                return current + 1;
+              });
+            }}
+            disabledSwipe={index === 0}
             onSwipeEnd={() => {
               addOrRemoveExcercises((current) => {
                 if (index === 0) return current;
@@ -47,6 +56,16 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
               });
             }}
             {...excercise}
+            initialState={index === currentActiveIndex ? "current" : "progress"}
+            onPress={(initialState, stateTransition) => {
+              console.log("pressed", {
+                initialState,
+                index,
+                currentActiveIndex,
+              });
+              if (index !== currentActiveIndex) return;
+              excercise.onPress?.(initialState, stateTransition);
+            }}
             excerciseOrder={index === 0 ? "W" : index}
           />
         </View>

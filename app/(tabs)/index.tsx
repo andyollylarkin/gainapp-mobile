@@ -1,10 +1,5 @@
-import ColumnDescription from "@/components/build-components/column-description";
 import ExcerciseTray from "@/components/build-components/composite/excercise-tray";
-import type { SetItemProps } from "@/components/build-components/composite/set-item";
-import SwipeableSet from "@/components/build-components/composite/swipable-set";
-import ExcerciseTitle from "@/components/build-components/excercise-title";
 import MultiplyIcon from "@/components/icons/multiply-icon";
-import DelayedPressable from "@/components/parts/delayed-pressable";
 import { Colors } from "@/constants/theme";
 import { View } from "react-native";
 
@@ -40,7 +35,7 @@ export default function HomeScreen() {
           {
             initialState: "progress",
             onPress: (currentState, transferState) => {
-              if (currentState === "progress") {
+              if (currentState === "current") {
                 transferState("done");
               }
             },
