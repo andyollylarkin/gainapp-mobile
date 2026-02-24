@@ -1,29 +1,52 @@
+import { Colors, typography } from "@/constants/theme";
 import useCountdown from "@/hooks/use-countdown";
-import { StyleSheet, View, Text } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
 import TextButton from "../parts/text-button";
-import { Colors, Fonts, typography } from "@/constants/theme";
-import { useEffect, useState } from "react";
 
 export interface ResetTimeProps {
   increaseAmount: number;
   decreaseAmount: number;
   onTimeout?: () => void;
   timeout: number;
+  start?: boolean;
 }
 
 export default function ResetTimer(props: ResetTimeProps) {
   const [targetTime, setTargetTime] = useState(props.timeout);
+  const hasMountedRef = useRef(false);
+  const hasStartedRef = useRef(false);
 
-  const timeLeft = useCountdown(targetTime);
+  const timeLeft = useCountdown(targetTime, props.start ?? false);
 
   const theme = Colors["general"];
 
   useEffect(() => {
-    if (timeLeft.real === 0) {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+
+    setTargetTime(props.timeout);
+  }, [props.timeout]);
+
+  useEffect(() => {
+    if (props.start) {
+      hasStartedRef.current = true;
+    }
+  }, [props.start]);
+
+  useEffect(() => {
+    if (!props.start || !hasStartedRef.current) {
+      return;
+    }
+
+    if (timeLeft.real === 0 && targetTime > 0) {
+      hasStartedRef.current = false;
       console.warn("Timer out");
       props.onTimeout?.();
     }
-  }, [props, props.onTimeout, timeLeft.real]);
+  }, [props, props.onTimeout, props.start, targetTime, timeLeft.real]);
 
   return (
     <View style={styles.element}>
@@ -33,6 +56,7 @@ export default function ResetTimer(props: ResetTimeProps) {
           bgColor={theme.color.darkTones.bgLight}
           textColor={theme.color.grayTones.main}
           onClick={() => {
+            if (timeLeft.real <= props.decreaseAmount) return;
             if (timeLeft.real - props.decreaseAmount < 0) {
               setTargetTime(0);
               return;
@@ -75,7 +99,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingHorizontal: 6,
     paddingVertical: 6,
-    ...typography.mediumL
+    ...typography.mediumL,
   },
   text: {
     ...typography.mediumL,

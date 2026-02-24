@@ -31,6 +31,7 @@ export default function TextButton({
 
 const styles = StyleSheet.create({
   button: {
+    height: "100%",
     borderRadius: 38,
     paddingHorizontal: 12,
     paddingVertical: 8,

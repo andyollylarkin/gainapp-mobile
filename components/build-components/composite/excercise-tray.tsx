@@ -3,7 +3,7 @@ import TimerIcon from "@/components/icons/timer";
 import Accordion from "@/components/parts/accordion";
 import TextButton from "@/components/parts/text-button";
 import { Colors } from "@/constants/theme";
-import { NonEmptyArray } from "@/types";
+import { NonEmptyArray, StartTimerEvent } from "@/types";
 import React, { useEffect } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import ColumnDescription, {
@@ -12,6 +12,7 @@ import ColumnDescription, {
 import ExcerciseTitle, { ExcerciseTitleProps } from "../excercise-title";
 import { SetItemProps } from "./set-item";
 import SwipeableSet from "./swipable-set";
+import useEventBus from "@/hooks/use-event-bus";
 
 type ExerciseWithId = SetItemProps & { _id: string };
 
@@ -37,6 +38,7 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
   );
   const [currentActiveIndex, setCurrentActiveIndex] = React.useState<number>(0);
   const [isExpanded, setIsExpanded] = React.useState<boolean>(true);
+  const eventBus = useEventBus<string, StartTimerEvent>();
 
   useEffect(() => {}, [currentActiveIndex]);
 
@@ -66,6 +68,15 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
                 setCurrentActiveIndex((current) => {
                   return current + 1;
                 });
+                eventBus.emit(
+                  "startTimer",
+                  new StartTimerEvent(
+                    `exercise-timer-${Date.now()}`,
+                    Date.now(),
+                    150,
+                  ),
+                );
+                props.onExcerciseComplete?.(excercise);
               }}
               disabledSwipe={index === 0 || currentActiveIndex > index}
               onSwipeEnd={() => {
@@ -156,6 +167,7 @@ const styles = StyleSheet.create({
   },
   buttons: {
     minWidth: 108,
+    maxHeight: 36,
   },
   bottomContainer: {
     padding: 12,

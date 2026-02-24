@@ -7,7 +7,10 @@ type TimeLeft = {
   real: number;
 };
 
-export default function useCountdown(targetSeconds: number): TimeLeft {
+export default function useCountdown(
+  targetSeconds: number,
+  start: boolean,
+): TimeLeft {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({
     hours: 0,
     minutes: 0,
@@ -24,6 +27,9 @@ export default function useCountdown(targetSeconds: number): TimeLeft {
   }, []);
 
   useEffect(() => {
+    if (!start) {
+      return;
+    }
     let remaining = Math.max(Math.floor(targetSeconds), 0);
     setTimeLeft(timeToLeft(remaining));
 
@@ -38,7 +44,7 @@ export default function useCountdown(targetSeconds: number): TimeLeft {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [targetSeconds, timeToLeft]);
+  }, [targetSeconds, timeToLeft, start]);
 
   return timeLeft;
 }
