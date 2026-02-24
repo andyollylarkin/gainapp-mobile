@@ -1,15 +1,12 @@
 import { Colors, typography } from "@/constants/theme";
 import { useEffect } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
 import FluentDrag from "../icons/fluent-drag";
-import ThreeDotsIcon from "../icons/three-dots";
-import TimelineIcon from "../icons/timeline";
-import Circle from "../parts/circle";
 import StatsButton from "./stats-button";
 import ThreeDotsButton from "./three-dots-button";
 
