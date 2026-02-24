@@ -1,4 +1,5 @@
 import ExcerciseTray from "@/components/build-components/composite/excercise-tray";
+import DayPicker from "@/components/build-components/day-picker";
 import MultiplyIcon from "@/components/icons/multiply-icon";
 import { Colors } from "@/constants/theme";
 import { View } from "react-native";
@@ -13,6 +14,7 @@ export default function HomeScreen() {
         paddingTop: 250,
       }}
     >
+      <DayPicker />
       <ExcerciseTray
         title={{
           type: "Barbell",

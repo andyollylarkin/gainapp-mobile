@@ -10,6 +10,8 @@ import FluentDrag from "../icons/fluent-drag";
 import ThreeDotsIcon from "../icons/three-dots";
 import TimelineIcon from "../icons/timeline";
 import Circle from "../parts/circle";
+import StatsButton from "./stats-button";
+import ThreeDotsButton from "./three-dots-button";
 
 export interface ExcerciseTitleProps {
   type: "Barbell" | "Rope" | "Treadmill" | "Bodyweight" | "Machine";
@@ -101,16 +103,11 @@ export default function ExcerciseTitle(props: ExcerciseTitleProps) {
             actionIconsStyle,
           ]}
         >
-          <Pressable onPress={props.icon1Click}>
-            <Circle bgColor={props.iconsColor}>
-              <ThreeDotsIcon color={Colors.general.color.grayTones.muted50} />
-            </Circle>
-          </Pressable>
-          <Pressable onPress={props.icon2Click}>
-            <Circle bgColor={props.iconsColor}>
-              <TimelineIcon color={Colors.general.color.grayTones.muted50} />
-            </Circle>
-          </Pressable>
+          <StatsButton color={props.iconsColor} onClick={props.icon1Click} />
+          <ThreeDotsButton
+            color={props.iconsColor}
+            onClick={props.icon2Click}
+          />
         </Animated.View>
       </View>
     </View>

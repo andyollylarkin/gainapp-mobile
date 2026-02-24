@@ -56,6 +56,7 @@ export default function RootLayout() {
       });
       timerOpacity.value = withTiming(1, { duration: 300 });
     };
+    // TODO: обработка двух и более таймеров
 
     emiter.on("startTimer", handler);
 

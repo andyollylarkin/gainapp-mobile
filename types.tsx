@@ -8,3 +8,12 @@ export class StartTimerEvent {
     public readonly duration: number,
   ) {}
 }
+
+export type Day =
+  | "Monday"
+  | "Tuesday"
+  | "Wednesday"
+  | "Thursday"
+  | "Friday"
+  | "Saturday"
+  | "Sunday";
