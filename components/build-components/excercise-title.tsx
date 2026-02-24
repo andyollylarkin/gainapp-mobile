@@ -1,5 +1,12 @@
 import { Colors, typography } from "@/constants/theme";
-import { Pressable, Text, View } from "react-native";
+import { useEffect } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import FluentDrag from "../icons/fluent-drag";
 import ThreeDotsIcon from "../icons/three-dots";
 import TimelineIcon from "../icons/timeline";
 import Circle from "../parts/circle";
@@ -15,9 +22,29 @@ export interface ExcerciseTitleProps {
     | typeof Colors.general.color.darkTones.bgLight;
   icon1Click: () => void;
   icon2Click: () => void;
+  expanded?: boolean;
 }
 
 export default function ExcerciseTitle(props: ExcerciseTitleProps) {
+  const { expanded = true } = props;
+  const dragIconOpacity = useSharedValue(expanded ? 0 : 1);
+  const actionIconsOpacity = useSharedValue(expanded ? 1 : 0);
+
+  useEffect(() => {
+    dragIconOpacity.value = withTiming(expanded ? 0 : 1, { duration: 220 });
+    actionIconsOpacity.value = withTiming(expanded ? 1 : 0, { duration: 220 });
+  }, [expanded, actionIconsOpacity, dragIconOpacity]);
+
+  const dragIconStyle = useAnimatedStyle(() => ({
+    opacity: dragIconOpacity.value,
+    transform: [{ scale: 0.95 + dragIconOpacity.value * 0.05 }],
+  }));
+
+  const actionIconsStyle = useAnimatedStyle(() => ({
+    opacity: actionIconsOpacity.value,
+    transform: [{ scale: 0.95 + actionIconsOpacity.value * 0.05 }],
+  }));
+
   return (
     <View
       style={{
@@ -29,13 +56,13 @@ export default function ExcerciseTitle(props: ExcerciseTitleProps) {
       }}
     >
       {/* TODO: replace to icon */}
-      <View
+      <Animated.View
         style={{
           width: 52,
           height: 52,
           backgroundColor: "gray",
         }}
-      ></View>
+      ></Animated.View>
       <View style={{ padding: 6, flexDirection: "column", gap: 2 }}>
         <Text
           style={{
@@ -54,22 +81,25 @@ export default function ExcerciseTitle(props: ExcerciseTitleProps) {
           {props.title}
         </Text>
       </View>
-      <View
-        style={{
-          flex: 1,
-          alignItems: "flex-start",
-          justifyContent: "flex-end",
-          flexDirection: "row",
-          height: "100%",
-        }}
-      >
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 12,
-          }}
+      <View style={styles.rightActionsArea}>
+        <Animated.View
+          pointerEvents={expanded ? "none" : "auto"}
+          style={[styles.centeredRightContainer, dragIconStyle]}
+        >
+          <FluentDrag
+            width={24}
+            height={24}
+            color={Colors.general.color.grayTones.muted50}
+          />
+        </Animated.View>
+
+        <Animated.View
+          pointerEvents={expanded ? "auto" : "none"}
+          style={[
+            styles.topRightContainer,
+            styles.iconsContainer,
+            actionIconsStyle,
+          ]}
         >
           <Pressable onPress={props.icon1Click}>
             <Circle bgColor={props.iconsColor}>
@@ -81,8 +111,38 @@ export default function ExcerciseTitle(props: ExcerciseTitleProps) {
               <TimelineIcon color={Colors.general.color.grayTones.muted50} />
             </Circle>
           </Pressable>
-        </View>
+        </Animated.View>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  rightActionsArea: {
+    flex: 1,
+    position: "relative",
+    alignSelf: "stretch",
+    alignItems: "flex-end",
+    justifyContent: "center",
+    minHeight: 52,
+  },
+  centeredRightContainer: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  topRightContainer: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+  },
+  iconsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+  },
+});
