@@ -6,6 +6,12 @@ import InputField from "@/components/parts/input-field";
 import { Colors } from "@/constants/theme";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 import CheckDark from "../check-dark";
 import CheckGold from "../check-gold";
 import CheckGray from "../check-gray";
@@ -90,28 +96,76 @@ const colorSchemes = {
 export default function SetItem(props: SetItemProps) {
   const [state, setState] = useState(colorSchemes[props.initialState]); // TODO: use state machine
   const [currentState, setCurrentState] = useState(props.initialState);
+  const scale = useSharedValue(1);
+  const colorState = useSharedValue({
+    backgroundColor: colorSchemes[props.initialState].bgColor,
+    textColor: colorSchemes[props.initialState].textColor,
+    warpupColor: colorSchemes[props.initialState].warpupColor,
+    warpupTextColor: colorSchemes[props.initialState].warpupTextColor,
+    inputFieldColor: colorSchemes[props.initialState].inputFieldColor,
+    inputFieldTextColor: colorSchemes[props.initialState].inputFieldTextColor,
+    selectColor: colorSchemes[props.initialState].selectColor,
+    selectTextColor: colorSchemes[props.initialState].selectTextColor,
+  });
 
   const stateTransition = (newState: SetState) => {
+    colorState.value = {
+      backgroundColor: colorSchemes[newState].bgColor,
+      textColor: colorSchemes[newState].textColor,
+      warpupColor: colorSchemes[newState].warpupColor,
+      warpupTextColor: colorSchemes[newState].warpupTextColor,
+      inputFieldColor: colorSchemes[newState].inputFieldColor,
+      inputFieldTextColor: colorSchemes[newState].inputFieldTextColor,
+      selectColor: colorSchemes[newState].selectColor,
+      selectTextColor: colorSchemes[newState].selectTextColor,
+    };
+
+    scale.value = withSequence(
+      withTiming(1.1, { duration: 120 }),
+      withTiming(1, { duration: 120 }),
+    );
+
     setState(colorSchemes[newState]);
     setCurrentState(newState);
   };
 
+  const animatedContainerStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
   useEffect(() => {
     if (currentState === "done") return;
     if (props.initialState !== currentState) {
+      colorState.value = {
+        backgroundColor: colorSchemes[props.initialState].bgColor,
+        textColor: colorSchemes[props.initialState].textColor,
+        warpupColor: colorSchemes[props.initialState].warpupColor,
+        warpupTextColor: colorSchemes[props.initialState].warpupTextColor,
+        inputFieldColor: colorSchemes[props.initialState].inputFieldColor,
+        inputFieldTextColor:
+          colorSchemes[props.initialState].inputFieldTextColor,
+        selectColor: colorSchemes[props.initialState].selectColor,
+        selectTextColor: colorSchemes[props.initialState].selectTextColor,
+      };
       setState(colorSchemes[props.initialState]);
       setCurrentState(props.initialState);
     }
-  }, [currentState, props.initialState]);
+  }, [colorState, currentState, props.initialState]);
 
   return (
-    <View style={[styles.container, { backgroundColor: state.bgColor }]}>
+    <Animated.View
+      style={[
+        styles.container,
+        { backgroundColor: state.bgColor },
+        animatedContainerStyle,
+      ]}
+    >
       <View style={styles.innerContainer}>
         <View style={[styles.partContainer, styles.leftPartContainer]}>
           <SetNumberWarpup
             text={props.excerciseOrder}
-            color={state.warpupColor}
-            textColor={state.warpupTextColor}
+            color={colorState.value.warpupColor}
+            textColor={colorState.value.warpupTextColor}
           />
           <HistoryText
             color={Colors.general.color.grayTones.muted40}
@@ -125,13 +179,13 @@ export default function SetItem(props: SetItemProps) {
             <TwoField
               defaultValue={"0"}
               delimiter="x"
-              delimiterColor={state.inputFieldTextColor}
+              delimiterColor={colorState.value.inputFieldTextColor}
               firstFieldValue={props.input.field1}
               secondFieldValue={props.input.field2}
-              fieldColor={state.inputFieldColor}
-              textColor={state.inputFieldTextColor}
-              selectColor={state.selectColor}
-              selectTextColor={state.selectTextColor}
+              fieldColor={colorState.value.inputFieldColor}
+              textColor={colorState.value.inputFieldTextColor}
+              selectColor={colorState.value.selectColor}
+              selectTextColor={colorState.value.selectTextColor}
               onFirstFieldChange={(value) =>
                 props.onInputChange?.(value, props.input.field2)
               }
@@ -142,10 +196,10 @@ export default function SetItem(props: SetItemProps) {
           ) : (
             <View style={styles.singleInputContainer}>
               <InputField
-                bgColor={state.inputFieldColor}
-                textColor={state.inputFieldTextColor}
-                selectColor={state.selectColor}
-                selectTextColor={state.selectTextColor}
+                bgColor={colorState.value.inputFieldColor}
+                textColor={colorState.value.inputFieldTextColor}
+                selectColor={colorState.value.selectColor}
+                selectTextColor={colorState.value.selectTextColor}
                 type="number"
                 placeholder="0"
                 value={props.input.field1}
@@ -157,13 +211,15 @@ export default function SetItem(props: SetItemProps) {
           <DelayedPressable
             delay={200}
             onPress={() => props.onPress?.(currentState, stateTransition)}
-            onPressEnd={() => props.onPressEnd && props.onPressEnd()}
+            onPressEnd={() => {
+              props.onPressEnd && props.onPressEnd();
+            }}
           >
             <state.checkItem />
           </DelayedPressable>
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 
