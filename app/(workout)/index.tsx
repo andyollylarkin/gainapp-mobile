@@ -1,7 +1,10 @@
 import ExcerciseTray from "@/components/build-components/composite/excercise-tray";
 import DayPicker from "@/components/build-components/day-picker";
 import MultiplyIcon from "@/components/icons/multiply-icon";
+import PlayIcon from "@/components/icons/play";
+import SliderButton from "@/components/parts/slider-button";
 import { Colors } from "@/constants/theme";
+import { router } from "expo-router";
 import { View } from "react-native";
 
 export default function HomeScreen() {
@@ -14,6 +17,16 @@ export default function HomeScreen() {
         paddingTop: 250,
       }}
     >
+      <SliderButton
+        color={"red"}
+        textColor={"white"}
+        text={"Slide Me"}
+        icon={<PlayIcon color={"white"} width={20} height={20} />}
+        holdDuration={2000}
+        onHoldEnd={() => router.push("/modal")}
+        onHoldStart={() => console.log("Hold started")}
+        holdOverlayColor={"blue"}
+      />
       <DayPicker />
       <ExcerciseTray
         title={{

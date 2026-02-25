@@ -22,10 +22,6 @@ import { StartTimerEvent } from "@/types";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
 
-export const unstable_settings = {
-  anchor: "(tabs)",
-};
-
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const fontsLoaded = useAppFonts();
@@ -90,11 +86,7 @@ export default function RootLayout() {
               },
             }}
           >
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="modal"
-              options={{ presentation: "modal", title: "Modal" }}
-            />
+            <Stack.Screen name="(workout)" options={{ headerShown: false }} />
           </Stack>
           <Animated.View
             style={[

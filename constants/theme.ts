@@ -109,12 +109,43 @@ export const typography = StyleSheet.create({
     fontWeight: "400",
     fontFamily: "Inter-Regular",
   },
+  semiBoldL: {
+    fontSize: 18,
+    lineHeight: 18 * 1.2,
+    fontWeight: "600",
+    fontFamily: "Inter-SemiBold",
+  },
+  semiBoldM: {
+    fontSize: 16,
+    lineHeight: 16 * 1.25,
+    fontWeight: "600",
+    fontFamily: "Inter-SemiBold",
+  },
+  semiBoldS: {
+    fontSize: 12,
+    lineHeight: 12 * 1.20,
+    fontWeight: "600",
+    fontFamily: "Inter-SemiBold",
+  },
+  boldL: {
+    fontSize: 18,
+    lineHeight: 18 * 1.2,
+    fontWeight: "700",
+    fontFamily: "Inter-Bold",
+  },
+  boldM: {
+    fontSize: 16,
+    lineHeight: 16 * 1.25,
+    fontWeight: "700",
+  },
 });
 
 export function useAppFonts() {
   const [fontsLoaded] = useFonts({
     Inter: require("../fonts/Inter-Regular.ttf"),
     "Inter-Medium": require("../fonts/Inter-Medium.ttf"),
+    "Inter-SemiBold": require("../fonts/Inter-Semibold.ttf"),
+    "Inter-Bold": require("../fonts/Inter-Bold.ttf"),
   });
 
   return fontsLoaded;
