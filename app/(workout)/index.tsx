@@ -1,11 +1,11 @@
 import ExcerciseItem, {
-  ExcerciseItemProps,
+	ExcerciseItemProps,
 } from "@/components/build-components/composite/excercise-item";
 import WorkoutPageDesc from "@/components/build-components/composite/workoutpage-desc";
 import DayPicker from "@/components/build-components/day-picker";
-import { Colors, typography } from "@/constants/theme";
+import { Colors } from "@/constants/theme";
 import { router } from "expo-router";
-import { ScrollView, View, Text } from "react-native";
+import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function HomeScreen() {

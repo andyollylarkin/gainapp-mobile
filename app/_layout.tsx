@@ -43,7 +43,10 @@ export default function RootLayout() {
             <Stack.Screen name="(workout)" options={{ headerShown: false }} />
             <Stack.Screen
               name="(modals)"
-              options={{ headerShown: false, presentation: "modal" }}
+              options={{
+                headerShown: false,
+                presentation: "fullScreenModal",
+              }}
             />
           </Stack>
         </View>

@@ -2,13 +2,24 @@ import ExcerciseTray from "@/components/build-components/composite/excercise-tra
 import MultiplyIcon from "@/components/icons/multiply-icon";
 import { Colors } from "@/constants/theme";
 import { ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ExcerciseModal() {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={{ flex: 1, paddingHorizontal: 8 }}>
+    <View
+      style={{
+        flex: 1,
+        paddingHorizontal: 8,
+      }}
+    >
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: 12, paddingBottom: 24 }}
+        contentContainerStyle={{
+          gap: 12,
+          paddingBottom: 24 + insets.bottom,
+        }}
       >
         <ExcerciseTray
           description={{ items: ["Set", "Previous", "kg", "Reps"] }}
