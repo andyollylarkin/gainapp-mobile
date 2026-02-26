@@ -1,26 +1,73 @@
 import ExcerciseTray from "@/components/build-components/composite/excercise-tray";
 import MultiplyIcon from "@/components/icons/multiply-icon";
-import { Colors } from "@/constants/theme";
-import { ScrollView, View } from "react-native";
+import TextButton from "@/components/parts/text-button";
+import { Colors, typography } from "@/constants/theme";
+import { useRouteInfo } from "expo-router/build/hooks";
+import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ExcerciseModal() {
   const insets = useSafeAreaInsets();
+  const rinfo = useRouteInfo();
+  const excersiceId = rinfo.params["id"];
+  const modalHeaderOverlayHeight = insets.top + 22;
 
   return (
     <View
       style={{
         flex: 1,
-        paddingHorizontal: 8,
+        backgroundColor: Colors.general.color.darkTones.bg,
       }}
     >
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
           gap: 12,
+          paddingTop: modalHeaderOverlayHeight,
           paddingBottom: 24 + insets.bottom,
         }}
       >
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "flex-end",
+              padding: 8,
+            }}
+          >
+            <TextButton
+              text="01:23"
+              bgColor={Colors.general.color.darkTones.bgTray}
+              textColor={Colors.general.color.grayTones.muted50}
+            />
+          </View>
+          <Text
+            style={{
+              ...typography.mediumL,
+              color: Colors.general.color.grayTones.main,
+            }}
+          >
+            Fullbody
+          </Text>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "flex-end",
+            }}
+          >
+            <TextButton
+              text="Finish"
+              bgColor={Colors.general.color.grayTones.main}
+              textColor={Colors.general.color.darkTones.bg}
+            />
+          </View>
+        </View>
         <ExcerciseTray
           description={{ items: ["Set", "Previous", "kg", "Reps"] }}
           history={{
