@@ -1,5 +1,5 @@
 import ExcerciseItem, {
-	ExcerciseItemProps,
+  ExcerciseItemProps,
 } from "@/components/build-components/composite/excercise-item";
 import WorkoutPageDesc from "@/components/build-components/composite/workoutpage-desc";
 import DayPicker from "@/components/build-components/day-picker";
@@ -47,72 +47,6 @@ export default function HomeScreen() {
       sets: 4,
       id: "5",
     },
-    {
-      excerciseName: "Jumping Jacks",
-      reps: 20,
-      sets: 4,
-      id: "6",
-    },
-    {
-      excerciseName: "Jumping Jacks",
-      reps: 20,
-      sets: 4,
-      id: "7",
-    },
-    {
-      excerciseName: "Jumping Jacks",
-      reps: 20,
-      sets: 4,
-      id: "8",
-    },
-    {
-      excerciseName: "Jumping Jacks",
-      reps: 20,
-      sets: 4,
-      id: "9",
-    },
-    {
-      excerciseName: "Jumping Jacks",
-      reps: 20,
-      sets: 4,
-      id: "10",
-    },
-    {
-      excerciseName: "Jumping Jacks",
-      reps: 20,
-      sets: 4,
-      id: "11",
-    },
-    {
-      excerciseName: "Jumping Jacks",
-      reps: 20,
-      sets: 4,
-      id: "12",
-    },
-    {
-      excerciseName: "Jumping Jacks",
-      reps: 20,
-      sets: 4,
-      id: "13",
-    },
-    {
-      excerciseName: "Jumping Jacks",
-      reps: 20,
-      sets: 4,
-      id: "14",
-    },
-    {
-      excerciseName: "Jumping Jacks",
-      reps: 20,
-      sets: 4,
-      id: "15",
-    },
-    {
-      excerciseName: "Jumping Jacks",
-      reps: 20,
-      sets: 4,
-      id: "16",
-    },
   ];
 
   const lenItems = items.length;
@@ -136,12 +70,10 @@ export default function HomeScreen() {
           left: 0,
           right: 0,
           zIndex: 10,
-          backgroundColor: Colors.general.color.darkTones.bg,
+          // backgroundColor: Colors.general.color.darkTones.bg,
           paddingTop: dayPickerTop,
         }}
-      >
-        <DayPicker />
-      </View>
+      ></View>
       <ScrollView
         scrollsToTop
         style={{
@@ -155,7 +87,7 @@ export default function HomeScreen() {
         disableIntervalMomentum
         decelerationRate="fast"
         contentContainerStyle={{
-          paddingTop: contentTopOffset,
+          paddingTop: insets.top + 20,
           paddingBottom: 24,
           paddingHorizontal: 8,
           justifyContent: "flex-start",
@@ -163,6 +95,9 @@ export default function HomeScreen() {
           gap: itemGap,
         }}
       >
+        <View style={{marginBottom: 22}}>
+          <DayPicker />
+        </View>
         <View
           style={{ width: "100%", paddingHorizontal: 12, marginBottom: 12 }}
         >

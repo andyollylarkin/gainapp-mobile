@@ -35,6 +35,10 @@ export default function RootLayout() {
         <View style={{ flex: 1 }}>
           <Stack
             screenOptions={{
+              headerTransparent: true,
+              headerStyle: {
+                backgroundColor: "transparent",
+              },
               contentStyle: {
                 backgroundColor: Colors.general.color.darkTones.bg,
               },
@@ -50,7 +54,7 @@ export default function RootLayout() {
             />
           </Stack>
         </View>
-        <StatusBar style="light" />
+        <StatusBar style="light" translucent backgroundColor="transparent" />
       </ThemeProvider>
     </GestureHandlerRootView>
   );

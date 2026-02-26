@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
 import React from "react";
 
+import BlurHeader from "@/components/blur-header";
 import { HapticTab } from "@/components/haptic-tab";
 import ChartIcon from "@/components/icons/chart";
 import PlanIcon from "@/components/icons/plan";
@@ -11,7 +12,9 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        headerTransparent: true,
+        header: () => <BlurHeader blurIntensity={10} />,
         tabBarButton: HapticTab,
         tabBarActiveTintColor: Colors.general.color.grayTones.main,
         tabBarInactiveTintColor: Colors.general.color.grayTones.muted30,
@@ -38,7 +41,6 @@ export default function TabLayout() {
               : Colors.general.color.grayTones.muted30;
             return <ChartIcon color={color} width={24} height={24} />;
           },
-          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -51,7 +53,6 @@ export default function TabLayout() {
               : Colors.general.color.grayTones.muted30;
             return <WorkoutIcon color={color} width={24} height={24} />;
           },
-          headerShown: false,
         }}
       />
       <Tabs.Screen
@@ -64,7 +65,6 @@ export default function TabLayout() {
               : Colors.general.color.grayTones.muted30;
             return <PlanIcon color={color} width={24} height={24} />;
           },
-          headerShown: false,
         }}
       />
     </Tabs>
