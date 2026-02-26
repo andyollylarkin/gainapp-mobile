@@ -1,23 +1,52 @@
-import { ColorValue, StyleSheet, View } from "react-native";
+import { ColorValue, Pressable, StyleSheet, View } from "react-native";
 
 export interface BoxProps {
   borderColor: ColorValue;
   bgColor: ColorValue;
   children: React.ReactNode;
+  paddingHorizontal?: number;
+  paddingVertical?: number;
+  radiusTop?: number;
+  radiusBottom?: number;
+  onPress?: () => void;
 }
 
 export default function Box(props: BoxProps) {
-  const { children, borderColor, bgColor } = props;
+  const {
+    children,
+    borderColor,
+    bgColor,
+    radiusTop,
+    radiusBottom,
+    paddingHorizontal,
+    paddingVertical,
+  } = props;
   return (
-    <View style={[styles.box, { borderColor, backgroundColor: bgColor }]}>
-      {children}
-    </View>
+    <Pressable onPress={props.onPress} style={{ width: "100%" }}>
+      <View
+        style={[
+          styles.box,
+          {
+            borderColor,
+            backgroundColor: bgColor,
+            borderTopLeftRadius: radiusTop ?? 6,
+            borderTopRightRadius: radiusTop ?? 6,
+            borderBottomLeftRadius: radiusBottom ?? 6,
+            borderBottomRightRadius: radiusBottom ?? 6,
+            paddingHorizontal: paddingHorizontal ?? 12,
+            paddingVertical: paddingVertical ?? 12,
+          },
+        ]}
+      >
+        {children}
+      </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   box: {
-    borderRadius: 24,
+    borderRadius: 6,
     borderWidth: 2,
     flex: 1,
     flexDirection: "row",

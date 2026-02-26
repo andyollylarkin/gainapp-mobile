@@ -1,8 +1,11 @@
-import ExcerciseTray from "@/components/build-components/composite/excercise-tray";
+import ExcerciseItem, {
+  ExcerciseItemProps,
+} from "@/components/build-components/composite/excercise-item";
+import WorkoutPageDesc from "@/components/build-components/composite/workoutpage-desc";
 import DayPicker from "@/components/build-components/day-picker";
-import MultiplyIcon from "@/components/icons/multiply-icon";
-import { Colors } from "@/constants/theme";
-import { ScrollView, View } from "react-native";
+import { Colors, typography } from "@/constants/theme";
+import { router } from "expo-router";
+import { ScrollView, View, Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
@@ -11,6 +14,112 @@ export default function HomeScreen() {
   const dayPickerHeight = 30;
   const dayPickerBottomGap = 24;
   const contentTopOffset = dayPickerTop + dayPickerHeight + dayPickerBottomGap;
+
+  const items: ExcerciseItemProps[] = [
+    {
+      excerciseName: "Running",
+      reps: 5,
+      sets: 4,
+      id: "1",
+    },
+    {
+      excerciseName: "Push-ups",
+      reps: 10,
+      sets: 3,
+      radiusBottom: 6,
+      id: "2",
+    },
+    {
+      excerciseName: "Squats",
+      reps: 15,
+      sets: 4,
+      id: "3",
+    },
+    {
+      excerciseName: "Plank",
+      reps: 60, // seconds
+      sets: 3,
+      id: "4",
+    },
+    {
+      excerciseName: "Jumping Jacks",
+      reps: 20,
+      sets: 4,
+      id: "5",
+    },
+    {
+      excerciseName: "Jumping Jacks",
+      reps: 20,
+      sets: 4,
+      id: "6",
+    },
+    {
+      excerciseName: "Jumping Jacks",
+      reps: 20,
+      sets: 4,
+      id: "7",
+    },
+    {
+      excerciseName: "Jumping Jacks",
+      reps: 20,
+      sets: 4,
+      id: "8",
+    },
+    {
+      excerciseName: "Jumping Jacks",
+      reps: 20,
+      sets: 4,
+      id: "9",
+    },
+    {
+      excerciseName: "Jumping Jacks",
+      reps: 20,
+      sets: 4,
+      id: "10",
+    },
+    {
+      excerciseName: "Jumping Jacks",
+      reps: 20,
+      sets: 4,
+      id: "11",
+    },
+    {
+      excerciseName: "Jumping Jacks",
+      reps: 20,
+      sets: 4,
+      id: "12",
+    },
+    {
+      excerciseName: "Jumping Jacks",
+      reps: 20,
+      sets: 4,
+      id: "13",
+    },
+    {
+      excerciseName: "Jumping Jacks",
+      reps: 20,
+      sets: 4,
+      id: "14",
+    },
+    {
+      excerciseName: "Jumping Jacks",
+      reps: 20,
+      sets: 4,
+      id: "15",
+    },
+    {
+      excerciseName: "Jumping Jacks",
+      reps: 20,
+      sets: 4,
+      id: "16",
+    },
+  ];
+
+  const lenItems = items.length;
+  const snapItemHeight = 86;
+  const itemGap = 2;
+  const snapStep = snapItemHeight + itemGap;
+  const snapOffsets = items.map((_, index) => index * snapStep);
 
   return (
     <View
@@ -38,11 +147,43 @@ export default function HomeScreen() {
         style={{
           flex: 1,
         }}
+        // TODO: fix snap
+        snapToAlignment="start"
+        snapToOffsets={snapOffsets.map((offset) => {
+          return offset + (contentTopOffset - 8);
+        })}
+        disableIntervalMomentum
+        decelerationRate="fast"
         contentContainerStyle={{
           paddingTop: contentTopOffset,
           paddingBottom: 24,
+          paddingHorizontal: 8,
+          justifyContent: "flex-start",
+          alignItems: "center",
+          gap: itemGap,
         }}
-      ></ScrollView>
+      >
+        <View
+          style={{ width: "100%", paddingHorizontal: 12, marginBottom: 12 }}
+        >
+          <WorkoutPageDesc
+            workoutName="Push workout"
+            excercisesCount={5}
+            durationMinutes={60}
+          />
+        </View>
+        {items.map((item, index) => (
+          <ExcerciseItem
+            key={item.id}
+            {...item}
+            onClick={(id) => {
+              router.push(`/(modals)/excercise?id=${id}`);
+            }}
+            radiusTop={index === 0 ? 24 : 6}
+            radiusBottom={index === lenItems - 1 ? 24 : 6}
+          />
+        ))}
+      </ScrollView>
     </View>
   );
 }

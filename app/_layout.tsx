@@ -41,6 +41,10 @@ export default function RootLayout() {
             }}
           >
             <Stack.Screen name="(workout)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="(modals)"
+              options={{ headerShown: false, presentation: "modal" }}
+            />
           </Stack>
         </View>
         <StatusBar style="light" />

@@ -3,6 +3,7 @@ import TimerIcon from "@/components/icons/timer";
 import Accordion from "@/components/parts/accordion";
 import TextButton from "@/components/parts/text-button";
 import { Colors } from "@/constants/theme";
+import useEventBus from "@/hooks/use-event-bus";
 import { NonEmptyArray, StartTimerEvent } from "@/types";
 import React, { useEffect } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
@@ -12,18 +13,18 @@ import ColumnDescription, {
 import ExcerciseTitle, { ExcerciseTitleProps } from "../excercise-title";
 import { SetItemProps } from "./set-item";
 import SwipeableSet from "./swipable-set";
-import useEventBus from "@/hooks/use-event-bus";
 
-type ExerciseWithId = SetItemProps & { _id: string };
+type PublicSetItemProps = Omit<SetItemProps, "onPress" | "id" | "_id">;
+type ExerciseWithId = PublicSetItemProps & { _id: string };
 
 export interface ExcerciseTrayProps {
   title: ExcerciseTitleProps;
   description: ColumnDescriptionProps;
-  excercises: NonEmptyArray<SetItemProps>;
+  excercises: NonEmptyArray<PublicSetItemProps>;
   history: HistoryTextProps;
-  onExcerciseChange?: (excercises: NonEmptyArray<SetItemProps>) => void;
-  onExcerciseComplete?: (excercise: SetItemProps) => void;
-  onExcerciseRemove?: (excercise: SetItemProps) => void;
+  onExcerciseChange?: (excercise: PublicSetItemProps, id: string) => void;
+  onExcerciseComplete?: (excercise: PublicSetItemProps, id: string) => void;
+  onExcerciseRemove?: (excercise: PublicSetItemProps, id: string) => void;
 }
 
 export default function ExcerciseTray(props: ExcerciseTrayProps) {
@@ -52,7 +53,6 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
     <View style={styles.container}>
       <Pressable
         onPress={() => {
-          console.log("pressed title");
           setIsExpanded((current) => !current);
         }}
       >
@@ -63,8 +63,10 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
         {excercises.map((excercise, index) => (
           <View key={excercise._id} style={styles.exerciseRow}>
             <SwipeableSet
+              id={excercise._id}
               onPressEnd={() => {
                 if (index !== currentActiveIndex) return;
+
                 setCurrentActiveIndex((current) => {
                   return current + 1;
                 });
@@ -76,10 +78,13 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
                     150,
                   ),
                 );
-                props.onExcerciseComplete?.(excercise);
+
+                props.onExcerciseComplete?.(excercise, excercise._id);
               }}
               disabledSwipe={index === 0 || currentActiveIndex > index}
               onSwipeEnd={() => {
+                props.onExcerciseChange?.(excercise, excercise._id);
+
                 addOrRemoveExcercises((current) => {
                   if (index === 0) return current;
                   const filtered = current.filter(
@@ -89,19 +94,19 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
                     filtered.length > 0 ? filtered : current
                   ) as NonEmptyArray<ExerciseWithId>;
                 });
+
+                props.onExcerciseRemove?.(excercise, excercise._id);
               }}
               {...excercise}
               initialState={
                 index === currentActiveIndex ? "current" : "progress"
               }
               onPress={(initialState, stateTransition) => {
-                console.log("pressed", {
-                  initialState,
-                  index,
-                  currentActiveIndex,
-                });
                 if (index !== currentActiveIndex) return;
-                excercise.onPress?.(initialState, stateTransition);
+                if (initialState === "current" || initialState === "progress") {
+                  stateTransition("done");
+                }
+                props.onExcerciseChange?.(excercise, excercise._id);
               }}
               onInputChange={(field1, field2) => {
                 addOrRemoveExcercises((current) => {

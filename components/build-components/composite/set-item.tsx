@@ -19,9 +19,10 @@ import CheckGreen from "../check-green";
 import SetNumberWarpup from "../set-number-warpup";
 import TwoField from "../two-field";
 
-type SetState = "pr_record" | "done" | "progress" | "current";
+export type SetState = "pr_record" | "done" | "progress" | "current";
 
 export interface SetItemProps {
+  id: string;
   history: {
     firstText: string | number;
     secondText: string | number;
