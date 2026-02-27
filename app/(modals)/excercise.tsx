@@ -5,9 +5,62 @@ import { Colors, typography } from "@/constants/theme";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { router } from "expo-router";
 import { useRouteInfo } from "expo-router/build/hooks";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+function TopDescription({
+  name,
+  time,
+}: {
+  name: string;
+  time: string;
+}): React.JSX.Element {
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}
+    >
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "flex-end",
+          padding: 8,
+        }}
+      >
+        <TextButton
+          text={time}
+          bgColor={Colors.general.color.darkTones.bgTray}
+          textColor={Colors.general.color.grayTones.muted50}
+        />
+      </View>
+      <Text
+        style={{
+          ...typography.mediumL,
+          color: Colors.general.color.grayTones.main,
+        }}
+      >
+        {name}
+      </Text>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "flex-end",
+        }}
+      >
+        <TextButton
+          text="Finish"
+          bgColor={Colors.general.color.grayTones.main}
+          textColor={Colors.general.color.darkTones.bg}
+          onClick={() => router.back()}
+        />
+      </View>
+    </View>
+  );
+}
 
 export default function ExcerciseModal() {
   const insets = useSafeAreaInsets();
@@ -15,7 +68,9 @@ export default function ExcerciseModal() {
   const excersiceId = rinfo.params["id"];
   const modalHeaderOverlayHeight = insets.top + 22;
 
-  const { excercises, addExcercise, updateExcercise } = useExcerciseStore();
+  const { excercises, addExcercise, updateExcercise, getTotalExcercises } =
+    useExcerciseStore();
+  const [completedExcercises, setCompletedExcercises] = useState<number>(0);
 
   // Пример хардкода, позже будет API
   const ex = [
@@ -54,7 +109,7 @@ export default function ExcerciseModal() {
     if (excercises.length === 0) {
       ex.forEach((e) => {
         console.log("State", e.id, e.initialState);
-        addExcercise(e);
+        addExcercise({ ...e, trayId: "tray-1" }, "tray-1");
       });
     }
   }, []);
@@ -74,48 +129,7 @@ export default function ExcerciseModal() {
           paddingBottom: 24 + insets.bottom,
         }}
       >
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "flex-end",
-              padding: 8,
-            }}
-          >
-            <TextButton
-              text="01:23"
-              bgColor={Colors.general.color.darkTones.bgTray}
-              textColor={Colors.general.color.grayTones.muted50}
-            />
-          </View>
-          <Text
-            style={{
-              ...typography.mediumL,
-              color: Colors.general.color.grayTones.main,
-            }}
-          >
-            Fullbody
-          </Text>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "flex-end",
-            }}
-          >
-            <TextButton
-              text="Finish"
-              bgColor={Colors.general.color.grayTones.main}
-              textColor={Colors.general.color.darkTones.bg}
-              onClick={() => router.back()}
-            />
-          </View>
-        </View>
+        <TopDescription name="Fullbody" time="01:23" />
         <ExcerciseTray
           id="tray-1"
           description={{ items: ["Set", "Previous", "kg", "Reps"] }}
@@ -137,7 +151,11 @@ export default function ExcerciseModal() {
           onExcerciseChange={(_, id) => {
             console.log(`Excercise with id ${id} changed`);
           }}
-          onExcerciseComplete={(newState, id) => {}}
+          onExcerciseComplete={(ex, id, { currentCompleted, total }) => {
+            console.log(
+              `Excercise completed. Progress: ${currentCompleted} / ${total}`,
+            );
+          }}
           onExcerciseRemove={(_, id) => {
             console.log(`Excercise with id ${id} removed`);
           }}

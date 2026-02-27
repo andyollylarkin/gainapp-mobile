@@ -4,7 +4,7 @@ import Accordion from "@/components/parts/accordion";
 import TextButton from "@/components/parts/text-button";
 import { Colors } from "@/constants/theme";
 import { useExcerciseStore } from "@/store/excercise-store";
-import React, { useEffect } from "react";
+import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import ColumnDescription, {
   ColumnDescriptionProps,
@@ -19,7 +19,11 @@ export interface ExcerciseTrayProps {
   history: HistoryTextProps;
   id: string;
   onExcerciseChange?: (excercise: SetItemProps, id: string) => void;
-  onExcerciseComplete?: (excercise: SetItemProps, id: string) => void;
+  onExcerciseComplete?: (
+    excercise: SetItemProps,
+    id: string,
+    { total, currentCompleted }: { total: number; currentCompleted: number },
+  ) => void;
   onExcerciseRemove?: (excercise: SetItemProps, id: string) => void;
 }
 
@@ -29,6 +33,7 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
     excercises,
     addExcercise,
     updateExcercise,
+    removeExcercise,
     setTrayActiveIndex,
     getActiveIndex,
   } = useExcerciseStore();
@@ -58,12 +63,16 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
 
                 setTrayActiveIndex(props.id, index + 1);
 
-                props.onExcerciseComplete?.(excercise, excercise.id);
+                props.onExcerciseComplete?.(excercise, excercise.id, {
+                  total: excercises.length,
+                  currentCompleted: index + 1,
+                });
               }}
               disabledSwipe={index === 0 || getActiveIndex(props.id) > index}
               onSwipeEnd={() => {
                 props.onExcerciseChange?.(excercise, excercise.id);
                 props.onExcerciseRemove?.(excercise, excercise.id);
+                removeExcercise(excercise.id, props.id);
               }}
               {...excercise}
               initialState={
@@ -77,14 +86,22 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
                 if (index !== getActiveIndex(props.id)) return;
                 if (initialState === "current" || initialState === "progress") {
                   stateTransition("done");
-                  updateExcercise(excercise.id, { initialState: "done" });
+                  updateExcercise(
+                    excercise.id,
+                    { initialState: "done" },
+                    props.id,
+                  );
                 }
                 props.onExcerciseChange?.(excercise, excercise.id);
               }}
               onInputChange={(field1, field2) => {
-                updateExcercise(excercise.id, {
-                  input: { field1, field2 },
-                });
+                updateExcercise(
+                  excercise.id,
+                  {
+                    input: { field1, field2 },
+                  },
+                  props.id,
+                );
               }}
               excerciseOrder={index === 0 ? "W" : index}
             />
@@ -109,10 +126,11 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
             <TextButton
               text={"Add Set"}
               onClick={() => {
-                const nextExcercise = createDefaultExcercise(
-                  excercises[excercises.length - 1],
-                );
-                addExcercise(nextExcercise);
+                const nextExcercise = {
+                  ...createDefaultExcercise(excercises[excercises.length - 1]),
+                  trayId: props.id,
+                };
+                addExcercise(nextExcercise, props.id);
               }}
               bgColor={Colors.general.color.darkTones.bgMiddle}
               textColor={Colors.general.color.grayTones.muted50}
