@@ -15,7 +15,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-export interface SliderButtonProps {
+export interface SliderButtonProps<T> {
   icon: React.ReactElement<IconProps>;
   holdDuration: number;
   onHoldStart: () => void;
@@ -23,10 +23,10 @@ export interface SliderButtonProps {
   color: ColorValue;
   holdOverlayColor: ColorValue;
   textColor: ColorValue;
-  text: string;
+  text: T;
 }
 
-export default function SliderButton(props: SliderButtonProps) {
+export default function SliderButton<T>(props: SliderButtonProps<T>) {
   const holdProgress = useSharedValue(0);
   const containerWidth = useSharedValue(0);
 

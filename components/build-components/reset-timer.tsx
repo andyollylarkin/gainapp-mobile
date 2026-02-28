@@ -1,5 +1,6 @@
 import { Colors, typography } from "@/constants/theme";
 import useCountdown from "@/hooks/use-countdown";
+import { } from "expo-background-fetch";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import TextButton from "../parts/text-button";
@@ -8,6 +9,7 @@ export interface ResetTimeProps {
   increaseAmount: number;
   decreaseAmount: number;
   onTimeout?: () => void;
+  onTick?: (timeLeft: number) => void;
   timeout: number;
   start?: boolean;
 }
@@ -47,6 +49,10 @@ export default function ResetTimer(props: ResetTimeProps) {
       props.onTimeout?.();
     }
   }, [props, props.onTimeout, props.start, targetTime, timeLeft.real]);
+
+  useEffect(() => {
+    props.onTick?.(timeLeft.real);
+  }, [props, timeLeft.real]);
 
   return (
     <View style={styles.element}>

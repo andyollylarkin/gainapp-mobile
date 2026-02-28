@@ -1,12 +1,15 @@
 import ExcerciseTray from "@/components/build-components/composite/excercise-tray";
+import ResetTimer from "@/components/build-components/reset-timer";
 import MultiplyIcon from "@/components/icons/multiply-icon";
 import TextButton from "@/components/parts/text-button";
 import { Colors, typography } from "@/constants/theme";
 import { useExcerciseStore } from "@/store/excercise-store";
+import { useExcerciseTimerStore } from "@/store/excercise-timer-store";
 import { router } from "expo-router";
 import { useRouteInfo } from "expo-router/build/hooks";
 import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
+import Animated, { useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function TopDescription({
@@ -64,15 +67,31 @@ function TopDescription({
 
 export default function ExcerciseModal() {
   const insets = useSafeAreaInsets();
-  const rinfo = useRouteInfo();
-  const excersiceId = rinfo.params["id"];
+  const reqInfo = useRouteInfo();
+  const excersiceId = reqInfo.params["id"];
   const modalHeaderOverlayHeight = insets.top + 22;
+  const [timerStarted, setTimerStarted] = useState<boolean>(false);
+  const [timerKey, setTimerKey] = useState<number>(0);
 
   const { excercises, addExcercise, updateExcercise, getTotalExcercises } =
     useExcerciseStore();
   const [completedExcercises, setCompletedExcercises] = useState<number>(0);
+  const { currentRest, updateCurrentRest } = useExcerciseTimerStore();
+  const timerOpacity = useSharedValue(0);
 
-  // Пример хардкода, позже будет API
+  const showOrHideTimer = (show: boolean) => {
+    console.log("Show timer", show, "Rest", currentRest);
+    if (show) {
+      updateCurrentRest(120);
+      setTimerKey((k) => k + 1); // перемонтируем ResetTimer
+      setTimerStarted(true);
+      timerOpacity.value = withTiming(1, { duration: 220 });
+    } else {
+      timerOpacity.value = withTiming(0, { duration: 220 });
+      setTimerStarted(false);
+    }
+  };
+
   const ex = [
     {
       id: "ex1",
@@ -105,7 +124,6 @@ export default function ExcerciseModal() {
   ];
 
   useEffect(() => {
-    // Добавляем все упражнения в стор
     if (excercises.length === 0) {
       ex.forEach((e) => {
         console.log("State", e.id, e.initialState);
@@ -119,20 +137,52 @@ export default function ExcerciseModal() {
       style={{
         flex: 1,
         backgroundColor: Colors.general.color.darkTones.bg,
+        position: "relative",
       }}
     >
+      <Animated.View
+        style={{
+          position: "absolute",
+          bottom: 80,
+          left: 0,
+          right: 0,
+          zIndex: 10,
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          opacity: timerOpacity,
+        }}
+      >
+        <View style={{ maxWidth: 278 }}>
+          <ResetTimer
+            key={timerKey}
+            decreaseAmount={15}
+            increaseAmount={15}
+            timeout={120}
+            start={timerStarted}
+            onTimeout={() => showOrHideTimer(false)}
+            onTick={(timeLeft) => {
+              console.log("Timer tick", timeLeft);
+              if (timeLeft <= 0) return;
+              updateCurrentRest(timeLeft);
+            }}
+          />
+        </View>
+      </Animated.View>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
           gap: 12,
           paddingTop: modalHeaderOverlayHeight,
           paddingBottom: 24 + insets.bottom,
+          paddingHorizontal: 8,
         }}
       >
         <TopDescription name="Fullbody" time="01:23" />
         <ExcerciseTray
           id="tray-1"
           description={{ items: ["Set", "Previous", "kg", "Reps"] }}
+          disable={timerStarted}
           history={{
             color: Colors.general.color.grayTones.muted40,
             delimiter: <MultiplyIcon />,
@@ -155,6 +205,8 @@ export default function ExcerciseModal() {
             console.log(
               `Excercise completed. Progress: ${currentCompleted} / ${total}`,
             );
+            showOrHideTimer(true);
+            setCompletedExcercises((current) => current + 1);
           }}
           onExcerciseRemove={(_, id) => {
             console.log(`Excercise with id ${id} removed`);

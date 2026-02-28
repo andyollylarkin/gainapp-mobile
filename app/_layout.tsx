@@ -32,7 +32,7 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={appTheme}>
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, position: "relative" }}>
           <Stack
             screenOptions={{
               headerTransparent: true,

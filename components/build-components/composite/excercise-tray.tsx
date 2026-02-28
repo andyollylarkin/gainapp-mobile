@@ -25,6 +25,7 @@ export interface ExcerciseTrayProps {
     { total, currentCompleted }: { total: number; currentCompleted: number },
   ) => void;
   onExcerciseRemove?: (excercise: SetItemProps, id: string) => void;
+  disable?: boolean;
 }
 
 export default function ExcerciseTray(props: ExcerciseTrayProps) {
@@ -59,6 +60,7 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
           <View key={excercise.id} style={styles.exerciseRow}>
             <SwipeableSet
               onPressEnd={() => {
+                if (props.disable) return;
                 if (index !== getActiveIndex(props.id)) return;
 
                 setTrayActiveIndex(props.id, index + 1);
@@ -83,6 +85,7 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
                     : "progress"
               }
               onPress={(initialState, stateTransition) => {
+                if (props.disable) return;
                 if (index !== getActiveIndex(props.id)) return;
                 if (initialState === "current" || initialState === "progress") {
                   stateTransition("done");

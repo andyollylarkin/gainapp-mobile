@@ -44,7 +44,7 @@ export default function useCountdown(
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [targetSeconds, timeToLeft, start]);
+  }, [start, targetSeconds, timeToLeft]);
 
   return timeLeft;
 }

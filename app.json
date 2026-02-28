@@ -10,7 +10,16 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.gainapp"
+      "bundleIdentifier": "com.anonymous.gainapp",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "processing",
+          "fetch",
+          "processing",
+          "fetch"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -40,11 +49,18 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-background-task"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "14e25587-9c95-4323-a246-4dab1357310e"
+      }
     }
   }
 }

@@ -3,6 +3,8 @@ import ExcerciseItem, {
 } from "@/components/build-components/composite/excercise-item";
 import WorkoutPageDesc from "@/components/build-components/composite/workoutpage-desc";
 import DayPicker from "@/components/build-components/day-picker";
+import PlayIcon from "@/components/icons/play";
+import SliderButton from "@/components/parts/slider-button";
 import { Colors } from "@/constants/theme";
 import { router } from "expo-router";
 import { ScrollView, View } from "react-native";
@@ -63,21 +65,11 @@ export default function HomeScreen() {
         position: "relative",
       }}
     >
-      <View
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 10,
-          // backgroundColor: Colors.general.color.darkTones.bg,
-          paddingTop: dayPickerTop,
-        }}
-      ></View>
       <ScrollView
         scrollsToTop
         style={{
           flex: 1,
+          position: "relative",
         }}
         // TODO: fix snap
         snapToAlignment="start"
@@ -95,8 +87,44 @@ export default function HomeScreen() {
           gap: itemGap,
         }}
       >
-        <View style={{marginBottom: 22}}>
+        <View style={{ marginBottom: 22 }}>
           <DayPicker />
+        </View>
+        <View
+          style={{
+            position: "absolute",
+            bottom: -contentTopOffset + 8,
+            left: 0,
+            right: 0,
+            zIndex: 10,
+            marginLeft: "auto",
+            marginRight: "auto",
+            // alignItems: "center", // Remove vertical centering
+            // justifyContent: "center", // Remove vertical centering
+          }}
+        >
+          <View style={{ maxWidth: 248, alignSelf: "center" }}>
+            <SliderButton<
+              | "Go to next workout"
+              | "Start today's workout"
+              | "Set as today’s workout"
+            >
+              color={Colors.general.color.grayTones.main}
+              textColor={Colors.general.color.darkTones.bg}
+              text="Go to next workout"
+              onHoldEnd={() => {}}
+              onHoldStart={() => {}}
+              icon={
+                <PlayIcon
+                  width={20}
+                  height={20}
+                  color={Colors.general.color.darkTones.bg}
+                />
+              }
+              holdDuration={1500}
+              holdOverlayColor={"#808080"}
+            />
+          </View>
         </View>
         <View
           style={{ width: "100%", paddingHorizontal: 12, marginBottom: 12 }}
