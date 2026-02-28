@@ -133,6 +133,8 @@ function RestDayContent() {
         justifyContent: "flex-start",
         alignItems: "flex-start",
         width: "100%",
+        flexDirection: "column",
+        gap: 12,
       }}
     >
       <Text
