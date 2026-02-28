@@ -1,13 +1,14 @@
 import { Colors, typography } from "@/constants/theme";
 import useCurrentDay from "@/hooks/use-current-day";
 import { Day } from "@/types";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 export interface DayPickerProps {
   currentDay?: Day;
+  onDaySelect?: (day: Day) => void;
 }
 
-export default function DayPicker({ currentDay }: DayPickerProps) {
+export default function DayPicker({ currentDay, onDaySelect }: DayPickerProps) {
   const current = useCurrentDay();
 
   if (!currentDay) {
@@ -30,28 +31,29 @@ export default function DayPicker({ currentDay }: DayPickerProps) {
         const isCurrentMonday = isCurrent && day === "Monday";
 
         return (
-          <View
-            key={day}
-            style={
-              isCurrentMonday
-                ? styles.firstDay
-                : isCurrent
-                  ? styles.currentDay
-                  : styles.day
-            }
-          >
-            <Text
+          <Pressable key={day} onPress={() => onDaySelect?.(day)}>
+            <View
               style={
                 isCurrentMonday
-                  ? styles.firstDayText
+                  ? styles.firstDay
                   : isCurrent
-                    ? styles.currentDayText
-                    : styles.otherDayText
+                    ? styles.currentDay
+                    : styles.day
               }
             >
-              {day.charAt(0).toUpperCase()}
-            </Text>
-          </View>
+              <Text
+                style={
+                  isCurrentMonday
+                    ? styles.firstDayText
+                    : isCurrent
+                      ? styles.currentDayText
+                      : styles.otherDayText
+                }
+              >
+                {day.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+          </Pressable>
         );
       })}
     </View>
