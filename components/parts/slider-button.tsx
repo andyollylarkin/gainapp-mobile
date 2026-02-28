@@ -15,7 +15,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
-export interface SliderButtonProps<T> {
+export interface SliderButtonProps<T extends string> {
   icon: React.ReactElement<IconProps>;
   holdDuration: number;
   onHoldStart: () => void;
@@ -26,9 +26,12 @@ export interface SliderButtonProps<T> {
   text: T;
 }
 
-export default function SliderButton<T>(props: SliderButtonProps<T>) {
+export default function SliderButton<T extends string>(
+  props: SliderButtonProps<T>,
+) {
   const holdProgress = useSharedValue(0);
   const containerWidth = useSharedValue(0);
+  const scale = useSharedValue(1);
 
   const overlayAnimatedStyle = useAnimatedStyle(() => {
     return {
@@ -41,6 +44,12 @@ export default function SliderButton<T>(props: SliderButtonProps<T>) {
     };
   });
 
+  const animatedContainerStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scale.value }],
+    };
+  });
+
   const handleContainerLayout = (event: LayoutChangeEvent) => {
     containerWidth.value = event.nativeEvent.layout.width;
   };
@@ -49,9 +58,13 @@ export default function SliderButton<T>(props: SliderButtonProps<T>) {
     props.onHoldStart();
     cancelAnimation(holdProgress);
     holdProgress.value = withTiming(1, { duration: props.holdDuration });
+    // shrink button
+    scale.value = withTiming(0.98, { duration: 60 });
   };
 
   const handleHoldEnd = useCallback(() => {
+    // return to normal size
+    scale.value = withTiming(1, { duration: 60 });
     if (holdProgress.value < 1) {
       cancelAnimation(holdProgress);
       holdProgress.value = withTiming(0, { duration: 150 });
@@ -63,8 +76,12 @@ export default function SliderButton<T>(props: SliderButtonProps<T>) {
   }, [holdProgress, props]);
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: props.color }]}
+    <Animated.View
+      style={[
+        styles.container,
+        { backgroundColor: props.color },
+        animatedContainerStyle,
+      ]}
       onLayout={handleContainerLayout}
     >
       <Animated.View style={overlayAnimatedStyle}></Animated.View>
@@ -90,7 +107,7 @@ export default function SliderButton<T>(props: SliderButtonProps<T>) {
           {props.text}
         </Text>
       </View>
-    </View>
+    </Animated.View>
   );
 }
 

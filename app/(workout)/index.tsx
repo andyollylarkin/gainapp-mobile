@@ -107,8 +107,8 @@ export default function HomeScreen() {
             color={Colors.general.color.grayTones.main}
             textColor={Colors.general.color.darkTones.bg}
             text="Go to next workout"
-            onHoldEnd={() => {}}
-            onHoldStart={() => {}}
+            onHoldEnd={() => console.log("Hold ended")}
+            onHoldStart={() => console.log("Hold start")}
             holdDuration={1500}
             holdOverlayColor="#808080"
             icon={
