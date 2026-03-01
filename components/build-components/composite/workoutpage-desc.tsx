@@ -4,6 +4,7 @@ import { Colors, typography } from "@/constants/theme";
 import { Text, View } from "react-native";
 import StatsButton from "../stats-button";
 import ThreeDotsButton from "../three-dots-button";
+import ScaledPressable from "@/components/animated/scaled-pressable";
 
 export interface WorkoutPageDescProps {
   workoutName: string;
@@ -72,15 +73,19 @@ export default function WorkoutPageDesc(props: WorkoutPageDescProps) {
           alignSelf: "flex-start",
         }}
       >
-        <StatsButton
-          color={Colors.general.color.darkTones.bgMiddle}
-          onClick={() => {}}
-        />
+        <ScaledPressable scaleDuration={150} scaleTo={0.94}>
+          <StatsButton
+            color={Colors.general.color.darkTones.bgMiddle}
+            onPressIn={() => {}}
+          />
+        </ScaledPressable>
 
-        <ThreeDotsButton
-          color={Colors.general.color.darkTones.bgMiddle}
-          onClick={() => {}}
-        />
+        <ScaledPressable scaleDuration={150} scaleTo={0.94}>
+          <ThreeDotsButton
+            color={Colors.general.color.darkTones.bgMiddle}
+            onPressIn={() => {}}
+          />
+        </ScaledPressable>
       </View>
     </View>
   );

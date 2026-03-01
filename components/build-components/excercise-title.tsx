@@ -9,6 +9,7 @@ import Animated, {
 import FluentDrag from "../icons/fluent-drag";
 import StatsButton from "./stats-button";
 import ThreeDotsButton from "./three-dots-button";
+import ScaledPressable from "../animated/scaled-pressable";
 
 export interface ExcerciseTitleProps {
   type: "Barbell" | "Rope" | "Treadmill" | "Bodyweight" | "Machine";
@@ -100,11 +101,18 @@ export default function ExcerciseTitle(props: ExcerciseTitleProps) {
             actionIconsStyle,
           ]}
         >
-          <StatsButton color={props.iconsColor} onClick={props.icon1Click} />
-          <ThreeDotsButton
-            color={props.iconsColor}
-            onClick={props.icon2Click}
-          />
+          <ScaledPressable scaleDuration={150} scaleTo={0.94}>
+            <StatsButton
+              color={props.iconsColor}
+              onPressIn={props.icon1Click}
+            />
+          </ScaledPressable>
+          <ScaledPressable scaleDuration={150} scaleTo={0.94}>
+            <ThreeDotsButton
+              color={props.iconsColor}
+              onPressIn={props.icon2Click}
+            />
+          </ScaledPressable>
         </Animated.View>
       </View>
     </View>

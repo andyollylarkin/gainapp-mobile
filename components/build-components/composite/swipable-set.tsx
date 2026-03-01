@@ -36,7 +36,7 @@ export default function SwipeableSet(
           : (progress, dragX) => <RightAction dragX={dragX} />
       }
     >
-      <SetItem {...setItemProps} />
+      <SetItem {...setItemProps} withVibrationImpact />
     </Swipeable>
   );
 }

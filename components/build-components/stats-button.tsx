@@ -1,17 +1,17 @@
-import { Pressable } from "react-native";
+import { Colors } from "@/constants/theme";
+import { GestureResponderEvent, Pressable } from "react-native";
 import ThreeDotsIcon from "../icons/three-dots";
 import Circle from "../parts/circle";
-import { Colors } from "@/constants/theme";
 
 export default function StatsButton({
-  onClick,
+  onPressIn,
   color,
 }: {
   color: string;
-  onClick: () => void;
+  onPressIn?: (e: GestureResponderEvent) => void;
 }) {
   return (
-    <Pressable onPress={onClick}>
+    <Pressable onPressIn={onPressIn}>
       <Circle bgColor={color}>
         <ThreeDotsIcon color={Colors.general.color.grayTones.muted50} />
       </Circle>

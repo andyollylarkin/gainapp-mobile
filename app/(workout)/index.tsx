@@ -99,14 +99,22 @@ export default function HomeScreen() {
         }}
       >
         <View style={{ width: 248 }}>
-          <SliderButton<
-            | "Go to next workout"
-            | "Start today's workout"
-            | "Set as today’s workout"
-          >
-            color={Colors.general.color.grayTones.main}
-            textColor={Colors.general.color.darkTones.bg}
-            text="Go to next workout"
+          <SliderButton<"Go to next workout" | "Start today's workout">
+            color={
+              currentDay === currentDaySelected
+                ? Colors.general.color.grayTones.main
+                : Colors.general.color.darkTones.bgLight
+            }
+            textColor={
+              currentDay === currentDaySelected
+                ? Colors.general.color.darkTones.bg
+                : Colors.general.color.grayTones.main
+            }
+            text={
+              currentDay === currentDaySelected
+                ? "Start today's workout"
+                : "Go to next workout"
+            }
             onHoldEnd={() => console.log("Hold ended")}
             onHoldStart={() => console.log("Hold start")}
             holdDuration={1500}
@@ -115,7 +123,11 @@ export default function HomeScreen() {
               <PlayIcon
                 width={20}
                 height={20}
-                color={Colors.general.color.darkTones.bg}
+                color={
+                  currentDay === currentDaySelected
+                    ? Colors.general.color.darkTones.bg
+                    : Colors.general.color.grayTones.main
+                }
               />
             }
           />

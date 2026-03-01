@@ -36,7 +36,7 @@ export default function PlayIcon(props: IconProps) {
           />
         </Mask>
         <G mask="url(#mask0_487_1417)">
-          <Path d="M0 0H20V20H0V0Z" fill="#0D0D0D" />
+          <Path d="M0 0H20V20H0V0Z" fill={color || "white"} />
         </G>
       </G>
       <Defs>

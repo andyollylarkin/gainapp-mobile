@@ -18,6 +18,7 @@ import CheckGray from "../check-gray";
 import CheckGreen from "../check-green";
 import SetNumberWarpup from "../set-number-warpup";
 import TwoField from "../two-field";
+import * as Haptics from "expo-haptics";
 
 export type SetState = "pr_record" | "done" | "progress" | "current";
 
@@ -39,6 +40,7 @@ export interface SetItemProps {
     field1: NonNullable<string>;
     field2: string | null;
   };
+  withVibrationImpact?: boolean;
   onPress?: (
     currentState: SetState,
     setNextState: (newState: SetState) => void,
@@ -214,6 +216,8 @@ export default function SetItem(props: SetItemProps) {
             onPress={() => props.onPress?.(currentState, stateTransition)}
             onPressEnd={() => {
               props.onPressEnd && props.onPressEnd();
+              props.withVibrationImpact &&
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
             }}
           >
             <state.checkItem />

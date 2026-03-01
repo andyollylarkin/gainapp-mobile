@@ -8,6 +8,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import { FIRST_DAY_OF_THE_WEEK } from "../../constants";
 
 export interface DayPickerProps {
   currentDay?: Day;
@@ -40,7 +41,7 @@ export default function DayPicker({ currentDay, onDaySelect }: DayPickerProps) {
     <View style={styles.container}>
       {days.map((day) => {
         const isCurrent = day === currentDay;
-        const isCurrentMonday = isCurrent && day === "Monday";
+        const isCurrentMonday = isCurrent && day === FIRST_DAY_OF_THE_WEEK;
 
         return (
           <Pressable
@@ -60,7 +61,7 @@ export default function DayPicker({ currentDay, onDaySelect }: DayPickerProps) {
                   : isCurrent
                     ? styles.currentDay
                     : styles.day,
-                animatedStyle,
+                isCurrent ? animatedStyle : {},
               ]}
             >
               <Text
