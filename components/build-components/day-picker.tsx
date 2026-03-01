@@ -2,6 +2,12 @@ import { Colors, typography } from "@/constants/theme";
 import useCurrentDay from "@/hooks/use-current-day";
 import { Day } from "@/types";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 
 export interface DayPickerProps {
   currentDay?: Day;
@@ -24,6 +30,12 @@ export default function DayPicker({ currentDay, onDaySelect }: DayPickerProps) {
     "Saturday",
     "Sunday",
   ];
+
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
   return (
     <View style={styles.container}>
       {days.map((day) => {
@@ -31,15 +43,25 @@ export default function DayPicker({ currentDay, onDaySelect }: DayPickerProps) {
         const isCurrentMonday = isCurrent && day === "Monday";
 
         return (
-          <Pressable key={day} onPress={() => onDaySelect?.(day)}>
-            <View
-              style={
+          <Pressable
+            key={day}
+            onPress={() => {
+              scale.value = withSequence(
+                withTiming(1.1, { duration: 100 }),
+                withTiming(1, { duration: 100 }),
+              );
+              onDaySelect?.(day);
+            }}
+          >
+            <Animated.View
+              style={[
                 isCurrentMonday
                   ? styles.firstDay
                   : isCurrent
                     ? styles.currentDay
-                    : styles.day
-              }
+                    : styles.day,
+                animatedStyle,
+              ]}
             >
               <Text
                 style={
@@ -52,7 +74,7 @@ export default function DayPicker({ currentDay, onDaySelect }: DayPickerProps) {
               >
                 {day.charAt(0).toUpperCase()}
               </Text>
-            </View>
+            </Animated.View>
           </Pressable>
         );
       })}
