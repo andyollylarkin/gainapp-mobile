@@ -162,7 +162,6 @@ export default function ExcerciseModal() {
             start={timerStarted}
             onTimeout={() => showOrHideTimer(false)}
             onTick={(timeLeft) => {
-              console.log("Timer tick", timeLeft);
               if (timeLeft <= 0) return;
               updateCurrentRest(timeLeft);
             }}

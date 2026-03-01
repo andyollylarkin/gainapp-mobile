@@ -1,6 +1,6 @@
 import { Colors, typography } from "@/constants/theme";
 import useCountdown from "@/hooks/use-countdown";
-import { } from "expo-background-fetch";
+import {} from "expo-background-fetch";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import TextButton from "../parts/text-button";
@@ -61,7 +61,7 @@ export default function ResetTimer(props: ResetTimeProps) {
           text={"-" + props.decreaseAmount + " sec"}
           bgColor={theme.color.darkTones.bgLight}
           textColor={theme.color.grayTones.main}
-          onClick={() => {
+          onPressIn={() => {
             if (timeLeft.real <= props.decreaseAmount) return;
             if (timeLeft.real - props.decreaseAmount < 0) {
               setTargetTime(0);
@@ -80,7 +80,7 @@ export default function ResetTimer(props: ResetTimeProps) {
           text={"+" + props.increaseAmount + " sec"}
           bgColor={theme.color.darkTones.bgLight}
           textColor={theme.color.grayTones.main}
-          onClick={() => {
+          onPressIn={() => {
             if (timeLeft.real <= 0) {
               return;
             }

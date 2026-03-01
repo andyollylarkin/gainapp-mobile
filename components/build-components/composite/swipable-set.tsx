@@ -22,9 +22,10 @@ export default function SwipeableSet(
     <Swipeable
       enabled={!disabled}
       containerStyle={styles.swipeable}
-      friction={1}
+      friction={2}
       enableTrackpadTwoFingerGesture
-      rightThreshold={10}
+      rightThreshold={150}
+      overshootRight={false}
       onSwipeableOpen={(direction) => {
         if (onSwipeEnd) {
           onSwipeEnd(direction);

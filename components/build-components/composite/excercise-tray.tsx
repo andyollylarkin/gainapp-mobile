@@ -12,6 +12,7 @@ import ColumnDescription, {
 import ExcerciseTitle, { ExcerciseTitleProps } from "../excercise-title";
 import { SetItemProps } from "./set-item";
 import SwipeableSet from "./swipable-set";
+import ScaledPressable from "@/components/animated/scaled-pressable";
 
 export interface ExcerciseTrayProps {
   title: ExcerciseTitleProps;
@@ -126,18 +127,22 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
             />
           </View>
           <View style={styles.buttons}>
-            <TextButton
-              text={"Add Set"}
-              onClick={() => {
-                const nextExcercise = {
-                  ...createDefaultExcercise(excercises[excercises.length - 1]),
-                  trayId: props.id,
-                };
-                addExcercise(nextExcercise, props.id);
-              }}
-              bgColor={Colors.general.color.darkTones.bgMiddle}
-              textColor={Colors.general.color.grayTones.muted50}
-            />
+            <ScaledPressable scaleDuration={150} scaleTo={0.94}>
+              <TextButton
+                text={"Add Set"}
+                onPressIn={() => {
+                  const nextExcercise = {
+                    ...createDefaultExcercise(
+                      excercises[excercises.length - 1],
+                    ),
+                    trayId: props.id,
+                  };
+                  addExcercise(nextExcercise, props.id);
+                }}
+                bgColor={Colors.general.color.darkTones.bgMiddle}
+                textColor={Colors.general.color.grayTones.muted50}
+              />
+            </ScaledPressable>
           </View>
         </View>
       </Accordion>

@@ -7,7 +7,7 @@ export interface TextButtonProps {
   text: string;
   bgColor: string;
   textColor: string;
-  onClick?: () => void;
+  onPressIn?: () => void;
   icon?: React.ReactElement<IconProps, React.ComponentType<IconProps>>;
 }
 
@@ -15,12 +15,12 @@ export default function TextButton({
   text,
   bgColor,
   textColor,
-  onClick,
+  onPressIn,
   icon,
 }: TextButtonProps) {
   return (
     <Pressable
-      onPress={onClick}
+      onPress={onPressIn}
       style={{ backgroundColor: bgColor, ...styles.button }}
     >
       {icon && icon}
