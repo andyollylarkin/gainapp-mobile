@@ -25,21 +25,15 @@ function TopDescription({
   onTimePress,
 }: TopDescriptionProps): React.JSX.Element {
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}
-    >
+    <View style={{ gap: 24 }}>
       <View
         style={{
           flexDirection: "row",
-          justifyContent: "flex-end",
-          padding: 8,
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
-        <View style={{ maxHeight: 40 }}>
+        <View style={{ maxHeight: 40, width: "auto" }}>
           <ScaledPressable scaleDuration={100} scaleTo={0.96}>
             <TextButton
               text={time}
@@ -49,32 +43,40 @@ function TopDescription({
             />
           </ScaledPressable>
         </View>
+        <Text
+          style={{
+            ...typography.mediumL,
+            color: Colors.general.color.grayTones.main,
+          }}
+        >
+          {name}
+        </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "flex-end",
+          }}
+        >
+          <View style={{ maxHeight: 40 }}>
+            <ScaledPressable scaleDuration={200} scaleTo={0.94}>
+              <TextButton
+                text="Finish"
+                bgColor={Colors.general.color.grayTones.main}
+                textColor={Colors.general.color.darkTones.bg}
+                onPressIn={() => router.back()}
+              />
+            </ScaledPressable>
+          </View>
+        </View>
       </View>
       <Text
         style={{
-          ...typography.mediumL,
-          color: Colors.general.color.grayTones.main,
+          ...typography.regularL,
+          color: Colors.general.color.grayTones.muted40,
         }}
       >
-        {name}
+        Add note
       </Text>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "flex-end",
-        }}
-      >
-        <View style={{ maxHeight: 40 }}>
-          <ScaledPressable scaleDuration={200} scaleTo={0.94}>
-            <TextButton
-              text="Finish"
-              bgColor={Colors.general.color.grayTones.main}
-              textColor={Colors.general.color.darkTones.bg}
-              onPressIn={() => router.back()}
-            />
-          </ScaledPressable>
-        </View>
-      </View>
     </View>
   );
 }

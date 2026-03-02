@@ -86,6 +86,19 @@ export default function HomeScreen() {
         ) : (
           <RestDayContent />
         )}
+        {currentDaySelected === currentDay && (
+          <Text
+            style={{
+              ...typography.regularS,
+              color: "#5E5E62",
+              textAlign: "center",
+              maxWidth: 260,
+              marginTop: 12,
+            }}
+          >
+            We will progressively increase the load in your workout
+          </Text>
+        )}
       </ScrollView>
       <View
         style={{
@@ -115,7 +128,11 @@ export default function HomeScreen() {
                 ? "Start today's workout"
                 : "Go to next workout"
             }
-            onHoldEnd={() => console.log("Hold ended")}
+            onHoldEnd={() => {
+              if (currentDay === currentDaySelected) {
+                router.push(`/(modals)/excercise?id=${items[0].id}`);
+              }
+            }}
             onHoldStart={() => console.log("Hold start")}
             holdDuration={1500}
             holdOverlayColor="#808080"
