@@ -1,3 +1,4 @@
+import ScaledPressable from "@/components/animated/scaled-pressable";
 import ExcerciseTray from "@/components/build-components/composite/excercise-tray";
 import ResetTimer from "@/components/build-components/reset-timer";
 import MultiplyIcon from "@/components/icons/multiply-icon";
@@ -12,13 +13,17 @@ import { ScrollView, Text, View } from "react-native";
 import Animated, { useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+interface TopDescriptionProps {
+  name: string;
+  time: string;
+  onTimePress?: () => void;
+}
+
 function TopDescription({
   name,
   time,
-}: {
-  name: string;
-  time: string;
-}): React.JSX.Element {
+  onTimePress,
+}: TopDescriptionProps): React.JSX.Element {
   return (
     <View
       style={{
@@ -34,11 +39,16 @@ function TopDescription({
           padding: 8,
         }}
       >
-        <TextButton
-          text={time}
-          bgColor={Colors.general.color.darkTones.bgTray}
-          textColor={Colors.general.color.grayTones.muted50}
-        />
+        <View style={{ maxHeight: 40 }}>
+          <ScaledPressable scaleDuration={100} scaleTo={0.96}>
+            <TextButton
+              text={time}
+              onPressIn={onTimePress}
+              bgColor={Colors.general.color.darkTones.bgTray}
+              textColor={Colors.general.color.grayTones.muted50}
+            />
+          </ScaledPressable>
+        </View>
       </View>
       <Text
         style={{
@@ -54,12 +64,16 @@ function TopDescription({
           justifyContent: "flex-end",
         }}
       >
-        <TextButton
-          text="Finish"
-          bgColor={Colors.general.color.grayTones.main}
-          textColor={Colors.general.color.darkTones.bg}
-          onClick={() => router.back()}
-        />
+        <View style={{ maxHeight: 40 }}>
+          <ScaledPressable scaleDuration={200} scaleTo={0.94}>
+            <TextButton
+              text="Finish"
+              bgColor={Colors.general.color.grayTones.main}
+              textColor={Colors.general.color.darkTones.bg}
+              onPressIn={() => router.back()}
+            />
+          </ScaledPressable>
+        </View>
       </View>
     </View>
   );
