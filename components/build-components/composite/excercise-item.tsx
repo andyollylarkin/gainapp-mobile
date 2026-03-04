@@ -45,7 +45,7 @@ export default function ExcerciseItem(props: ExcerciseItemProps) {
             }}
           />
         )}
-        <View>
+        <View style={{ flexDirection: "column", gap: 9 }}>
           <Text
             style={{
               ...typography.mediumM,
