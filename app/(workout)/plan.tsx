@@ -60,10 +60,9 @@ export default function PlanScreen() {
           data={[
             { y: 2, x: 2 },
             { y: 4, x: 3 },
-            { y: 8, x: 4 },
+            { y: 3, x: 4 },
           ]}
           renderPoint={(props) => <Bar {...props} color="#FF9400" />}
-          // renderLine={(props) => <LinePoint {...props} strokeWidth={4} />}
           formatYTick={(val, _) => {
             return `${val}`;
           }}
@@ -73,8 +72,9 @@ export default function PlanScreen() {
           style={{
             grid: {
               color: Colors.general.color.grayTones.muted30,
-              lastIndexColor: "gray",
-              opacity: 0.3,
+              lastIndexColor: "#4D2C00",
+              lastValueColor: "#FF9400",
+              opacity: 0.4,
               fontFamily: typography.mediumS.fontFamily,
               fontSize: typography.mediumS.fontSize,
             },

@@ -41,6 +41,7 @@ export interface ChartProps {
     showGrid?: boolean;
     grid?: {
       color?: string;
+      lastValueColor?: string;
       lastIndexColor?: string;
       opacity?: number;
       fontFamily?: string;
@@ -337,7 +338,12 @@ export default function Chart(props: ChartProps) {
             x={centerRightLabelX}
             y={y}
             fontSize={labelFontSize}
-            fill={props.style?.grid?.color ?? CHART_COLOR}
+            fill={
+              i === visibleYTicks.length - 1 &&
+              props.style?.grid?.lastValueColor
+                ? props.style.grid.lastValueColor
+                : (props.style?.grid?.color ?? CHART_COLOR)
+            }
             fontFamily={props.style?.grid?.fontFamily ?? "System"}
             textAnchor="middle"
             alignmentBaseline="middle"
