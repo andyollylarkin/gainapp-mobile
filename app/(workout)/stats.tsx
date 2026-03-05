@@ -1,9 +1,10 @@
-import { Text, View } from "react-native";
+import CalendarItem from "@/components/build-components/calendar-item";
+import { View } from "react-native";
 
 export default function StatsScreen() {
   return (
-    <View>
-      <Text>Stats Screen</Text>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <CalendarItem/>
     </View>
   );
 }
