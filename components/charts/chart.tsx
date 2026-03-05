@@ -73,6 +73,33 @@ const isDateLikeString = (value: string) => {
   return !Number.isFinite(asNumber) && Number.isFinite(asDate);
 };
 
+const getYTickStep = (maxValue: number) => {
+  const safeMax = Math.max(Math.abs(maxValue), 1e-6);
+  const magnitude = Math.pow(10, Math.floor(Math.log10(safeMax)));
+  return magnitude;
+};
+
+const buildYTicks = (minValue: number, maxValue: number, step: number) => {
+  if (step <= 0) {
+    return [minValue, maxValue];
+  }
+
+  const epsilon = step * 1e-6;
+  const ticks: number[] = [Number(minValue.toFixed(6))];
+  const firstStepTick = Math.ceil((minValue + epsilon) / step) * step;
+  const lastStepTick = Math.ceil((maxValue - epsilon) / step) * step;
+
+  for (let tick = firstStepTick; tick <= lastStepTick + epsilon; tick += step) {
+    ticks.push(Number(tick.toFixed(6)));
+  }
+
+  const uniqueTicks = [...new Set(ticks)].sort((a, b) => a - b);
+
+  return uniqueTicks.length > 0
+    ? uniqueTicks
+    : [Number(minValue.toFixed(6)), Number(maxValue.toFixed(6))];
+};
+
 export default function Chart(props: ChartProps) {
   const data = props.data || [];
   const width = props.width ?? 0;
@@ -82,12 +109,12 @@ export default function Chart(props: ChartProps) {
   const rightLabelGap = 6;
   const rightLabelInset = 2;
   const topPadding = 14;
-  const bottomPadding = 30;
+  const labelFontSize = props.style?.grid?.fontSize ?? 10;
+  const bottomPadding = Math.max(30, labelFontSize + 26);
 
   const ySpan = Math.max(height - topPadding - bottomPadding, 1);
 
   const labelMargin = 4;
-  const labelFontSize = props.style?.grid?.fontSize ?? 10;
   const yLabelHalfHeight = labelFontSize / 2;
   const yLabelMin = yLabelHalfHeight + 1;
   const yLabelMax = height - yLabelHalfHeight - 1;
@@ -132,12 +159,23 @@ export default function Chart(props: ChartProps) {
 
   const xValues = data.map((item) => toXNumber(item.x));
   const yValues = data.map((item) => item.y);
+  const minY = yValues.length > 0 ? Math.min(...yValues) : 0;
+  const maxY = yValues.length > 0 ? Math.max(...yValues) : 0;
 
   const xTicks = [...new Set(xValues)].sort((a, b) => a - b);
-  const yTicks = [...new Set(yValues)].sort((a, b) => a - b);
+  const yTickStep = getYTickStep(Math.max(Math.abs(minY), Math.abs(maxY)));
+  const yTicks = buildYTicks(minY, maxY, yTickStep);
+  const yDomainMin = yTicks.length > 0 ? yTicks[0] : minY;
+  const yDomainMax = yTicks.length > 0 ? yTicks[yTicks.length - 1] : maxY;
 
-  const formatTick = (value: number) =>
-    Number.isInteger(value) ? value.toString() : value.toFixed(1);
+  const yTickPrecision = yTickStep < 1 ? Math.ceil(Math.abs(Math.log10(yTickStep))) : 0;
+  const formatTick = (value: number) => {
+    if (yTickPrecision > 0) {
+      return value.toFixed(yTickPrecision);
+    }
+
+    return Number.isInteger(value) ? value.toString() : value.toFixed(1);
+  };
 
   const minYLabelSpacing = labelFontSize + 4;
   const maxYLabels = Math.max(Math.floor(ySpan / minYLabelSpacing), 1);
@@ -165,7 +203,6 @@ export default function Chart(props: ChartProps) {
   const xSpan = Math.max(plotRight - leftPadding, 1);
 
   const xTickIndexMap = new Map(xTicks.map((value, index) => [value, index]));
-  const yTickIndexMap = new Map(yTicks.map((value, index) => [value, index]));
 
   const formatXTickValue = (value: number) => {
     if (!hasDateX) {
@@ -190,14 +227,7 @@ export default function Chart(props: ChartProps) {
   };
 
   const getScaledY = (value: number) => {
-    const yIndex = yTickIndexMap.get(value) ?? 0;
-    return normalize(
-      yIndex,
-      0,
-      Math.max(yTicks.length - 1, 1),
-      topPadding + ySpan,
-      topPadding,
-    );
+    return normalize(value, yDomainMin, yDomainMax, topPadding + ySpan, topPadding);
   };
 
   const scaledPoints = data.map((item) => ({
