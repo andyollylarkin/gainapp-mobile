@@ -28,7 +28,6 @@ export const useExcerciseStore = create<ExcerciseStore>((set, get) => ({
   trayActiveIndex: {},
   addExcercise: (excercise, trayId) =>
     set((state) => {
-      console.log("Adding excercise:", excercise);
       return { excercises: [...state.excercises, { ...excercise, trayId }] };
     }),
   updateExcercise: (id, updatedExcercise, trayId) =>

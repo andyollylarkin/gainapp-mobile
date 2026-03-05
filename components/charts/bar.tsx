@@ -65,7 +65,6 @@ export default function Bar(props: ChartPointRenderProps) {
   const step = props.gridHeight ?? 40;
   const dashHeight = Math.max(step - DASH_GAP, 1);
   const chartBottom = props.chartHeight ?? 0;
-  console.log(props.index, dashBars, step, dashHeight, chartBottom);
 
   return (
     <G>
