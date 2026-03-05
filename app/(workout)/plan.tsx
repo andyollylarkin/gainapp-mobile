@@ -1,7 +1,8 @@
+import Bar from "@/components/charts/bar";
 import Chart from "@/components/charts/chart";
 import { CirclePoint, LinePoint } from "@/components/charts/circle-point";
 import { Colors, typography } from "@/constants/theme";
-import { View, Text } from "react-native";
+import { Text, View } from "react-native";
 
 export default function PlanScreen() {
   return (
@@ -26,7 +27,12 @@ export default function PlanScreen() {
         }}
       >
         <View
-          style={{ flexDirection: "column", gap: 2, alignItems: "flex-start",padding:4 }}
+          style={{
+            flexDirection: "column",
+            gap: 2,
+            alignItems: "flex-start",
+            padding: 4,
+          }}
         >
           <Text
             style={{
@@ -46,24 +52,53 @@ export default function PlanScreen() {
           </Text>
         </View>
         <Chart
+          step={1}
+          yMin={0}
           width={362}
           height={168}
+          pointWidth={24}
           data={[
-            { y: 2, x: 1 },
-            { y: 13, x: 2 },
-            { y: 6, x: 3 },
+            { y: 2, x: 2 },
+            { y: 4, x: 3 },
             { y: 8, x: 4 },
-            { y: 12, x: 5 },
-            { y: 27, x: 6 },
-            { y: 40, x: 7 },
+          ]}
+          renderPoint={(props) => <Bar {...props} color="#FF9400" />}
+          // renderLine={(props) => <LinePoint {...props} strokeWidth={4} />}
+          formatYTick={(val, _) => {
+            return `${val}`;
+          }}
+          formatXTick={(val, _) => {
+            return `${val} W`;
+          }}
+          style={{
+            grid: {
+              color: Colors.general.color.grayTones.muted30,
+              lastIndexColor: "gray",
+              opacity: 0.3,
+              fontFamily: typography.mediumS.fontFamily,
+              fontSize: typography.mediumS.fontSize,
+            },
+            showGrid: true,
+            chartContainer: {
+              color: "#27C2FF",
+            },
+          }}
+        />
+        <Chart
+          width={362}
+          height={168}
+          pointWidth={24}
+          data={[
+            { y: 2, x: 2 },
+            { y: 5, x: 3 },
+            { y: 10, x: 4 },
           ]}
           renderPoint={(props) => <CirclePoint {...props} />}
           renderLine={(props) => <LinePoint {...props} strokeWidth={4} />}
           formatYTick={(val, _) => {
-            return `${val} kg`;
+            return `${val}`;
           }}
           formatXTick={(val, _) => {
-            console.log(val);
             return `${val} W`;
           }}
           style={{

@@ -14,6 +14,9 @@ export type ChartPointRenderProps = {
   item: ChartData;
   index: number;
   color?: string;
+  chartHeight?: number;
+  gridHeight?: number;
+  gridLinesCount?: number;
 };
 
 export type ChartLineRenderProps = {
@@ -29,6 +32,9 @@ export interface ChartProps {
   renderLine?: (props: ChartLineRenderProps) => ReactNode;
   formatYTick?: (value: number, index: number) => string;
   formatXTick?: (value: number, index: number) => string;
+  pointWidth?: number;
+  step?: number;
+  yMin?: number;
   style?: {
     backgroundColor?: string;
     chartContainer?: { color?: string };
@@ -76,6 +82,10 @@ const isDateLikeString = (value: string) => {
 const getYTickStep = (maxValue: number) => {
   const safeMax = Math.max(Math.abs(maxValue), 1e-6);
   const magnitude = Math.pow(10, Math.floor(Math.log10(safeMax)));
+  const normalized = safeMax / magnitude;
+  if (normalized <= 1) return magnitude * 0.1;
+  if (normalized <= 2) return magnitude * 0.2;
+  if (normalized <= 5) return magnitude * 0.5;
   return magnitude;
 };
 
@@ -159,16 +169,18 @@ export default function Chart(props: ChartProps) {
 
   const xValues = data.map((item) => toXNumber(item.x));
   const yValues = data.map((item) => item.y);
-  const minY = yValues.length > 0 ? Math.min(...yValues) : 0;
+  const minY = props.yMin ?? (yValues.length > 0 ? Math.min(...yValues) : 0);
   const maxY = yValues.length > 0 ? Math.max(...yValues) : 0;
 
   const xTicks = [...new Set(xValues)].sort((a, b) => a - b);
-  const yTickStep = getYTickStep(Math.max(Math.abs(minY), Math.abs(maxY)));
+  const yTickStep =
+    props.step ?? getYTickStep(Math.max(Math.abs(minY), Math.abs(maxY)));
   const yTicks = buildYTicks(minY, maxY, yTickStep);
   const yDomainMin = yTicks.length > 0 ? yTicks[0] : minY;
   const yDomainMax = yTicks.length > 0 ? yTicks[yTicks.length - 1] : maxY;
 
-  const yTickPrecision = yTickStep < 1 ? Math.ceil(Math.abs(Math.log10(yTickStep))) : 0;
+  const yTickPrecision =
+    yTickStep < 1 ? Math.ceil(Math.abs(Math.log10(yTickStep))) : 0;
   const formatTick = (value: number) => {
     if (yTickPrecision > 0) {
       return value.toFixed(yTickPrecision);
@@ -179,7 +191,8 @@ export default function Chart(props: ChartProps) {
 
   const minYLabelSpacing = labelFontSize + 4;
   const maxYLabels = Math.max(Math.floor(ySpan / minYLabelSpacing), 1);
-  const yLabelStep = Math.max(Math.ceil(yTicks.length / maxYLabels), 1);
+  const yLabelStep =
+    props.step != null ? 1 : Math.max(Math.ceil(yTicks.length / maxYLabels), 1);
   const visibleYTicks = yTicks.filter(
     (_, i) => i % yLabelStep === 0 || i === yTicks.length - 1,
   );
@@ -201,6 +214,7 @@ export default function Chart(props: ChartProps) {
   const rightLabelLeft = plotRight + rightLabelGap;
   const rightLabelRight = width - rightLabelInset;
   const xSpan = Math.max(plotRight - leftPadding, 1);
+  const xHalfPoint = (props.pointWidth ?? 0) / 2;
 
   const xTickIndexMap = new Map(xTicks.map((value, index) => [value, index]));
 
@@ -221,13 +235,19 @@ export default function Chart(props: ChartProps) {
       xIndex,
       0,
       Math.max(xTicks.length - 1, 1),
-      leftPadding,
-      leftPadding + xSpan,
+      leftPadding + xHalfPoint,
+      leftPadding + xSpan - xHalfPoint,
     );
   };
 
   const getScaledY = (value: number) => {
-    return normalize(value, yDomainMin, yDomainMax, topPadding + ySpan, topPadding);
+    return normalize(
+      value,
+      yDomainMin,
+      yDomainMax,
+      topPadding + ySpan,
+      topPadding,
+    );
   };
 
   const scaledPoints = data.map((item) => ({
@@ -251,7 +271,7 @@ export default function Chart(props: ChartProps) {
       ) : null}
 
       {props.style?.showGrid &&
-        visibleYTicks.map((value, i) => {
+        yTicks.map((value, i) => {
           const y = clamp(getScaledY(value), yLabelMin, yLabelMax);
 
           return (
@@ -262,7 +282,7 @@ export default function Chart(props: ChartProps) {
               x2={plotRight}
               y2={y}
               stroke={
-                i === visibleYTicks.length - 1
+                i === yTicks.length - 1
                   ? (props.style?.grid?.lastIndexColor ?? CHART_COLOR)
                   : (props.style?.grid?.color ?? CHART_COLOR)
               }
@@ -287,6 +307,9 @@ export default function Chart(props: ChartProps) {
                 item,
                 index: i,
                 color: props.style?.chartContainer?.color ?? CHART_COLOR,
+                chartHeight: topPadding + ySpan,
+                gridHeight: ySpan / Math.max(yTicks.length - 1, 1),
+                gridLinesCount: Math.max(yTicks.length - 1, 1),
               })
             ) : (
               <Circle
