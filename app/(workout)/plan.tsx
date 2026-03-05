@@ -91,7 +91,7 @@ export default function PlanScreen() {
           data={[
             { y: 2, x: 2 },
             { y: 5, x: 3 },
-            { y: 10, x: 4 },
+            { y: 13, x: 4 },
           ]}
           renderPoint={(props) => <CirclePoint {...props} />}
           renderLine={(props) => <LinePoint {...props} strokeWidth={4} />}
