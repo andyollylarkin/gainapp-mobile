@@ -48,11 +48,9 @@ const styles = StyleSheet.create({
   box: {
     borderRadius: 6,
     borderWidth: 2,
-    flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
-    maxHeight: 130,
   },
 });

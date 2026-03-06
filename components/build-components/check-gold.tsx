@@ -15,6 +15,7 @@ export default function CheckGold({ onPress }: { onPress?: () => void }) {
           ],
           angle: 120,
         }}
+        size={40}
       >
         <CircleIconContent>
           <TrophyIcon color={Colors.general.color.goldTones.goldBgLight} />

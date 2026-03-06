@@ -47,9 +47,15 @@ export interface CircleProps {
     | ReactElement<typeof CircleTextContent>
     | ReactElement<typeof CircleIconContent>;
   gradient?: LinearGradientProps & { angle?: number };
+  size?: number;
 }
 
-export default function Circle({ bgColor, children, gradient }: CircleProps) {
+export default function Circle({
+  bgColor,
+  children,
+  gradient,
+  size = 30,
+}: CircleProps) {
   const circleStyle = {
     width: "100%" as const,
     aspectRatio: 1,
@@ -57,8 +63,8 @@ export default function Circle({ bgColor, children, gradient }: CircleProps) {
     borderRadius: 9999,
     justifyContent: "center" as const,
     alignItems: "center" as const,
-    maxWidth: 30,
-    maxHeight: 30,
+    maxWidth: size,
+    maxHeight: size,
   };
 
   if (gradient) {
