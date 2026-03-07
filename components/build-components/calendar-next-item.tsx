@@ -4,7 +4,7 @@ import Circle, { CircleIconContent } from "../parts/circle";
 
 export default function CalendarNextItem() {
   return (
-    <Circle bgColor="#41DD42">
+    <Circle bgColor="#41DD42" size={44}>
       <CircleIconContent>
         <CalendarNextIcon
           width={18}

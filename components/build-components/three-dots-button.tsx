@@ -1,7 +1,7 @@
-import { GestureResponderEvent, Pressable } from "react-native";
-import Circle from "../parts/circle";
-import TimelineIcon from "../icons/timeline";
 import { Colors } from "@/constants/theme";
+import { GestureResponderEvent, Pressable } from "react-native";
+import ThreeDotsIcon from "../icons/three-dots";
+import Circle from "../parts/circle";
 
 export default function ThreeDotsButton({
   onPressIn,
@@ -13,7 +13,7 @@ export default function ThreeDotsButton({
   return (
     <Pressable onPressIn={onPressIn}>
       <Circle bgColor={color}>
-        <TimelineIcon color={Colors.general.color.grayTones.muted50} />
+        <ThreeDotsIcon color={Colors.general.color.grayTones.muted50} />
       </Circle>
     </Pressable>
   );

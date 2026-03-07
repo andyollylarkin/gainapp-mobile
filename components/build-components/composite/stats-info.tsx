@@ -32,14 +32,16 @@ export interface StatsInfoProps {
   onDropdownPress?: (direction: "down" | "up") => void;
 }
 
+const isToday = (date: Date, today: Date) =>
+  date.getFullYear() === today.getFullYear() &&
+  date.getMonth() === today.getMonth() &&
+  date.getDate() === today.getDate();
+
 export default function StatsInfo(props: StatsInfoProps) {
   const [isOpen, setIsOpen] = useState(true);
   const openProgress = useSharedValue(1);
   const today = new Date();
-  const isToday = (date: Date) =>
-    date.getFullYear() === today.getFullYear() &&
-    date.getMonth() === today.getMonth() &&
-    date.getDate() === today.getDate();
+  const todayItem = props.items.find((item) => isToday(item.date, today));
 
   const bottomAnimStyle = useAnimatedStyle(() => ({
     opacity: openProgress.value,
@@ -95,98 +97,89 @@ export default function StatsInfo(props: StatsInfoProps) {
           emptyColor={Colors.general.color.greenTones.greenBgLight}
           current={props.currentProgress ?? 2}
         />
-        <Animated.View style={[styles.bottomBox, bottomAnimStyle]}>
-          {props.items &&
-            props.items.length > 0 &&
-            props.items.map((item, index) => (
-              <View
-                key={index}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  width: "100%",
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "column",
-                    alignItems: "flex-start",
-                    gap: 6,
-                    flex: 1,
-                  }}
-                >
-                  <Text
-                    style={{
-                      ...typography.mediumM,
-                      color: Colors.general.color.grayTones.main,
-                    }}
-                  >
-                    {item.workOutName} -{" "}
-                    {isToday(item.date)
-                      ? "Today"
-                      : `${String(item.date.getDate()).padStart(2, "0")} ${item.date.toLocaleDateString("en-US", { month: "short" })}`}
-                  </Text>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 12,
-                    }}
-                  >
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 4,
-                      }}
-                    >
-                      <LightningIcon
-                        width={18}
-                        height={18}
-                        color={Colors.general.color.grayTones.muted40}
-                      />
-                      <Text
-                        style={{
-                          ...typography.regularM,
-                          color: Colors.general.color.grayTones.muted40,
-                        }}
-                      >
-                        {item.exercisesCount} exercises
-                      </Text>
-                    </View>
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 4,
-                      }}
-                    >
-                      <ClockIcon
-                        width={18}
-                        height={18}
-                        color={Colors.general.color.grayTones.muted40}
-                      />
-                      <Text
-                        style={{
-                          ...typography.regularM,
-                          color: Colors.general.color.grayTones.muted40,
-                        }}
-                      >
-                        {item.workoutDuration} minutes
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-                {isToday(item.date) || item.date > today ? (
-                  <BackItem />
-                ) : (
-                  <CheckGreen />
-                )}
-              </View>
-            ))}
-        </Animated.View>
+        {isOpen ? (
+          <Animated.View style={[styles.bottomBox, bottomAnimStyle]}>
+            {props.items &&
+              props.items.length > 0 &&
+              props.items.map((item, index) => (
+                <StatsItem key={index} item={item} today={today} />
+              ))}
+          </Animated.View>
+        ) : todayItem ? (
+          <StatsItem item={todayItem} today={today} />
+        ) : null}
       </View>
     </Box>
+  );
+}
+
+function StatsItem({ item, today }: { item: Item; today: Date }) {
+  const isToday = (date: Date, today: Date) =>
+    date.getFullYear() === today.getFullYear() &&
+    date.getMonth() === today.getMonth() &&
+    date.getDate() === today.getDate();
+
+  const dateLabel = isToday(item.date, today)
+    ? "Today"
+    : `${String(item.date.getDate()).padStart(2, "0")} ${item.date.toLocaleDateString("en-US", { month: "short" })}`;
+
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", width: "100%" }}>
+      <View
+        style={{
+          flexDirection: "column",
+          alignItems: "flex-start",
+          gap: 6,
+          flex: 1,
+        }}
+      >
+        <Text
+          style={{
+            ...typography.mediumM,
+            color: Colors.general.color.grayTones.main,
+          }}
+        >
+          {item.workOutName} - {dateLabel}
+        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+            <LightningIcon
+              width={18}
+              height={18}
+              color={Colors.general.color.grayTones.muted40}
+            />
+            <Text
+              style={{
+                ...typography.regularM,
+                color: Colors.general.color.grayTones.muted40,
+              }}
+            >
+              {item.exercisesCount} exercises
+            </Text>
+          </View>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+            <ClockIcon
+              width={18}
+              height={18}
+              color={Colors.general.color.grayTones.muted40}
+            />
+            <Text
+              style={{
+                ...typography.regularM,
+                color: Colors.general.color.grayTones.muted40,
+              }}
+            >
+              {item.workoutDuration} minutes
+            </Text>
+          </View>
+        </View>
+      </View>
+      {isToday(item.date, today) || item.date > today ? (
+        <BackItem />
+      ) : (
+        <CheckGreen />
+      )}
+    </View>
   );
 }
 
