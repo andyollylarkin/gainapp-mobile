@@ -60,7 +60,7 @@ export default function ChartInfo(props: ChartInfoProps) {
             Total Volume
           </Text>
         </View>
-        <ScaledPressable scaleTo={0.94} scaleDuration={100}>
+        <ScaledPressable scaleTo={0.94} scaleDuration={150}>
           <ThreeDotsButton color={Colors.general.color.darkTones.bgMiddle} />
         </ScaledPressable>
       </View>

@@ -6,7 +6,7 @@ import PlusIcon from "@/components/icons/plus";
 import Circle from "@/components/parts/circle";
 import { Colors, typography } from "@/constants/theme";
 import React from "react";
-import { ScrollView, StyleSheet, View, Text, Pressable } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function StatsScreen() {
@@ -77,20 +77,7 @@ export default function StatsScreen() {
                 245 total workouts
               </Text>
             </View>
-            <ScaledPressable scaleTo={0.94} scaleDuration={150}>
-              <Pressable>
-                <Circle
-                  size={30}
-                  bgColor={Colors.general.color.darkTones.bgMiddle}
-                >
-                  <PlusIcon
-                    width={18}
-                    height={18}
-                    color={Colors.general.color.grayTones.muted50}
-                  />
-                </Circle>
-              </Pressable>
-            </ScaledPressable>
+            <AddButton onPress={() => console.log("Press button")} />
           </View>
           <ChartInfo
             data={[
@@ -104,6 +91,22 @@ export default function StatsScreen() {
         </View>
       </View>
     </ScrollView>
+  );
+}
+
+function AddButton({ onPress }: { onPress?: () => void }) {
+  return (
+    <ScaledPressable scaleTo={0.94} scaleDuration={150}>
+      <Pressable onPressIn={onPress}>
+        <Circle size={30} bgColor={Colors.general.color.darkTones.bgMiddle}>
+          <PlusIcon
+            width={18}
+            height={18}
+            color={Colors.general.color.grayTones.muted50}
+          />
+        </Circle>
+      </Pressable>
+    </ScaledPressable>
   );
 }
 
