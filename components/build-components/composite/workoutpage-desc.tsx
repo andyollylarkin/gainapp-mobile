@@ -74,14 +74,14 @@ export default function WorkoutPageDesc(props: WorkoutPageDescProps) {
         }}
       >
         <ScaledPressable scaleDuration={150} scaleTo={0.94}>
-          <StatsButton
+          <ThreeDotsButton
             color={Colors.general.color.darkTones.bgMiddle}
             onPressIn={() => {}}
           />
         </ScaledPressable>
 
         <ScaledPressable scaleDuration={150} scaleTo={0.94}>
-          <ThreeDotsButton
+          <StatsButton
             color={Colors.general.color.darkTones.bgMiddle}
             onPressIn={() => {}}
           />

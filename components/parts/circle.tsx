@@ -44,7 +44,7 @@ export function CircleIconContent({ children }: CircleIconContentProps) {
 
 export interface CircleProps {
   bgColor?: string;
-  children: React.ReactElement<IconProps | TextProps>; // ограничиваем пропсы
+  children: React.ReactElement<IconProps | TextProps>;
   gradient?: LinearGradientProps & { angle?: number };
   size?: number;
 }
