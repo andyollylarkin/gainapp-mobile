@@ -1,8 +1,9 @@
 import { typography } from "@/constants/theme";
 import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
-import { ReactElement } from "react";
-import { Text, View } from "react-native";
+import { ReactNode } from "react";
+import { Text, TextProps, View } from "react-native";
 import { SvgProps } from "react-native-svg";
+import IconProps from "../icons/props";
 
 export type CircleTextContentProps = {
   textColor: string;
@@ -43,9 +44,7 @@ export function CircleIconContent({ children }: CircleIconContentProps) {
 
 export interface CircleProps {
   bgColor?: string;
-  children:
-    | ReactElement<typeof CircleTextContent>
-    | ReactElement<typeof CircleIconContent>;
+  children: React.ReactElement<IconProps | TextProps>; // ограничиваем пропсы
   gradient?: LinearGradientProps & { angle?: number };
   size?: number;
 }

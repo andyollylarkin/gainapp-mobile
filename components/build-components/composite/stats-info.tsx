@@ -224,7 +224,7 @@ function DropdownButton({
       <ArrowIcon
         width={18}
         height={18}
-        direction={isOpen ? "down" : "up"}
+        direction={isOpen ? "up" : "down"}
         color={Colors.general.color.grayTones.muted50}
       />
     </Animated.View>

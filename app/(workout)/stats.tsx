@@ -30,19 +30,19 @@ export default function StatsScreen() {
               exercisesCount: 5,
               workoutDuration: "60",
               workOutName: "Push",
-              date: new Date("2026-03-05"),
+              date: new Date("2026-03-09"),
             },
             {
               exercisesCount: 5,
               workoutDuration: "60",
               workOutName: "Push",
-              date: new Date("2026-03-06"),
+              date: new Date("2026-03-10"),
             },
             {
               exercisesCount: 5,
               workoutDuration: "80",
               workOutName: "Push",
-              date: new Date("2026-03-07"),
+              date: new Date("2026-03-11"),
             },
           ]}
         />
