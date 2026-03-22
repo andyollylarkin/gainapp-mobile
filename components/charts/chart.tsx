@@ -13,7 +13,7 @@ export type ChartPointRenderProps = {
   y: number;
   item: ChartData;
   index: number;
-  color?: string;
+  color?: string | ((index: number, value: ChartXValue) => string);
   chartHeight?: number;
   gridHeight?: number;
   gridLinesCount?: number;
@@ -21,7 +21,7 @@ export type ChartPointRenderProps = {
 
 export type ChartLineRenderProps = {
   points: { x: number; y: number }[];
-  color?: string;
+  color?: string | ((index: number, value: ChartXValue) => string);
 };
 
 export interface ChartProps {
@@ -41,6 +41,7 @@ export interface ChartProps {
     showGrid?: boolean;
     grid?: {
       color?: string;
+      xColor?: string | ((index: number, value: ChartXValue) => string);
       lastValueColor?: string;
       lastIndexColor?: string;
       opacity?: number;
@@ -174,6 +175,13 @@ export default function Chart(props: ChartProps) {
   const maxY = yValues.length > 0 ? Math.max(...yValues) : 0;
 
   const xTicks = [...new Set(xValues)].sort((a, b) => a - b);
+  const xTickValueMap = new Map<number, ChartXValue>();
+  data.forEach((item) => {
+    const xValue = toXNumber(item.x);
+    if (!xTickValueMap.has(xValue)) {
+      xTickValueMap.set(xValue, item.x);
+    }
+  });
   const yTickStep =
     props.step ?? getYTickStep(Math.max(Math.abs(minY), Math.abs(maxY)));
   const yTicks = buildYTicks(minY, maxY, yTickStep);
@@ -249,6 +257,16 @@ export default function Chart(props: ChartProps) {
       topPadding + ySpan,
       topPadding,
     );
+  };
+
+  const resolveXColor = (index: number, value: number) => {
+    const xColor = props.style?.grid?.xColor;
+
+    if (typeof xColor === "function") {
+      return xColor(index, xTickValueMap.get(value) ?? value);
+    }
+
+    return xColor;
   };
 
   const scaledPoints = data.map((item) => ({
@@ -373,7 +391,11 @@ export default function Chart(props: ChartProps) {
               x={safeX}
               y={xLabelY}
               fontSize={labelFontSize}
-              fill={props.style?.grid?.color ?? CHART_COLOR}
+              fill={
+                resolveXColor(i, value) ??
+                props.style?.grid?.color ??
+                CHART_COLOR
+              }
               fontFamily={props.style?.grid?.fontFamily ?? "System"}
               textAnchor={xAnchor}
               alignmentBaseline="middle"

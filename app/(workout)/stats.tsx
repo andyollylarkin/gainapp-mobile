@@ -1,6 +1,7 @@
 import ScaledPressable from "@/components/animated/scaled-pressable";
 import BarChartInfo from "@/components/build-components/composite/bar-chart-info";
 import ChartInfo from "@/components/build-components/composite/chart-info";
+import ProfileHeader from "@/components/build-components/composite/profile-header";
 import StatsInfo from "@/components/build-components/composite/stats-info";
 import PlusIcon from "@/components/icons/plus";
 import Circle from "@/components/parts/circle";
@@ -11,6 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function StatsScreen() {
   const insets = useSafeAreaInsets();
+  const currentWeek = 4;
   return (
     <ScrollView
       style={styles.screen}
@@ -20,6 +22,9 @@ export default function StatsScreen() {
       ]}
     >
       <View style={styles.items}>
+        <View style={{ marginBottom: 12 }}>
+          <ProfileHeader />
+        </View>
         <StatsInfo
           title="Weekly Progress"
           weeksRange="02 Mar - 08 Mar"
@@ -47,14 +52,19 @@ export default function StatsScreen() {
           ]}
         />
         <BarChartInfo
+          weeklyGoal={3}
+          weekStreak={3}
+          currentWeek={(idx) => {
+            return idx === currentWeek;
+          }}
           data={[
+            // y - workouts count, x - week number
             { y: 1, x: 1 },
-            { y: 1, x: 2 },
-            { y: 1, x: 3 },
-            { y: 1, x: 4 },
+            { y: 2, x: 2 },
+            { y: 3, x: 3 },
+            { y: 3, x: 4 },
             { y: 1, x: 5 },
             { y: 1, x: 6 },
-            { y: 1, x: 7 },
           ]}
         />
         <View style={styles.workoutContainer}>

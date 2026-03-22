@@ -66,6 +66,11 @@ export default function Bar(props: ChartPointRenderProps) {
   const dashHeight = Math.max(step - DASH_GAP, 1);
   const chartBottom = props.chartHeight ?? 0;
 
+  const color =
+    typeof props.color === "function"
+      ? props.color(props.index, props.item.x)
+      : props.color;
+
   return (
     <G>
       {Array.from({ length: dashBars }).map((_, i) => (
@@ -76,7 +81,7 @@ export default function Bar(props: ChartPointRenderProps) {
           width={BAR_WIDTH}
           targetHeight={dashHeight}
           delay={i * 60}
-          color={props.color || "blue"}
+          color={color ?? "#FF9400"}
         />
       ))}
     </G>

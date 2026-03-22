@@ -73,6 +73,12 @@ export const Fonts = Platform.select({
 });
 
 export const typography = StyleSheet.create({
+  mediumXL: {
+    fontSize: 24,
+    lineHeight: 24 * 1.25,
+    fontWeight: "500",
+    fontFamily: "Inter-Medium",
+  },
   mediumL: {
     fontSize: 18,
     lineHeight: 18 * 1.2,
@@ -123,7 +129,7 @@ export const typography = StyleSheet.create({
   },
   semiBoldS: {
     fontSize: 12,
-    lineHeight: 12 * 1.20,
+    lineHeight: 12 * 1.2,
     fontWeight: "600",
     fontFamily: "Inter-SemiBold",
   },
