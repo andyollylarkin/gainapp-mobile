@@ -82,6 +82,12 @@ export default function BarChartInfo(props: ChartInfoProps) {
               <Bar
                 {...props}
                 color={(idx, num) => {
+                  console.log(
+                    "Calculating color for index:",
+                    idx,
+                    "value:",
+                    num,
+                  );
                   const percentage = calculateCompletionPercentage(
                     num as number,
                     weeklyGoal,

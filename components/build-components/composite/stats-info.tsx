@@ -21,6 +21,7 @@ type Item = {
   exercisesCount: number;
   workoutDuration: string | number;
   date: Date;
+  status: "completed" | "missed" | "upcoming";
 };
 
 export interface StatsInfoProps {
@@ -91,11 +92,9 @@ export default function StatsInfo(props: StatsInfoProps) {
         <CellBar
           gap={12}
           borderRadius={6}
-          max={props.totalProgress ?? 4}
+          max={props.totalProgress ?? 1}
           height={12}
-          filledColor={Colors.general.color.greenTones.greenMain}
-          emptyColor={Colors.general.color.greenTones.greenBgLight}
-          current={props.currentProgress ?? 2}
+          current={props.currentProgress ?? 0}
         />
         {isOpen ? (
           <Animated.View style={[styles.bottomBox, bottomAnimStyle]}>

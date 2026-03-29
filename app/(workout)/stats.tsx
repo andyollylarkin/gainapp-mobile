@@ -2,16 +2,42 @@ import ScaledPressable from "@/components/animated/scaled-pressable";
 import BarChartInfo from "@/components/build-components/composite/bar-chart-info";
 import ChartInfo from "@/components/build-components/composite/chart-info";
 import ProfileHeader from "@/components/build-components/composite/profile-header";
-import StatsInfo from "@/components/build-components/composite/stats-info";
+import StatsInfo, {
+  StatsInfoProps,
+} from "@/components/build-components/composite/stats-info";
 import PlusIcon from "@/components/icons/plus";
 import Circle from "@/components/parts/circle";
 import { Colors, typography } from "@/constants/theme";
-import React from "react";
+import React, { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function StatsScreen() {
   const insets = useSafeAreaInsets();
+  const [progressItems, setProgressItems] = useState<StatsInfoProps["items"]>([
+    {
+      exercisesCount: 5,
+      workoutDuration: "60",
+      workOutName: "Push",
+      date: new Date("2026-03-29"),
+      status: "completed",
+    },
+    {
+      exercisesCount: 5,
+      workoutDuration: "60",
+      workOutName: "Push",
+      date: new Date("2026-03-30"),
+      status: "upcoming",
+    },
+    {
+      exercisesCount: 5,
+      workoutDuration: "80",
+      workOutName: "Push",
+      date: new Date("2026-04-01"),
+      status: "upcoming",
+    },
+  ]);
+
   const currentWeek = 4;
   return (
     <ScrollView
@@ -28,28 +54,12 @@ export default function StatsScreen() {
         <StatsInfo
           title="Weekly Progress"
           weeksRange="02 Mar - 08 Mar"
-          totalProgress={4}
-          currentProgress={2}
-          items={[
-            {
-              exercisesCount: 5,
-              workoutDuration: "60",
-              workOutName: "Push",
-              date: new Date("2026-03-09"),
-            },
-            {
-              exercisesCount: 5,
-              workoutDuration: "60",
-              workOutName: "Push",
-              date: new Date("2026-03-10"),
-            },
-            {
-              exercisesCount: 5,
-              workoutDuration: "80",
-              workOutName: "Push",
-              date: new Date("2026-03-11"),
-            },
-          ]}
+          totalProgress={progressItems.length ?? 0}
+          currentProgress={
+            progressItems.filter((item, _) => item.status === "completed")
+              .length ?? 0
+          }
+          items={progressItems}
         />
         <BarChartInfo
           weeklyGoal={3}
@@ -62,7 +72,7 @@ export default function StatsScreen() {
             { y: 1, x: 1 },
             { y: 2, x: 2 },
             { y: 3, x: 3 },
-            { y: 3, x: 4 },
+            { y: 1, x: 4 },
             { y: 1, x: 5 },
             { y: 1, x: 6 },
           ]}

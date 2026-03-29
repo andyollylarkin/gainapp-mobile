@@ -68,7 +68,7 @@ export default function Bar(props: ChartPointRenderProps) {
 
   const color =
     typeof props.color === "function"
-      ? props.color(props.index, props.item.x)
+      ? props.color(props.index, props.item.y, props.item.x)
       : props.color;
 
   return (
@@ -81,7 +81,7 @@ export default function Bar(props: ChartPointRenderProps) {
           width={BAR_WIDTH}
           targetHeight={dashHeight}
           delay={i * 60}
-          color={color ?? "#FF9400"}
+          color={color ?? "black"}
         />
       ))}
     </G>

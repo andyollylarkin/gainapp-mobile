@@ -13,7 +13,7 @@ export type ChartPointRenderProps = {
   y: number;
   item: ChartData;
   index: number;
-  color?: string | ((index: number, value: ChartXValue) => string);
+  color?: string | ((index: number, y: number, x: ChartXValue) => string);
   chartHeight?: number;
   gridHeight?: number;
   gridLinesCount?: number;
