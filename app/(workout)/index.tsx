@@ -7,47 +7,64 @@ import PlayIcon from "@/components/icons/play";
 import SliderButton from "@/components/parts/slider-button";
 import { Colors, typography } from "@/constants/theme";
 import useCurrentDay from "@/hooks/use-current-day";
+import {
+  getWorkoutOverviewByDay,
+  WorkoutOverviewResponse,
+} from "@/logic/api/ex-description";
 import { Day } from "@/types";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const SNAP_ITEM_HEIGHT = 86;
 const ITEM_GAP = 2;
 
-function dayCompare(day1: Day, day2: Day): number {
-  const dayOrder: Day[] = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-  ];
-  const idx1 = dayOrder.indexOf(day1);
-  const idx2 = dayOrder.indexOf(day2);
-  if (idx1 < idx2) return -1;
-  if (idx1 === idx2) return 0;
-  return 1;
-}
-
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const currentDay = useCurrentDay();
   const [currentDaySelected, setCurrentDay] = useState<Day>(currentDay);
+  const [overview, setOverview] = useState<WorkoutOverviewResponse | null>(
+    null,
+  );
+  const [isLoadingOverview, setIsLoadingOverview] = useState(false);
 
   const contentTopOffset = insets.top + 30 + 24;
   const snapStep = SNAP_ITEM_HEIGHT + ITEM_GAP;
 
-  const items: ExcerciseItemProps[] = [
-    { excerciseName: "Running", reps: 5, sets: 4, id: "1" },
-    { excerciseName: "Push-ups", reps: 10, sets: 3, id: "2" },
-    { excerciseName: "Squats", reps: 15, sets: 4, id: "3" },
-    { excerciseName: "Plank", reps: 60, sets: 3, id: "4" },
-    { excerciseName: "Jumping Jacks", reps: 20, sets: 4, id: "5" },
-  ];
+  useEffect(() => {
+    let isActive = true;
+
+    setIsLoadingOverview(true);
+
+    getWorkoutOverviewByDay(currentDaySelected)
+      .then((response) => {
+        if (!isActive) return;
+        setOverview(response);
+      })
+      .catch((error) => {
+        console.warn("Failed to load workout overview", error);
+        if (!isActive) return;
+        setOverview(null);
+      })
+      .finally(() => {
+        if (!isActive) return;
+        setIsLoadingOverview(false);
+      });
+
+    return () => {
+      isActive = false;
+    };
+  }, [currentDaySelected]);
+
+  const items: ExcerciseItemProps[] = (overview?.exercises ?? []).map(
+    (exercise) => ({
+      excerciseName: exercise.excerciseName,
+      reps: exercise.reps,
+      sets: exercise.sets,
+      id: exercise.id,
+    }),
+  );
 
   const snapOffsets = items.map(
     (_, index) => index * snapStep + (contentTopOffset - 8),
@@ -80,11 +97,19 @@ export default function HomeScreen() {
             onDaySelect={(day) => setCurrentDay(day)}
           />
         </View>
-        {dayCompare(currentDaySelected, currentDay) === -1 ||
-        dayCompare(currentDaySelected, currentDay) === 0 ? (
-          <WorkoutContent items={items} />
-        ) : (
+        {isLoadingOverview ? (
+          <Text
+            style={{
+              ...typography.regularL,
+              color: Colors.general.color.grayTones.muted40,
+            }}
+          >
+            Loading...
+          </Text>
+        ) : overview?.isRestDay ? (
           <RestDayContent />
+        ) : (
+          <WorkoutContent items={items} description={overview?.description} />
         )}
         {currentDaySelected === currentDay && (
           <Text
@@ -129,7 +154,7 @@ export default function HomeScreen() {
                 : "Go to next workout"
             }
             onHoldEnd={() => {
-              if (currentDay === currentDaySelected) {
+              if (currentDay === currentDaySelected && items.length > 0) {
                 router.push(`/(modals)/excercise?id=${items[0].id}`);
               }
             }}
@@ -188,7 +213,13 @@ function RestDayContent() {
   );
 }
 
-function WorkoutContent({ items }: { items: ExcerciseItemProps[] }) {
+function WorkoutContent({
+  items,
+  description,
+}: {
+  items: ExcerciseItemProps[];
+  description?: WorkoutOverviewResponse["description"];
+}) {
   const len = items.length;
 
   return (
@@ -201,9 +232,9 @@ function WorkoutContent({ items }: { items: ExcerciseItemProps[] }) {
         }}
       >
         <WorkoutPageDesc
-          workoutName="Push workout"
-          excercisesCount={items.length}
-          durationMinutes={60}
+          workoutName={description?.workoutName ?? "Workout"}
+          excercisesCount={description?.excercisesCount ?? items.length}
+          durationMinutes={description?.durationMinutes ?? 0}
         />
       </View>
 

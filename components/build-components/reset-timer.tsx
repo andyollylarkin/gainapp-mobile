@@ -1,8 +1,8 @@
 import { Colors, typography } from "@/constants/theme";
 import useCountdown from "@/hooks/use-countdown";
-import {} from "expo-background-fetch";
+import { NumberFlow } from "number-flow-react-native";
 import { useEffect, useRef, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import TextButton from "../parts/text-button";
 
 export interface ResetTimeProps {
@@ -71,10 +71,27 @@ export default function ResetTimer(props: ResetTimeProps) {
           }}
         />
       </View>
-      <Text style={styles.text}>
-        {timeLeft.minutes}:
-        {timeLeft.seconds < 10 ? `0${timeLeft.seconds}` : timeLeft.seconds}
-      </Text>
+      <View style={[styles.text, { flexDirection: "row", gap: 4 }]}>
+        <NumberFlow
+          value={timeLeft.minutes}
+          style={
+            (typography.mediumL, { color: Colors.general.color.grayTones.main })
+          }
+        />
+        <Text
+          style={
+            (typography.mediumL, { color: Colors.general.color.grayTones.main })
+          }
+        >
+          :
+        </Text>
+        <NumberFlow
+          value={timeLeft.seconds}
+          style={
+            (typography.mediumL, { color: Colors.general.color.grayTones.main })
+          }
+        />
+      </View>
       <View style={{ maxWidth: 88 }}>
         <TextButton
           text={"+" + props.increaseAmount + " sec"}
@@ -108,7 +125,7 @@ const styles = StyleSheet.create({
     ...typography.mediumL,
   },
   text: {
-    ...typography.mediumL,
-    color: Colors["general"].color.grayTones.main,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

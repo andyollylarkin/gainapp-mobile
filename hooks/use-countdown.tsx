@@ -27,6 +27,14 @@ export default function useCountdown(
   }, []);
 
   useEffect(() => {
+    if (start) {
+      return;
+    }
+
+    setTimeLeft(timeToLeft(Math.floor(targetSeconds)));
+  }, [start, targetSeconds, timeToLeft]);
+
+  useEffect(() => {
     if (!start) {
       return;
     }

@@ -66,19 +66,19 @@ export default function ExcerciseTitle(props: ExcerciseTitleProps) {
       <View style={{ padding: 6, flexDirection: "column", gap: 2 }}>
         <Text
           style={{
-            ...typography.mediumM,
-            color: Colors.general.color.grayTones.muted30,
-          }}
-        >
-          {props.type}
-        </Text>
-        <Text
-          style={{
             ...typography.mediumL,
             color: Colors.general.color.grayTones.main,
           }}
         >
           {props.title}
+        </Text>
+        <Text
+          style={{
+            ...typography.mediumM,
+            color: Colors.general.color.grayTones.muted30,
+          }}
+        >
+          {props.type}
         </Text>
       </View>
       <View style={styles.rightActionsArea}>

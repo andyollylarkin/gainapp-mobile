@@ -212,7 +212,7 @@ export default function SetItem(props: SetItemProps) {
             </View>
           )}
           <DelayedPressable
-            delay={200}
+            delay={0} // NO DELAY ON PRESS SET END
             onPress={() => props.onPress?.(currentState, stateTransition)}
             onPressEnd={() => {
               props.onPressEnd && props.onPressEnd();
