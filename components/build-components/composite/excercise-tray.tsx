@@ -1,3 +1,4 @@
+import ScaledPressable from "@/components/animated/scaled-pressable";
 import { HistoryTextProps } from "@/components/history-text";
 import TimerIcon from "@/components/icons/timer";
 import Accordion from "@/components/parts/accordion";
@@ -6,13 +7,13 @@ import { Colors } from "@/constants/theme";
 import { useExcerciseStore } from "@/store/excercise-store";
 import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { addExerciseSet } from "../../../logic/api/add-exercise-set";
 import ColumnDescription, {
   ColumnDescriptionProps,
 } from "../column-description";
 import ExcerciseTitle, { ExcerciseTitleProps } from "../excercise-title";
 import { SetItemProps } from "./set-item";
 import SwipeableSet from "./swipable-set";
-import ScaledPressable from "@/components/animated/scaled-pressable";
 
 export interface ExcerciseTrayProps {
   title: ExcerciseTitleProps;
@@ -46,6 +47,23 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
     initialState: "progress",
   });
 
+  const fallbackSet: SetItemProps = {
+    id: "fallback",
+    history: {
+      firstText: 0,
+      secondText: 0,
+      delimiter: "x",
+    },
+    excerciseOrder: "W",
+    maxInputValue: 500,
+    initialState: "progress",
+    input: { field1: "0", field2: "0" },
+  };
+
+  const trayExcercises = excercises.filter(
+    (excercise) => excercise.trayId === props.id,
+  );
+
   return (
     <View style={styles.container}>
       <Pressable
@@ -57,7 +75,7 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
       </Pressable>
       <Accordion isExpanded={isExpanded}>
         <ColumnDescription {...props.description} />
-        {excercises.map((excercise, index) => (
+        {trayExcercises.map((excercise, index) => (
           <View key={excercise.id} style={styles.exerciseRow}>
             <SwipeableSet
               onPressEnd={() => {
@@ -67,7 +85,7 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
                 setTrayActiveIndex(props.id, index + 1);
 
                 props.onExcerciseComplete?.(excercise, excercise.id, {
-                  total: excercises.length,
+                  total: trayExcercises.length,
                   currentCompleted: index + 1,
                 });
               }}
@@ -131,13 +149,26 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
               <TextButton
                 text={"Add Set"}
                 onPressIn={() => {
+                  const baseSet =
+                    trayExcercises[trayExcercises.length - 1] ?? fallbackSet;
                   const nextExcercise = {
-                    ...createDefaultExcercise(
-                      excercises[excercises.length - 1],
-                    ),
+                    ...createDefaultExcercise(baseSet),
                     trayId: props.id,
                   };
                   addExcercise(nextExcercise, props.id);
+
+                  void addExerciseSet({
+                    workoutDayExerciseId: props.id,
+                    id: nextExcercise.id,
+                    metrics: {
+                      field1: nextExcercise.input.field1,
+                      field2: nextExcercise.input.field2,
+                    },
+                    completed: false,
+                    restSecondsActual: null,
+                  }).catch((error) => {
+                    console.warn("Failed to add exercise set", error);
+                  });
                 }}
                 bgColor={Colors.general.color.darkTones.bgMiddle}
                 textColor={Colors.general.color.grayTones.muted50}

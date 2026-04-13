@@ -22,16 +22,6 @@ export default function DayPicker({ currentDay, onDaySelect }: DayPickerProps) {
     currentDay = current;
   }
 
-  const days: Day[] = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-  ];
-
   const scale = useSharedValue(1);
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -39,13 +29,14 @@ export default function DayPicker({ currentDay, onDaySelect }: DayPickerProps) {
 
   return (
     <View style={styles.container}>
-      {days.map((day) => {
-        const isCurrent = day === currentDay;
-        const isCurrentMonday = isCurrent && day === FIRST_DAY_OF_THE_WEEK;
+      {Day.map((day) => {
+        const isCurrent = day.name === currentDay.name;
+        const isCurrentMonday =
+          isCurrent && day.name === FIRST_DAY_OF_THE_WEEK.name;
 
         return (
           <Pressable
-            key={day}
+            key={day.name}
             onPress={() => {
               scale.value = withSequence(
                 withTiming(1.1, { duration: 100 }),
@@ -73,7 +64,7 @@ export default function DayPicker({ currentDay, onDaySelect }: DayPickerProps) {
                       : styles.otherDayText
                 }
               >
-                {day.charAt(0).toUpperCase()}
+                {day.name.charAt(0).toUpperCase()}
               </Text>
             </Animated.View>
           </Pressable>

@@ -6,13 +6,13 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import ScaledPressable from "../animated/scaled-pressable";
 import FluentDrag from "../icons/fluent-drag";
 import StatsButton from "./stats-button";
 import ThreeDotsButton from "./three-dots-button";
-import ScaledPressable from "../animated/scaled-pressable";
 
 export interface ExcerciseTitleProps {
-  type: "Barbell" | "Rope" | "Treadmill" | "Bodyweight" | "Machine";
+  type: string;
   title: string;
   backgroundColor:
     | typeof Colors.general.color.darkTones.bgTray

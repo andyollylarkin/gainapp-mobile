@@ -174,7 +174,13 @@ export default function SetItem(props: SetItemProps) {
             color={Colors.general.color.grayTones.muted40}
             firstText={props.history.firstText}
             secondText={props.history.secondText}
-            delimiter={props.history.delimiter}
+            delimiter={
+              props.history.delimiter === "x" ? (
+                <MultiplyIcon color={Colors.general.color.grayTones.muted40} />
+              ) : (
+                <CrossIcon color={Colors.general.color.grayTones.muted40} />
+              )
+            }
           />
         </View>
         <View style={[styles.partContainer, styles.rightPartContainer]}>

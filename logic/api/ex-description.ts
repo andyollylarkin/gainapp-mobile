@@ -23,24 +23,10 @@ export interface WorkoutOverviewResponse {
   isRestDay: boolean;
 }
 
-export function dayToWeekday(day: Day): number {
-  const mapping: Record<Day, number> = {
-    Monday: 1,
-    Tuesday: 2,
-    Wednesday: 3,
-    Thursday: 4,
-    Friday: 5,
-    Saturday: 6,
-    Sunday: 7,
-  };
-
-  return mapping[day];
-}
-
 export async function getWorkoutOverviewByDay(
   day: Day,
 ): Promise<WorkoutOverviewResponse> {
-  const weekday = dayToWeekday(day);
+  const weekday = Day.toNumber(day);
   const url = `${API_BASE_URL}/api/users/${FIXED_USER_ID}/workouts/weekday/${weekday}/overview`;
 
   const response = await fetch(url, {

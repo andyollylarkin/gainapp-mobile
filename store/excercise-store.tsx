@@ -1,5 +1,4 @@
 import { SetItemProps } from "@/components/build-components/composite/set-item";
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 import { create } from "zustand";
 
 type StoredProps = SetItemProps & { trayId: string };

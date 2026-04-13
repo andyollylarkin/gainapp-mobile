@@ -129,7 +129,11 @@ export default function HomeScreen() {
         ) : overview?.isRestDay ? (
           <RestDayContent />
         ) : overview ? (
-          <WorkoutContent items={items} description={overview?.description} />
+          <WorkoutContent
+            items={items}
+            description={overview?.description}
+            selectedDay={currentDaySelected}
+          />
         ) : (
           <View style={{ flex: 1, width: "100%", justifyContent: "center" }}>
             <GenerateContent
@@ -138,7 +142,7 @@ export default function HomeScreen() {
             />
           </View>
         )}
-        {currentDaySelected === currentDay && overview && (
+        {overview && !overview.isRestDay && (
           <Text
             style={{
               ...typography.regularS,
@@ -167,34 +171,40 @@ export default function HomeScreen() {
           {overview && (
             <SliderButton<"Go to next workout" | "Start today's workout">
               color={
-                currentDay === currentDaySelected
+                currentDay === currentDaySelected && !overview.isRestDay
                   ? Colors.general.color.grayTones.main
                   : Colors.general.color.darkTones.bgLight
               }
               textColor={
-                currentDay === currentDaySelected
+                currentDay === currentDaySelected && !overview.isRestDay
                   ? Colors.general.color.darkTones.bg
                   : Colors.general.color.grayTones.main
               }
               text={
-                currentDay === currentDaySelected
+                currentDay === currentDaySelected && !overview.isRestDay
                   ? "Start today's workout"
                   : "Go to next workout"
               }
               onHoldEnd={() => {
                 if (currentDay === currentDaySelected && items.length > 0) {
-                  router.push(`/(modals)/excercise?id=${items[0].id}`);
+                  router.push(
+                    `/(modals)/excercise?id=${items[0].id}&day=${currentDaySelected}`,
+                  );
+                } else {
+                  setCurrentDay((prev) => prev.nextDay());
                 }
               }}
               onHoldStart={() => console.log("Hold start")}
-              holdDuration={1500}
+              holdDuration={
+                !currentDay || !currentDaySelected ? 1500 : 1500 / 2
+              }
               holdOverlayColor="#808080"
               icon={
                 <PlayIcon
                   width={20}
                   height={20}
                   color={
-                    currentDay === currentDaySelected
+                    currentDay === currentDaySelected && !overview.isRestDay
                       ? Colors.general.color.darkTones.bg
                       : Colors.general.color.grayTones.main
                   }
@@ -323,9 +333,11 @@ function RestDayContent() {
 function WorkoutContent({
   items,
   description,
+  selectedDay,
 }: {
   items: ExcerciseItemProps[];
   description?: WorkoutOverviewResponse["description"];
+  selectedDay: Day;
 }) {
   const len = items.length;
 
@@ -350,7 +362,7 @@ function WorkoutContent({
           key={item.id}
           {...item}
           onClick={(id) => {
-            router.push(`/(modals)/excercise?id=${id}`);
+            router.push(`/(modals)/excercise?id=${id}&day=${selectedDay}`);
           }}
           radiusTop={index === 0 ? 24 : 6}
           radiusBottom={index === len - 1 ? 24 : 6}
