@@ -42,8 +42,7 @@ export interface WorkoutByWeekdayResponse {
 export async function getWorkoutByWeekday(
   day: Day,
 ): Promise<WorkoutByWeekdayResponse> {
-  const weekday = Day.toNumber(day);
-  const url = `${API_BASE_URL}/api/users/${FIXED_USER_ID}/workouts/weekday/${weekday}`;
+  const url = `${API_BASE_URL}/api/users/${FIXED_USER_ID}/workouts/weekday/${Day.toNumber(day)}`;
 
   const response = await fetch(url, {
     method: "GET",

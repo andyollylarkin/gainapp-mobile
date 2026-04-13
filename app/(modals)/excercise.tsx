@@ -12,7 +12,7 @@ import {
 } from "@/logic/api/exercises-by-weekday";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { useExcerciseTimerStore } from "@/store/excercise-timer-store";
-import { Day } from "@/types";
+import { Day, DayEnum } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -104,8 +104,13 @@ function TopDescription({
 export default function ExcerciseModal() {
   const insets = useSafeAreaInsets();
   const currentDay = useCurrentDay();
-  const params = useLocalSearchParams<{ day?: Day }>();
-  const requestDay = params.day ?? currentDay;
+  const params = useLocalSearchParams();
+  const dayParam = Array.isArray(params.day) ? params.day[0] : params.day;
+  const requestDayName: keyof typeof DayEnum =
+    typeof dayParam === "string" &&
+    (Object.values(DayEnum) as string[]).includes(dayParam)
+      ? (dayParam as keyof typeof DayEnum)
+      : currentDay.name;
   const modalHeaderOverlayHeight = insets.top + 22;
   const [timerStarted, setTimerStarted] = useState<boolean>(false);
   const [timerKey, setTimerKey] = useState<number>(0);
@@ -132,7 +137,7 @@ export default function ExcerciseModal() {
     let isActive = true;
     setIsLoadingWorkout(true);
 
-    getWorkoutByWeekday(requestDay)
+    getWorkoutByWeekday(Day.fromString(requestDayName))
       .then((response) => {
         if (!isActive) return;
         setWorkoutData(response);
@@ -150,7 +155,7 @@ export default function ExcerciseModal() {
     return () => {
       isActive = false;
     };
-  }, [requestDay]);
+  }, [requestDayName]);
 
   useEffect(() => {
     if (!workoutData || workoutData.isRestDay) {

@@ -188,7 +188,7 @@ export default function HomeScreen() {
               onHoldEnd={() => {
                 if (currentDay === currentDaySelected && items.length > 0) {
                   router.push(
-                    `/(modals)/excercise?id=${items[0].id}&day=${currentDaySelected}`,
+                    `/(modals)/excercise?id=${items[0].id}&day=${currentDaySelected.name}`,
                   );
                 } else {
                   setCurrentDay((prev) => prev.nextDay());
@@ -362,7 +362,7 @@ function WorkoutContent({
           key={item.id}
           {...item}
           onClick={(id) => {
-            router.push(`/(modals)/excercise?id=${id}&day=${selectedDay}`);
+            router.push(`/(modals)/excercise?id=${id}&day=${selectedDay.name}`);
           }}
           radiusTop={index === 0 ? 24 : 6}
           radiusBottom={index === len - 1 ? 24 : 6}
