@@ -4,7 +4,7 @@ import ResetTimer from "@/components/build-components/reset-timer";
 import TextButton from "@/components/parts/text-button";
 import { Colors, typography } from "@/constants/theme";
 import useCurrentDay from "@/hooks/use-current-day";
-import { completeExerciseSet } from "@/logic/api/complete-exercise-set";
+import { completeExerciseSet } from "@/logic/api/update-exercise-set";
 import {
   getWorkoutByWeekday,
   WorkoutByWeekdayResponse,
@@ -217,7 +217,7 @@ export default function ExcerciseModal() {
             key={timerKey}
             decreaseAmount={15}
             increaseAmount={15}
-            timeout={120}
+            timeout={119}
             start={timerStarted}
             onTimeout={() => showOrHideTimer(false)}
             onTick={(timeLeft) => {

@@ -2,7 +2,7 @@ import { Colors, typography } from "@/constants/theme";
 import useCountdown from "@/hooks/use-countdown";
 import { NumberFlow } from "number-flow-react-native";
 import { useEffect, useRef, useState } from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import TextButton from "../parts/text-button";
 
 export interface ResetTimeProps {
@@ -74,22 +74,27 @@ export default function ResetTimer(props: ResetTimeProps) {
       <View style={[styles.text, { flexDirection: "row", gap: 4 }]}>
         <NumberFlow
           value={timeLeft.minutes}
-          style={
-            (typography.mediumL, { color: Colors.general.color.grayTones.main })
-          }
+          format={{ minimumIntegerDigits: 2, useGrouping: false }}
+          style={{
+            ...typography.mediumL,
+            color: Colors.general.color.grayTones.main,
+          }}
         />
         <Text
-          style={
-            (typography.mediumL, { color: Colors.general.color.grayTones.main })
-          }
+          style={{
+            ...typography.mediumL,
+            color: Colors.general.color.grayTones.main,
+          }}
         >
           :
         </Text>
         <NumberFlow
           value={timeLeft.seconds}
-          style={
-            (typography.mediumL, { color: Colors.general.color.grayTones.main })
-          }
+          format={{ minimumIntegerDigits: 2, useGrouping: false }}
+          style={{
+            ...typography.mediumL,
+            color: Colors.general.color.grayTones.main,
+          }}
         />
       </View>
       <View style={{ maxWidth: 88 }}>

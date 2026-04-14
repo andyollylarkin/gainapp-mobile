@@ -4,9 +4,16 @@ import TimerIcon from "@/components/icons/timer";
 import Accordion from "@/components/parts/accordion";
 import TextButton from "@/components/parts/text-button";
 import { Colors } from "@/constants/theme";
+import { completeExerciseSet } from "@/logic/api/update-exercise-set";
 import { useExcerciseStore } from "@/store/excercise-store";
-import React from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { debounce } from "@/utils/debounce";
+import React, { useMemo } from "react";
+import {
+  Pressable,
+  StyleSheet,
+  View,
+  unstable_batchedUpdates,
+} from "react-native";
 import { addExerciseSet } from "../../../logic/api/add-exercise-set";
 import ColumnDescription, {
   ColumnDescriptionProps,
@@ -28,6 +35,127 @@ export interface ExcerciseTrayProps {
   ) => void;
   onExcerciseRemove?: (excercise: SetItemProps, id: string) => void;
   disable?: boolean;
+}
+
+type TrayExercise = SetItemProps & { trayId: string };
+
+interface ExerciseRowProps {
+  excercise: TrayExercise;
+  index: number;
+  activeIndex: number;
+  total: number;
+  trayId: string;
+  disable?: boolean;
+  updateExcercise: (
+    id: string,
+    updatedExcercise: Partial<TrayExercise>,
+    trayId: string,
+  ) => void;
+  removeExcercise: (id: string, trayId: string) => void;
+  setTrayActiveIndex: (id: string, activeIndex: number) => void;
+  onExcerciseChange?: (excercise: SetItemProps, id: string) => void;
+  onExcerciseComplete?: (
+    excercise: SetItemProps,
+    id: string,
+    { total, currentCompleted }: { total: number; currentCompleted: number },
+  ) => void;
+  onExcerciseRemove?: (excercise: SetItemProps, id: string) => void;
+  updateSetParams: (
+    f1: string,
+    f2: string | null,
+    id: string,
+    setNumber?: string | number,
+  ) => void;
+}
+
+const ExerciseRow = React.memo(function ExerciseRow(props: ExerciseRowProps) {
+  const {
+    excercise,
+    index,
+    activeIndex,
+    total,
+    trayId,
+    disable,
+    updateExcercise,
+    removeExcercise,
+    setTrayActiveIndex,
+    onExcerciseChange,
+    onExcerciseComplete,
+    onExcerciseRemove,
+    updateSetParams,
+  } = props;
+
+  return (
+    <View style={styles.exerciseRow}>
+      <SwipeableSet
+        disabledSwipe={index === 0 || activeIndex > index}
+        onSwipeEnd={() => {
+          onExcerciseChange?.(excercise, excercise.id);
+          onExcerciseRemove?.(excercise, excercise.id);
+          removeExcercise(excercise.id, trayId);
+        }}
+        {...excercise}
+        initialState={
+          excercise.initialState === "done"
+            ? "done"
+            : index === activeIndex
+              ? "current"
+              : "progress"
+        }
+        onPress={(initialState, stateTransition) => {
+          if (disable) return;
+          if (index !== activeIndex) return;
+
+          if (initialState === "current" || initialState === "progress") {
+            stateTransition("done");
+            const nextCompleted = activeIndex + 1;
+
+            unstable_batchedUpdates(() => {
+              setTrayActiveIndex(trayId, nextCompleted);
+              updateExcercise(excercise.id, { initialState: "done" }, trayId);
+            });
+
+            onExcerciseComplete?.(excercise, excercise.id, {
+              total,
+              currentCompleted: nextCompleted,
+            });
+          }
+
+          onExcerciseChange?.(excercise, excercise.id);
+        }}
+        onInputChange={(field1, field2) => {
+          updateExcercise(
+            excercise.id,
+            {
+              input: { field1, field2 },
+            },
+            trayId,
+          );
+          updateSetParams(
+            field1,
+            field2,
+            excercise.trayId,
+            excercise.excerciseOrder as number,
+          );
+        }}
+        excerciseOrder={index === 0 ? "W" : index}
+      />
+    </View>
+  );
+}, areExerciseRowPropsEqual);
+
+function areExerciseRowPropsEqual(
+  prev: ExerciseRowProps,
+  next: ExerciseRowProps,
+) {
+  return (
+    prev.excercise === next.excercise &&
+    prev.index === next.index &&
+    prev.activeIndex === next.activeIndex &&
+    prev.total === next.total &&
+    prev.trayId === next.trayId &&
+    prev.disable === next.disable
+  );
 }
 
 export default function ExcerciseTray(props: ExcerciseTrayProps) {
@@ -63,6 +191,83 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
   const trayExcercises = excercises.filter(
     (excercise) => excercise.trayId === props.id,
   );
+  const activeIndex = getActiveIndex(props.id);
+  const totalExercises = trayExcercises.length;
+
+  const updateSetParams = useMemo<
+    (
+      f1: string,
+      f2: string | null,
+      id: string,
+      setNumber?: string | number,
+    ) => void
+  >(() => {
+    return debounce(
+      async (
+        f1: string,
+        f2: string | null,
+        id: string,
+        setNumber?: string | number,
+      ) => {
+        if (setNumber === "W") setNumber = 1;
+
+        try {
+          await completeExerciseSet({
+            workoutDayExerciseId: id,
+            parameter1: Number(f1),
+            parameter2: Number(f2 ?? 0),
+            setNumber: Number(setNumber),
+          });
+        } catch (error) {
+          console.warn("Failed to update exercise set", error);
+        } finally {
+          console.log("Set parameters updated", f1, f2, id, setNumber);
+        }
+      },
+      800,
+    ) as (
+      f1: string,
+      f2: string | null,
+      id: string,
+      setNumber?: string | number,
+    ) => void;
+  }, []);
+
+  const exerciseRows = useMemo(
+    () =>
+      trayExcercises.map((excercise, index) => (
+        <ExerciseRow
+          key={excercise.id}
+          excercise={excercise}
+          index={index}
+          activeIndex={activeIndex}
+          total={totalExercises}
+          trayId={props.id}
+          disable={props.disable}
+          updateExcercise={updateExcercise}
+          removeExcercise={removeExcercise}
+          setTrayActiveIndex={setTrayActiveIndex}
+          onExcerciseChange={props.onExcerciseChange}
+          onExcerciseComplete={props.onExcerciseComplete}
+          onExcerciseRemove={props.onExcerciseRemove}
+          updateSetParams={updateSetParams}
+        />
+      )),
+    [
+      trayExcercises,
+      activeIndex,
+      totalExercises,
+      props.id,
+      props.disable,
+      props.onExcerciseChange,
+      props.onExcerciseComplete,
+      props.onExcerciseRemove,
+      updateExcercise,
+      removeExcercise,
+      setTrayActiveIndex,
+      updateSetParams,
+    ],
+  );
 
   return (
     <View style={styles.container}>
@@ -75,60 +280,7 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
       </Pressable>
       <Accordion isExpanded={isExpanded}>
         <ColumnDescription {...props.description} />
-        {trayExcercises.map((excercise, index) => (
-          <View key={excercise.id} style={styles.exerciseRow}>
-            <SwipeableSet
-              onPressEnd={() => {
-                if (props.disable) return;
-                if (index !== getActiveIndex(props.id)) return;
-
-                setTrayActiveIndex(props.id, index + 1);
-
-                props.onExcerciseComplete?.(excercise, excercise.id, {
-                  total: trayExcercises.length,
-                  currentCompleted: index + 1,
-                });
-              }}
-              disabledSwipe={index === 0 || getActiveIndex(props.id) > index}
-              onSwipeEnd={() => {
-                props.onExcerciseChange?.(excercise, excercise.id);
-                props.onExcerciseRemove?.(excercise, excercise.id);
-                removeExcercise(excercise.id, props.id);
-              }}
-              {...excercise}
-              initialState={
-                excercise.initialState === "done"
-                  ? "done"
-                  : index === getActiveIndex(props.id)
-                    ? "current"
-                    : "progress"
-              }
-              onPress={(initialState, stateTransition) => {
-                if (props.disable) return;
-                if (index !== getActiveIndex(props.id)) return;
-                if (initialState === "current" || initialState === "progress") {
-                  stateTransition("done");
-                  updateExcercise(
-                    excercise.id,
-                    { initialState: "done" },
-                    props.id,
-                  );
-                }
-                props.onExcerciseChange?.(excercise, excercise.id);
-              }}
-              onInputChange={(field1, field2) => {
-                updateExcercise(
-                  excercise.id,
-                  {
-                    input: { field1, field2 },
-                  },
-                  props.id,
-                );
-              }}
-              excerciseOrder={index === 0 ? "W" : index}
-            />
-          </View>
-        ))}
+        {exerciseRows}
         <View style={styles.bottomContainer}>
           <View style={styles.buttons}>
             <TextButton

@@ -16,62 +16,33 @@ type AccordionProps = {
 export default function Accordion({
   isExpanded,
   children,
-  duration = 300,
+  duration = 180,
   style,
 }: AccordionProps) {
-  const expanded = useSharedValue(isExpanded ? 1 : 0);
-  const contentHeight = useSharedValue(0);
-  const containerHeight = useSharedValue(-1);
+  const opacity = useSharedValue(isExpanded ? 1 : 0);
 
   useEffect(() => {
-    if (containerHeight.value < 0) return;
-
-    expanded.value = isExpanded ? 1 : 0;
-    containerHeight.value = withTiming(isExpanded ? contentHeight.value : 0, {
-      duration,
-    });
-  }, [isExpanded, duration, contentHeight, containerHeight, expanded]);
+    opacity.value = withTiming(isExpanded ? 1 : 0, { duration });
+  }, [isExpanded, duration, opacity]);
 
   const animatedStyle = useAnimatedStyle(() => {
-    if (containerHeight.value < 0) {
-      return {
-        overflow: "hidden",
-      };
-    }
-
     return {
-      height: containerHeight.value,
-      overflow: "hidden",
+      opacity: opacity.value,
     };
   });
 
   return (
-    <Animated.View style={[animatedStyle, style]}>
-      <View
-        onLayout={(e) => {
-          const measuredHeight = e.nativeEvent.layout.height;
-          if (measuredHeight <= 0) return;
-
-          const prevHeight = contentHeight.value;
-          contentHeight.value = measuredHeight;
-
-          if (containerHeight.value < 0) {
-            containerHeight.value = isExpanded ? measuredHeight : 0;
-            return;
-          }
-
-          if (
-            expanded.value === 1 &&
-            Math.abs(prevHeight - measuredHeight) > 0.5
-          ) {
-            containerHeight.value = withTiming(measuredHeight, {
-              duration: 300,
-            });
-          }
-        }}
-      >
-        {children}
-      </View>
+    <Animated.View
+      style={[
+        {
+          height: isExpanded ? undefined : 0,
+          overflow: "hidden",
+        },
+        animatedStyle,
+        style,
+      ]}
+    >
+      <View>{children}</View>
     </Animated.View>
   );
 }

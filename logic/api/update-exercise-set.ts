@@ -3,10 +3,12 @@ const FIXED_USER_ID = "bebf5efa-ea6e-4025-adb3-edcf0b7c5155";
 
 export interface CompleteExerciseSetRequest {
   workoutDayExerciseId: string;
-  setNumber: number;
-  metrics: Record<string, unknown>;
-  completed: boolean | null;
-  restSecondsActual: number | null;
+  setNumber?: number;
+  metrics?: Record<string, unknown>;
+  completed?: boolean | null;
+  parameter1?: string | number | null;
+  parameter2?: string | number | null;
+  restSecondsActual?: number | null;
 }
 
 export async function completeExerciseSet(

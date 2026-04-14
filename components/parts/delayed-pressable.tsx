@@ -36,13 +36,19 @@ export default function DelayedPressable<TArgs extends unknown[]>(
     (...args: TArgs) => {
       clearTimer();
 
+      if (delay <= 0) {
+        onPress(...args);
+        onPressEnd?.();
+        return;
+      }
+
       timeoutRef.current = setTimeout(() => {
         onPress(...args);
-        onPressEnd && onPressEnd();
+        onPressEnd?.();
         timeoutRef.current = null;
       }, delay);
     },
-    [clearTimer, delay, onPress],
+    [clearTimer, delay, onPress, onPressEnd],
   );
 
   useEffect(

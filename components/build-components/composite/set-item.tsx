@@ -4,6 +4,7 @@ import MultiplyIcon from "@/components/icons/multiply-icon";
 import DelayedPressable from "@/components/parts/delayed-pressable";
 import InputField from "@/components/parts/input-field";
 import { Colors } from "@/constants/theme";
+import * as Haptics from "expo-haptics";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, {
@@ -18,7 +19,6 @@ import CheckGray from "../check-gray";
 import CheckGreen from "../check-green";
 import SetNumberWarpup from "../set-number-warpup";
 import TwoField from "../two-field";
-import * as Haptics from "expo-haptics";
 
 export type SetState = "pr_record" | "done" | "progress" | "current";
 
@@ -58,6 +58,7 @@ const colorSchemes = {
     warpupTextColor: Colors.general.color.goldTones.goldBgLight,
     inputFieldColor: Colors.general.color.goldTones.goldBgLight,
     inputFieldTextColor: Colors.general.color.goldTones.goldMain,
+    inputFieldDelimiterColor: Colors.general.color.goldTones.goldMain,
     selectColor: Colors.general.color.goldTones.goldMain,
     selectTextColor: Colors.general.color.goldTones.goldBgLight,
   },
@@ -69,6 +70,7 @@ const colorSchemes = {
     warpupTextColor: Colors.general.color.greenTones.greenBgLight,
     inputFieldColor: Colors.general.color.greenTones.greenBgLight,
     inputFieldTextColor: Colors.general.color.greenTones.greenMain,
+    inputFieldDelimiterColor: Colors.general.color.greenTones.greenMain,
     selectColor: Colors.general.color.greenTones.greenMain,
     selectTextColor: Colors.general.color.greenTones.greenBgLight,
   },
@@ -80,6 +82,7 @@ const colorSchemes = {
     warpupTextColor: Colors.general.color.grayTones.muted50,
     inputFieldColor: Colors.general.color.darkTones.bgMiddle,
     inputFieldTextColor: Colors.general.color.grayTones.main,
+    inputFieldDelimiterColor: Colors.general.color.grayTones.muted50,
     selectColor: Colors.general.color.darkTones.bgMiddle,
     selectTextColor: Colors.general.color.grayTones.main,
   },
@@ -91,69 +94,37 @@ const colorSchemes = {
     warpupTextColor: Colors.general.color.grayTones.muted50,
     inputFieldColor: Colors.general.color.darkTones.bgLight,
     inputFieldTextColor: Colors.general.color.grayTones.main,
+    inputFieldDelimiterColor: Colors.general.color.grayTones.muted50,
     selectColor: Colors.general.color.darkTones.bgLight,
     selectTextColor: Colors.general.color.grayTones.main,
   },
 } as const;
 
 export default function SetItem(props: SetItemProps) {
-  const [state, setState] = useState(colorSchemes[props.initialState]); // TODO: use state machine
-  const [currentState, setCurrentState] = useState(props.initialState);
+  const [optimisticState, setOptimisticState] = useState<SetState | null>(null);
   const scale = useSharedValue(1);
-  const colorState = useSharedValue({
-    backgroundColor: colorSchemes[props.initialState].bgColor,
-    textColor: colorSchemes[props.initialState].textColor,
-    warpupColor: colorSchemes[props.initialState].warpupColor,
-    warpupTextColor: colorSchemes[props.initialState].warpupTextColor,
-    inputFieldColor: colorSchemes[props.initialState].inputFieldColor,
-    inputFieldTextColor: colorSchemes[props.initialState].inputFieldTextColor,
-    selectColor: colorSchemes[props.initialState].selectColor,
-    selectTextColor: colorSchemes[props.initialState].selectTextColor,
-  });
+
+  const currentState = optimisticState ?? props.initialState;
+  const state = colorSchemes[currentState];
 
   const stateTransition = (newState: SetState) => {
-    colorState.value = {
-      backgroundColor: colorSchemes[newState].bgColor,
-      textColor: colorSchemes[newState].textColor,
-      warpupColor: colorSchemes[newState].warpupColor,
-      warpupTextColor: colorSchemes[newState].warpupTextColor,
-      inputFieldColor: colorSchemes[newState].inputFieldColor,
-      inputFieldTextColor: colorSchemes[newState].inputFieldTextColor,
-      selectColor: colorSchemes[newState].selectColor,
-      selectTextColor: colorSchemes[newState].selectTextColor,
-    };
-
     scale.value = withSequence(
       withTiming(1.1, { duration: 120 }),
       withTiming(1, { duration: 120 }),
     );
 
-    setState(colorSchemes[newState]);
-    setCurrentState(newState);
+    setOptimisticState(newState);
   };
+
+  useEffect(() => {
+    if (optimisticState && props.initialState === optimisticState) {
+      setOptimisticState(null);
+    }
+  }, [optimisticState, props.initialState]);
 
   const animatedContainerStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
-
-  useEffect(() => {
-    if (currentState === "done") return;
-    if (props.initialState !== currentState) {
-      colorState.value = {
-        backgroundColor: colorSchemes[props.initialState].bgColor,
-        textColor: colorSchemes[props.initialState].textColor,
-        warpupColor: colorSchemes[props.initialState].warpupColor,
-        warpupTextColor: colorSchemes[props.initialState].warpupTextColor,
-        inputFieldColor: colorSchemes[props.initialState].inputFieldColor,
-        inputFieldTextColor:
-          colorSchemes[props.initialState].inputFieldTextColor,
-        selectColor: colorSchemes[props.initialState].selectColor,
-        selectTextColor: colorSchemes[props.initialState].selectTextColor,
-      };
-      setState(colorSchemes[props.initialState]);
-      setCurrentState(props.initialState);
-    }
-  }, [colorState, currentState, props.initialState]);
 
   return (
     <Animated.View
@@ -167,8 +138,8 @@ export default function SetItem(props: SetItemProps) {
         <View style={[styles.partContainer, styles.leftPartContainer]}>
           <SetNumberWarpup
             text={props.excerciseOrder}
-            color={colorState.value.warpupColor}
-            textColor={colorState.value.warpupTextColor}
+            color={state.warpupColor}
+            textColor={state.warpupTextColor}
           />
           <HistoryText
             color={Colors.general.color.grayTones.muted40}
@@ -188,13 +159,13 @@ export default function SetItem(props: SetItemProps) {
             <TwoField
               defaultValue={"0"}
               delimiter="x"
-              delimiterColor={colorState.value.inputFieldTextColor}
+              delimiterColor={state.inputFieldDelimiterColor}
               firstFieldValue={props.input.field1}
               secondFieldValue={props.input.field2}
-              fieldColor={colorState.value.inputFieldColor}
-              textColor={colorState.value.inputFieldTextColor}
-              selectColor={colorState.value.selectColor}
-              selectTextColor={colorState.value.selectTextColor}
+              fieldColor={state.inputFieldColor}
+              textColor={state.inputFieldTextColor}
+              selectColor={state.selectColor}
+              selectTextColor={state.selectTextColor}
               onFirstFieldChange={(value) =>
                 props.onInputChange?.(value, props.input.field2)
               }
@@ -205,10 +176,10 @@ export default function SetItem(props: SetItemProps) {
           ) : (
             <View style={styles.singleInputContainer}>
               <InputField
-                bgColor={colorState.value.inputFieldColor}
-                textColor={colorState.value.inputFieldTextColor}
-                selectColor={colorState.value.selectColor}
-                selectTextColor={colorState.value.selectTextColor}
+                bgColor={state.inputFieldColor}
+                textColor={state.inputFieldTextColor}
+                selectColor={state.selectColor}
+                selectTextColor={state.selectTextColor}
                 type="number"
                 placeholder="0"
                 value={props.input.field1}

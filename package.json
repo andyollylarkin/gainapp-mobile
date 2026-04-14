@@ -47,6 +47,7 @@
     "react-native-swipeable": "^0.6.0",
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.5.1",
+    "torph": "^0.0.9",
     "zustand": "^5.0.11"
   },
   "devDependencies": {
