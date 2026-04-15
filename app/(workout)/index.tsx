@@ -10,6 +10,7 @@ import { Colors, typography } from "@/constants/theme";
 import useApiReached from "@/hooks/use-api-reached";
 import useCurrentDay from "@/hooks/use-current-day";
 import useNetworkConnected from "@/hooks/use-network-connected";
+import { useSyncQueue } from "@/hooks/use-sync-queue";
 import {
   getWorkoutOverviewByDay,
   WorkoutOverviewResponse,
@@ -40,6 +41,8 @@ export default function HomeScreen() {
     setWorkoutOverviewForDay,
     setWorkoutByWeekdayForDay,
   } = useExcerciseStore();
+
+  useSyncQueue();
 
   const contentTopOffset = insets.top + 30 + 24;
   const snapStep = SNAP_ITEM_HEIGHT + ITEM_GAP;
