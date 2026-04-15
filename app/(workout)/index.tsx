@@ -7,7 +7,9 @@ import GainLogo from "@/components/icons/gain-logo";
 import PlayIcon from "@/components/icons/play";
 import SliderButton from "@/components/parts/slider-button";
 import { Colors, typography } from "@/constants/theme";
+import useApiReached from "@/hooks/use-api-reached";
 import useCurrentDay from "@/hooks/use-current-day";
+import useNetworkConnected from "@/hooks/use-network-connected";
 import {
   getWorkoutOverviewByDay,
   WorkoutOverviewResponse,
@@ -367,6 +369,8 @@ function WorkoutContent({
   selectedDay: Day;
 }) {
   const len = items.length;
+  const { pendingSyncActions } = useExcerciseStore();
+  const { isReached: isConnected } = useApiReached();
 
   return (
     <>
@@ -377,6 +381,10 @@ function WorkoutContent({
           marginBottom: 12,
         }}
       >
+        <Text style={{ color: "red" }}>{pendingSyncActions.length}</Text>
+        <Text style={{ color: "red" }}>
+          {isConnected ? "Online" : "Offline"}
+        </Text>
         <WorkoutPageDesc
           workoutName={description?.workoutName ?? "Workout"}
           excercisesCount={description?.excercisesCount ?? items.length}

@@ -259,6 +259,7 @@ export default function ExcerciseModal() {
           name={workoutData?.description.workoutName ?? "Workout"}
           time={`${workoutData?.description.durationMinutes ?? 0}m`}
         />
+
         {isLoadingWorkout && !workoutData ? (
           <Text
             style={{
