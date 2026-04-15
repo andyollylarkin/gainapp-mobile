@@ -372,8 +372,6 @@ function WorkoutContent({
   selectedDay: Day;
 }) {
   const len = items.length;
-  const { pendingSyncActions } = useExcerciseStore();
-  const { isReached: isConnected } = useApiReached();
 
   return (
     <>
@@ -384,10 +382,6 @@ function WorkoutContent({
           marginBottom: 12,
         }}
       >
-        <Text style={{ color: "red" }}>{pendingSyncActions.length}</Text>
-        <Text style={{ color: "red" }}>
-          {isConnected ? "Online" : "Offline"}
-        </Text>
         <WorkoutPageDesc
           workoutName={description?.workoutName ?? "Workout"}
           excercisesCount={description?.excercisesCount ?? items.length}
