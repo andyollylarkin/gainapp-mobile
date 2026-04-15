@@ -12,7 +12,9 @@ import {
   getWorkoutOverviewByDay,
   WorkoutOverviewResponse,
 } from "@/logic/api/ex-description";
+import { getWorkoutByWeekday } from "@/logic/api/exercises-by-weekday";
 import { generateAiWorkout } from "@/logic/api/generate-ai";
+import { useExcerciseStore } from "@/store/excercise-store";
 import { Day } from "@/types";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -31,6 +33,11 @@ export default function HomeScreen() {
   );
   const [isLoadingOverview, setIsLoadingOverview] = useState(false);
   const [isGeneratingWorkout, setIsGeneratingWorkout] = useState(false);
+  const {
+    getWorkoutOverviewForDay,
+    setWorkoutOverviewForDay,
+    setWorkoutByWeekdayForDay,
+  } = useExcerciseStore();
 
   const contentTopOffset = insets.top + 30 + 24;
   const snapStep = SNAP_ITEM_HEIGHT + ITEM_GAP;
@@ -38,17 +45,28 @@ export default function HomeScreen() {
   useEffect(() => {
     let isActive = true;
 
+    setOverview(getWorkoutOverviewForDay(currentDaySelected.name));
     setIsLoadingOverview(true);
 
     getWorkoutOverviewByDay(currentDaySelected)
       .then((response) => {
         if (!isActive) return;
         setOverview(response);
+        setWorkoutOverviewForDay(currentDaySelected.name, response);
+
+        void getWorkoutByWeekday(currentDaySelected)
+          .then((weekdayWorkout) => {
+            if (!isActive) return;
+            setWorkoutByWeekdayForDay(currentDaySelected.name, weekdayWorkout);
+          })
+          .catch((weekdayError) => {
+            if (!isActive) return;
+            console.warn("Failed to cache weekday workout", weekdayError);
+          });
       })
       .catch((error) => {
         console.warn("Failed to load workout overview", error);
         if (!isActive) return;
-        setOverview(null);
       })
       .finally(() => {
         if (!isActive) return;
@@ -58,7 +76,12 @@ export default function HomeScreen() {
     return () => {
       isActive = false;
     };
-  }, [currentDaySelected]);
+  }, [
+    currentDaySelected,
+    getWorkoutOverviewForDay,
+    setWorkoutOverviewForDay,
+    setWorkoutByWeekdayForDay,
+  ]);
 
   const items: ExcerciseItemProps[] = (overview?.exercises ?? []).map(
     (exercise) => ({
@@ -82,6 +105,10 @@ export default function HomeScreen() {
     try {
       const generatedOverview = await generateAiWorkout();
       setOverview(generatedOverview);
+      setWorkoutOverviewForDay(currentDaySelected.name, generatedOverview);
+
+      const weekdayWorkout = await getWorkoutByWeekday(currentDaySelected);
+      setWorkoutByWeekdayForDay(currentDaySelected.name, weekdayWorkout);
     } catch (error) {
       console.warn("Failed to generate AI workout", error);
     } finally {
@@ -117,7 +144,7 @@ export default function HomeScreen() {
             onDaySelect={(day) => setCurrentDay(day)}
           />
         </View>
-        {isLoadingOverview ? (
+        {isLoadingOverview && !overview ? (
           <Text
             style={{
               ...typography.regularL,

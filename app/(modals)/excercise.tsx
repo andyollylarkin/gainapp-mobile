@@ -4,7 +4,6 @@ import ResetTimer from "@/components/build-components/reset-timer";
 import TextButton from "@/components/parts/text-button";
 import { Colors, typography } from "@/constants/theme";
 import useCurrentDay from "@/hooks/use-current-day";
-import { completeExerciseSet } from "@/logic/api/update-exercise-set";
 import {
   getWorkoutByWeekday,
   WorkoutByWeekdayResponse,
@@ -111,13 +110,22 @@ export default function ExcerciseModal() {
     (Object.values(DayEnum) as string[]).includes(dayParam)
       ? (dayParam as keyof typeof DayEnum)
       : currentDay.name;
+  const requestDay = Day.fromString(requestDayName);
+  const requestDayEnum = requestDay.name;
   const modalHeaderOverlayHeight = insets.top + 22;
   const [timerStarted, setTimerStarted] = useState<boolean>(false);
   const [timerKey, setTimerKey] = useState<number>(0);
   const [workoutData, setWorkoutData] =
     useState<WorkoutByWeekdayResponse | null>(null);
   const [isLoadingWorkout, setIsLoadingWorkout] = useState(false);
-  const { addExcercise, setTrayActiveIndex } = useExcerciseStore();
+  const {
+    addExcercise,
+    setTrayActiveIndex,
+    getWorkoutByWeekdayForDay,
+    setWorkoutByWeekdayForDay,
+    queueCompleteExerciseSet,
+    queueDeleteExerciseSet,
+  } = useExcerciseStore();
   const { currentRest, updateCurrentRest } = useExcerciseTimerStore();
   const timerOpacity = useSharedValue(0);
 
@@ -135,17 +143,23 @@ export default function ExcerciseModal() {
 
   useEffect(() => {
     let isActive = true;
+    const cachedWorkout = getWorkoutByWeekdayForDay(requestDayEnum);
+    setWorkoutData(cachedWorkout);
     setIsLoadingWorkout(true);
 
-    getWorkoutByWeekday(Day.fromString(requestDayName))
+    getWorkoutByWeekday(requestDay)
       .then((response) => {
         if (!isActive) return;
-        setWorkoutData(response);
+
+        // Keep local unsynced progress if cached data for this day already exists.
+        if (!cachedWorkout) {
+          setWorkoutData(response);
+          setWorkoutByWeekdayForDay(requestDayEnum, response);
+        }
       })
       .catch((error) => {
         if (!isActive) return;
         console.warn("Failed to load weekday workout", error);
-        setWorkoutData(null);
       })
       .finally(() => {
         if (!isActive) return;
@@ -155,7 +169,12 @@ export default function ExcerciseModal() {
     return () => {
       isActive = false;
     };
-  }, [requestDayName]);
+  }, [
+    requestDay,
+    requestDayEnum,
+    getWorkoutByWeekdayForDay,
+    setWorkoutByWeekdayForDay,
+  ]);
 
   useEffect(() => {
     if (!workoutData || workoutData.isRestDay) {
@@ -240,7 +259,7 @@ export default function ExcerciseModal() {
           name={workoutData?.description.workoutName ?? "Workout"}
           time={`${workoutData?.description.durationMinutes ?? 0}m`}
         />
-        {isLoadingWorkout ? (
+        {isLoadingWorkout && !workoutData ? (
           <Text
             style={{
               ...typography.regularL,
@@ -290,7 +309,7 @@ export default function ExcerciseModal() {
                 const resolvedWorkoutDayExerciseId =
                   tray.workoutDayExerciseId ?? tray.id;
 
-                void completeExerciseSet({
+                queueCompleteExerciseSet({
                   workoutDayExerciseId: resolvedWorkoutDayExerciseId,
                   setNumber: currentCompleted,
                   metrics: {
@@ -298,13 +317,11 @@ export default function ExcerciseModal() {
                   },
                   completed: true,
                   restSecondsActual: currentRest,
-                }).catch((error) => {
-                  console.warn("Failed to send completed exercise set", error);
                 });
                 showOrHideTimer(true);
               }}
               onExcerciseRemove={(_, id) => {
-                console.log(`Excercise with id ${id} removed`);
+                queueDeleteExerciseSet({ id });
               }}
             />
           ))

@@ -4,7 +4,6 @@ import TimerIcon from "@/components/icons/timer";
 import Accordion from "@/components/parts/accordion";
 import TextButton from "@/components/parts/text-button";
 import { Colors } from "@/constants/theme";
-import { completeExerciseSet } from "@/logic/api/update-exercise-set";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { debounce } from "@/utils/debounce";
 import React, { useMemo } from "react";
@@ -14,7 +13,6 @@ import {
   View,
   unstable_batchedUpdates,
 } from "react-native";
-import { addExerciseSet } from "../../../logic/api/add-exercise-set";
 import ColumnDescription, {
   ColumnDescriptionProps,
 } from "../column-description";
@@ -131,12 +129,8 @@ const ExerciseRow = React.memo(function ExerciseRow(props: ExerciseRowProps) {
             },
             trayId,
           );
-          updateSetParams(
-            field1,
-            field2,
-            excercise.trayId,
-            excercise.excerciseOrder as number,
-          );
+          const setNumber = index + 1;
+          updateSetParams(field1, field2, trayId, setNumber);
         }}
         excerciseOrder={index === 0 ? "W" : index}
       />
@@ -167,6 +161,8 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
     removeExcercise,
     setTrayActiveIndex,
     getActiveIndex,
+    queueAddExerciseSet,
+    queueUpdateExerciseSetParams,
   } = useExcerciseStore();
 
   const createDefaultExcercise = (base: SetItemProps): SetItemProps => ({
@@ -211,18 +207,12 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
       ) => {
         if (setNumber === "W") setNumber = 1;
 
-        try {
-          await completeExerciseSet({
-            workoutDayExerciseId: id,
-            parameter1: Number(f1),
-            parameter2: Number(f2 ?? 0),
-            setNumber: Number(setNumber),
-          });
-        } catch (error) {
-          console.warn("Failed to update exercise set", error);
-        } finally {
-          console.log("Set parameters updated", f1, f2, id, setNumber);
-        }
+        queueUpdateExerciseSetParams({
+          workoutDayExerciseId: id,
+          parameter1: Number(f1),
+          parameter2: Number(f2 ?? 0),
+          setNumber: Number(setNumber),
+        });
       },
       800,
     ) as (
@@ -231,7 +221,7 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
       id: string,
       setNumber?: string | number,
     ) => void;
-  }, []);
+  }, [queueUpdateExerciseSetParams]);
 
   const exerciseRows = useMemo(
     () =>
@@ -301,25 +291,33 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
               <TextButton
                 text={"Add Set"}
                 onPressIn={() => {
-                  const baseSet =
+                  const previousSet =
                     trayExcercises[trayExcercises.length - 1] ?? fallbackSet;
+                  const previousInput = {
+                    field1: previousSet.input.field1 ?? "0",
+                    field2: previousSet.input.field2 ?? "0",
+                  };
+                  const parameter1 = Number(previousInput.field1) || 0;
+                  const parameter2 = Number(previousInput.field2) || 0;
+
                   const nextExcercise = {
-                    ...createDefaultExcercise(baseSet),
+                    ...createDefaultExcercise(previousSet),
+                    input: previousInput,
                     trayId: props.id,
                   };
                   addExcercise(nextExcercise, props.id);
 
-                  void addExerciseSet({
+                  queueAddExerciseSet({
                     workoutDayExerciseId: props.id,
                     id: nextExcercise.id,
+                    parameter1,
+                    parameter2,
                     metrics: {
-                      field1: nextExcercise.input.field1,
-                      field2: nextExcercise.input.field2,
+                      field1: parameter1,
+                      field2: parameter2,
                     },
                     completed: false,
                     restSecondsActual: null,
-                  }).catch((error) => {
-                    console.warn("Failed to add exercise set", error);
                   });
                 }}
                 bgColor={Colors.general.color.darkTones.bgMiddle}
