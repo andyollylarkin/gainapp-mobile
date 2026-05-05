@@ -40,5 +40,5 @@ export default function ScaledPressable({
     },
   });
 
-  return <Animated.View style={animatedStyle}>{child}</Animated.View>;
+  return <Animated.View style={[animatedStyle]}>{child}</Animated.View>;
 }

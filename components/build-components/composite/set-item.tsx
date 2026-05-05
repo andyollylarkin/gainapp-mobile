@@ -5,8 +5,8 @@ import DelayedPressable from "@/components/parts/delayed-pressable";
 import InputField from "@/components/parts/input-field";
 import { Colors } from "@/constants/theme";
 import * as Haptics from "expo-haptics";
-import { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { RefObject, useEffect, useState } from "react";
+import { StyleSheet, TextInput, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -47,6 +47,12 @@ export interface SetItemProps {
   ) => void;
   onPressEnd?: () => void;
   onInputChange?: (field1: string, field2: string | null) => void;
+  onInputFocus?: (
+    obj: RefObject<TextInput | null>,
+    value: string,
+    setValue: (nextValue: string) => void,
+  ) => void;
+  onInputBlur?: () => void;
 }
 
 const colorSchemes = {
@@ -157,6 +163,12 @@ export default function SetItem(props: SetItemProps) {
         <View style={[styles.partContainer, styles.rightPartContainer]}>
           {props.input.field2 !== null ? (
             <TwoField
+              onFieldSelect={(obj, value, setValue) => {
+                if (obj) {
+                  props.onInputFocus?.(obj, value, setValue);
+                }
+              }}
+              onFieldBlur={() => props.onInputBlur?.()}
               defaultValue={"0"}
               delimiter="x"
               delimiterColor={state.inputFieldDelimiterColor}
@@ -185,6 +197,10 @@ export default function SetItem(props: SetItemProps) {
                 value={props.input.field1}
                 maxNumberValue={props.maxInputValue}
                 onChange={(value) => props.onInputChange?.(value, null)}
+                onFocus={(obj, value, setValue) =>
+                  props.onInputFocus?.(obj, value, setValue)
+                }
+                onBlur={() => props.onInputBlur?.()}
               />
             </View>
           )}

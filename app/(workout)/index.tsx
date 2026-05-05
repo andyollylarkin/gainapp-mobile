@@ -3,13 +3,12 @@ import ExcerciseItem, {
 } from "@/components/build-components/composite/excercise-item";
 import WorkoutPageDesc from "@/components/build-components/composite/workoutpage-desc";
 import DayPicker from "@/components/build-components/day-picker";
+import { DefaultKeyboard } from "@/components/build-components/keyboard/keyboard";
 import GainLogo from "@/components/icons/gain-logo";
 import PlayIcon from "@/components/icons/play";
 import SliderButton from "@/components/parts/slider-button";
 import { Colors, typography } from "@/constants/theme";
-import useApiReached from "@/hooks/use-api-reached";
 import useCurrentDay from "@/hooks/use-current-day";
-import useNetworkConnected from "@/hooks/use-network-connected";
 import { useSyncQueue } from "@/hooks/use-sync-queue";
 import {
   getWorkoutOverviewByDay,

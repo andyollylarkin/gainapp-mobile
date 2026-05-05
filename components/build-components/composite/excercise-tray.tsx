@@ -6,10 +6,11 @@ import TextButton from "@/components/parts/text-button";
 import { Colors } from "@/constants/theme";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { debounce } from "@/utils/debounce";
-import React, { useMemo } from "react";
+import React, { RefObject, useMemo } from "react";
 import {
   Pressable,
   StyleSheet,
+  TextInput,
   View,
   unstable_batchedUpdates,
 } from "react-native";
@@ -33,6 +34,12 @@ export interface ExcerciseTrayProps {
   ) => void;
   onExcerciseRemove?: (excercise: SetItemProps, id: string) => void;
   disable?: boolean;
+  onInputFocus?: (
+    obj: RefObject<TextInput | null>,
+    value: string,
+    setValue: (nextValue: string) => void,
+  ) => void;
+  onInputBlur?: () => void;
 }
 
 type TrayExercise = SetItemProps & { trayId: string };
@@ -64,6 +71,12 @@ interface ExerciseRowProps {
     id: string,
     setNumber?: string | number,
   ) => void;
+  onInputFocus?: (
+    obj: RefObject<TextInput | null>,
+    value: string,
+    setValue: (nextValue: string) => void,
+  ) => void;
+  onInputBlur?: () => void;
 }
 
 const ExerciseRow = React.memo(function ExerciseRow(props: ExerciseRowProps) {
@@ -86,6 +99,8 @@ const ExerciseRow = React.memo(function ExerciseRow(props: ExerciseRowProps) {
   return (
     <View style={styles.exerciseRow}>
       <SwipeableSet
+        onInputFocus={props.onInputFocus}
+        onInputBlur={props.onInputBlur}
         disabledSwipe={index === 0 || activeIndex > index}
         onSwipeEnd={() => {
           onExcerciseChange?.(excercise, excercise.id);
@@ -227,6 +242,8 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
     () =>
       trayExcercises.map((excercise, index) => (
         <ExerciseRow
+          onInputFocus={props.onInputFocus}
+          onInputBlur={props.onInputBlur}
           key={excercise.id}
           excercise={excercise}
           index={index}
@@ -256,6 +273,8 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
       removeExcercise,
       setTrayActiveIndex,
       updateSetParams,
+      props.onInputFocus,
+      props.onInputBlur,
     ],
   );
 

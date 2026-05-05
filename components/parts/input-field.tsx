@@ -1,5 +1,5 @@
 import { Colors, typography } from "@/constants/theme";
-import { useEffect, useState } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { StyleSheet, TextInput } from "react-native";
 
 export type BgColor =
@@ -31,13 +31,19 @@ export interface InputFieldProps {
   maxNumberValue?: number;
   onChange?: (value: string) => void;
   onClick?: () => void;
-  onFocus?: () => void;
+  onFocus?: (
+    obj: RefObject<TextInput | null>,
+    value: string,
+    setValue: (nextValue: string) => void,
+  ) => void;
+  onBlur?: () => void;
 }
 
 export default function InputField(props: InputFieldProps) {
   const fieldType = props.type || "text";
   const [selectedField, setSelectedField] = useState<boolean>(false);
   const [innerValue, setInnerValue] = useState<string>(props.value ?? "");
+  const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     if (props.value !== undefined) {
@@ -45,8 +51,9 @@ export default function InputField(props: InputFieldProps) {
     }
   }, [props.value]);
 
-  const sanitizeNumberValue = (value: string) => {
-    const normalized = value.replace(/,/g, ".").replace(/[^\d.]/g, "");
+  const sanitizeNumberValue = (value: string | null | undefined) => {
+    const safeValue = value ?? "";
+    const normalized = safeValue.replace(/,/g, ".").replace(/[^\d.]/g, "");
     const firstDotIndex = normalized.indexOf(".");
 
     if (firstDotIndex === -1) {
@@ -58,8 +65,10 @@ export default function InputField(props: InputFieldProps) {
     return `${integerPart}.${decimalPart}`;
   };
 
-  const handleChangeText = (value: string) => {
-    let nextValue = fieldType === "number" ? sanitizeNumberValue(value) : value;
+  const normalizeValue = (value: string | null | undefined) => {
+    const safeValue = value ?? "";
+    let nextValue =
+      fieldType === "number" ? sanitizeNumberValue(safeValue) : safeValue;
 
     if (fieldType === "number" && props.maxNumberValue !== undefined) {
       const numericValue = parseFloat(nextValue);
@@ -68,6 +77,18 @@ export default function InputField(props: InputFieldProps) {
       }
     }
 
+    return nextValue;
+  };
+
+  const setValueFromOutside = (value: string) => {
+    const nextValue = normalizeValue(value);
+    setInnerValue(nextValue);
+    props.onChange?.(nextValue);
+  };
+
+  const handleChangeText = (value: string) => {
+    const nextValue = normalizeValue(value);
+
     setInnerValue(nextValue);
 
     props.onChange?.(nextValue);
@@ -75,15 +96,17 @@ export default function InputField(props: InputFieldProps) {
 
   return (
     <TextInput
+      ref={inputRef}
       value={innerValue}
       onFocus={() => {
         setSelectedField(true);
         if (props.onFocus) {
-          props.onFocus();
+          props.onFocus(inputRef, innerValue, setValueFromOutside);
         }
       }}
       onBlur={(e) => {
         setSelectedField(false);
+        props.onBlur?.();
       }}
       onChangeText={handleChangeText}
       keyboardType={fieldType === "number" ? "numeric" : "default"}

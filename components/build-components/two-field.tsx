@@ -1,5 +1,6 @@
 import { Colors } from "@/constants/theme";
-import { StyleSheet, View } from "react-native";
+import { RefObject } from "react";
+import { StyleSheet, TextInput, View } from "react-native";
 import CrossIcon from "../icons/cross";
 import MultiplyIcon from "../icons/multiply-icon";
 import InputField, { BgColor, TextColor } from "../parts/input-field";
@@ -16,6 +17,12 @@ export interface TwoFieldProps {
   secondFieldValue?: string;
   onFirstFieldChange?: (value: string) => void;
   onSecondFieldChange?: (value: string) => void;
+  onFieldBlur?: () => void;
+  onFieldSelect: (
+    obj: RefObject<TextInput | null>,
+    value: string,
+    setValue: (nextValue: string) => void,
+  ) => void;
 }
 
 export default function TwoField(props: TwoFieldProps) {
@@ -43,6 +50,8 @@ export default function TwoField(props: TwoFieldProps) {
           selectColor={props.selectColor}
           selectTextColor={props.selectTextColor}
           onChange={props.onFirstFieldChange}
+          onFocus={props.onFieldSelect}
+          onBlur={props.onFieldBlur}
         />
       </View>
       <View style={styles.delimiterContainer}>{delimiter}</View>
@@ -57,6 +66,8 @@ export default function TwoField(props: TwoFieldProps) {
           selectColor={props.selectColor}
           selectTextColor={props.selectTextColor}
           onChange={props.onSecondFieldChange}
+          onFocus={props.onFieldSelect}
+          onBlur={props.onFieldBlur}
         />
       </View>
     </View>

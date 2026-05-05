@@ -1,4 +1,5 @@
 import ScaledPressable from "@/components/animated/scaled-pressable";
+import ExcerciseCustomKeyboard from "@/components/build-components/composite/excercise-custom-keyboard";
 import ExcerciseTray from "@/components/build-components/composite/excercise-tray";
 import ResetTimer from "@/components/build-components/reset-timer";
 import TextButton from "@/components/parts/text-button";
@@ -13,8 +14,8 @@ import { useExcerciseStore } from "@/store/excercise-store";
 import { useExcerciseTimerStore } from "@/store/excercise-timer-store";
 import { Day, DayEnum } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { RefObject, useEffect, useRef, useState } from "react";
+import { ScrollView, Text, TextInput, View } from "react-native";
 import Animated, { useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -110,23 +111,23 @@ export default function ExcerciseModal() {
     (Object.values(DayEnum) as string[]).includes(dayParam)
       ? (dayParam as keyof typeof DayEnum)
       : currentDay.name;
-  const requestDay = Day.fromString(requestDayName);
-  const requestDayEnum = requestDay.name;
+  const requestDayEnum = Day.fromString(requestDayName).name;
   const modalHeaderOverlayHeight = insets.top + 22;
   const [timerStarted, setTimerStarted] = useState<boolean>(false);
   const [timerKey, setTimerKey] = useState<number>(0);
   const [workoutData, setWorkoutData] =
     useState<WorkoutByWeekdayResponse | null>(null);
   const [isLoadingWorkout, setIsLoadingWorkout] = useState(false);
-  const {
-    addExcercise,
-    setTrayActiveIndex,
-    getWorkoutByWeekdayForDay,
-    setWorkoutByWeekdayForDay,
-    queueCompleteExerciseSet,
-    queueDeleteExerciseSet,
-  } = useExcerciseStore();
-  const { currentRest, updateCurrentRest } = useExcerciseTimerStore();
+  const queueCompleteExerciseSet = useExcerciseStore(
+    (state) => state.queueCompleteExerciseSet,
+  );
+  const queueDeleteExerciseSet = useExcerciseStore(
+    (state) => state.queueDeleteExerciseSet,
+  );
+  const currentRest = useExcerciseTimerStore((state) => state.currentRest);
+  const updateCurrentRest = useExcerciseTimerStore(
+    (state) => state.updateCurrentRest,
+  );
   const timerOpacity = useSharedValue(0);
 
   const showOrHideTimer = (show: boolean) => {
@@ -141,20 +142,68 @@ export default function ExcerciseModal() {
     }
   };
 
+  const currentSetValueRef = useRef<((next: string) => void) | null>(null);
+  const focusedInputRef = useRef<RefObject<TextInput | null> | null>(null);
+  const currentValueRef = useRef<string>("");
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const blurHideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const applyInputValue = (nextValue: string) => {
+    currentValueRef.current = nextValue;
+    currentSetValueRef.current?.(nextValue);
+  };
+
+  const appendInputValue = (val?: string | number) => {
+    const chunk = String(val ?? "");
+
+    if (!chunk) return;
+
+    const nextValue = `${currentValueRef.current}${chunk}`;
+    applyInputValue(nextValue);
+  };
+
+  const removeLastInputChar = () => {
+    const nextValue = currentValueRef.current.slice(0, -1);
+    applyInputValue(nextValue);
+  };
+
+  const hideCustomKeyboard = () => {
+    if (blurHideTimeoutRef.current) {
+      clearTimeout(blurHideTimeoutRef.current);
+      blurHideTimeoutRef.current = null;
+    }
+
+    setIsKeyboardVisible(false);
+    focusedInputRef.current?.current?.blur();
+    focusedInputRef.current = null;
+  };
+
+  useEffect(() => {
+    return () => {
+      if (blurHideTimeoutRef.current) {
+        clearTimeout(blurHideTimeoutRef.current);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     let isActive = true;
-    const cachedWorkout = getWorkoutByWeekdayForDay(requestDayEnum);
+    const cachedWorkout = useExcerciseStore
+      .getState()
+      .getWorkoutByWeekdayForDay(requestDayEnum);
     setWorkoutData(cachedWorkout);
     setIsLoadingWorkout(true);
 
-    getWorkoutByWeekday(requestDay)
+    getWorkoutByWeekday(Day.fromString(requestDayName))
       .then((response) => {
         if (!isActive) return;
 
         // Keep local unsynced progress if cached data for this day already exists.
         if (!cachedWorkout) {
           setWorkoutData(response);
-          setWorkoutByWeekdayForDay(requestDayEnum, response);
+          useExcerciseStore
+            .getState()
+            .setWorkoutByWeekdayForDay(requestDayEnum, response);
         }
       })
       .catch((error) => {
@@ -169,17 +218,14 @@ export default function ExcerciseModal() {
     return () => {
       isActive = false;
     };
-  }, [
-    requestDay,
-    requestDayEnum,
-    getWorkoutByWeekdayForDay,
-    setWorkoutByWeekdayForDay,
-  ]);
+  }, [requestDayName, requestDayEnum]);
 
   useEffect(() => {
     if (!workoutData || workoutData.isRestDay) {
       return;
     }
+
+    const { addExcercise, setTrayActiveIndex } = useExcerciseStore.getState();
 
     useExcerciseStore.setState({ excercises: [], trayActiveIndex: {} });
 
@@ -208,7 +254,7 @@ export default function ExcerciseModal() {
 
       setTrayActiveIndex(tray.id, calculateActiveIndex(tray.sets));
     });
-  }, [addExcercise, setTrayActiveIndex, workoutData]);
+  }, [workoutData]);
 
   return (
     <View
@@ -281,6 +327,23 @@ export default function ExcerciseModal() {
         ) : (
           workoutData?.trays.map((tray) => (
             <ExcerciseTray
+              onInputFocus={(obj, value, setValue) => {
+                if (blurHideTimeoutRef.current) {
+                  clearTimeout(blurHideTimeoutRef.current);
+                  blurHideTimeoutRef.current = null;
+                }
+
+                currentSetValueRef.current = setValue;
+                currentValueRef.current = value;
+                focusedInputRef.current = obj;
+                setIsKeyboardVisible(true);
+              }}
+              onInputBlur={() => {
+                blurHideTimeoutRef.current = setTimeout(() => {
+                  setIsKeyboardVisible(false);
+                  focusedInputRef.current = null;
+                }, 80);
+              }}
               key={tray.id}
               id={tray.id}
               description={{ items: tray.description.items }}
@@ -328,6 +391,12 @@ export default function ExcerciseModal() {
           ))
         )}
       </ScrollView>
+      <ExcerciseCustomKeyboard
+        visible={isKeyboardVisible}
+        onAppend={appendInputValue}
+        onBackspace={removeLastInputChar}
+        onHide={hideCustomKeyboard}
+      />
     </View>
   );
 }
