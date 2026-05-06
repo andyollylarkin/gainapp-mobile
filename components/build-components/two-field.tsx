@@ -29,10 +29,14 @@ export default function TwoField(props: TwoFieldProps) {
   const delimiter =
     props.delimiter === "x" ? (
       <MultiplyIcon
+        width={16}
+        height={16}
         color={props.delimiterColor || Colors.general.color.grayTones.muted50}
       />
     ) : (
       <CrossIcon
+        width={16}
+        height={16}
         color={props.delimiterColor || Colors.general.color.grayTones.muted50}
       />
     );
