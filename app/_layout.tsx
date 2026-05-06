@@ -1,3 +1,4 @@
+import { ExpoContextMenuProvider } from "@appandflow/expo-context-menu";
 import {
   DarkTheme,
   DefaultTheme,
@@ -31,33 +32,34 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider value={appTheme}>
-        <View>
-        </View>
-        <View style={{ flex: 1, position: "relative" }}>
-          <Stack
-            screenOptions={{
-              headerTransparent: true,
-              headerStyle: {
-                backgroundColor: "transparent",
-              },
-              contentStyle: {
-                backgroundColor: Colors.general.color.darkTones.bg,
-              },
-            }}
-          >
-            <Stack.Screen name="(workout)" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="(modals)"
-              options={{
-                headerShown: false,
-                presentation: "fullScreenModal",
+      <ExpoContextMenuProvider>
+        <ThemeProvider value={appTheme}>
+          <View></View>
+          <View style={{ flex: 1, position: "relative" }}>
+            <Stack
+              screenOptions={{
+                headerTransparent: true,
+                headerStyle: {
+                  backgroundColor: "transparent",
+                },
+                contentStyle: {
+                  backgroundColor: Colors.general.color.darkTones.bg,
+                },
               }}
-            />
-          </Stack>
-        </View>
-        <StatusBar style="light" translucent backgroundColor="transparent" />
-      </ThemeProvider>
+            >
+              <Stack.Screen name="(workout)" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="(modals)"
+                options={{
+                  headerShown: false,
+                  presentation: "fullScreenModal",
+                }}
+              />
+            </Stack>
+          </View>
+          <StatusBar style="light" translucent backgroundColor="transparent" />
+        </ThemeProvider>
+      </ExpoContextMenuProvider>
     </GestureHandlerRootView>
   );
 }

@@ -1,7 +1,15 @@
 import ScaledPressable from "@/components/animated/scaled-pressable";
+import type { ActionsSheetItem } from "@/components/build-components/actions-sheet";
 import ExcerciseCustomKeyboard from "@/components/build-components/composite/excercise-custom-keyboard";
 import ExcerciseTray from "@/components/build-components/composite/excercise-tray";
 import ResetTimer from "@/components/build-components/reset-timer";
+import NoteIcon from "@/components/icons/note";
+import PlusIcon from "@/components/icons/plus";
+import type IconProps from "@/components/icons/props";
+import SwitchIcon from "@/components/icons/switch";
+import TrashIcon from "@/components/icons/trash";
+import UpArrowIcon from "@/components/icons/up-arrow";
+import WeightIcon from "@/components/icons/weight";
 import TextButton from "@/components/parts/text-button";
 import { Colors, typography } from "@/constants/theme";
 import useCurrentDay from "@/hooks/use-current-day";
@@ -13,11 +21,61 @@ import {
 import { useExcerciseStore } from "@/store/excercise-store";
 import { useExcerciseTimerStore } from "@/store/excercise-timer-store";
 import { Day, DayEnum } from "@/types";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { RefObject, useEffect, useRef, useState } from "react";
 import { ScrollView, Text, TextInput, View } from "react-native";
 import Animated, { useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const MdiIcon = (name: keyof typeof MaterialCommunityIcons.glyphMap) => {
+  function MaterialIcon({ width, height, color }: IconProps) {
+    return (
+      <MaterialCommunityIcons
+        name={name}
+        size={Math.min(width, height)}
+        color={color}
+      />
+    );
+  }
+
+  MaterialIcon.displayName = `MdiIcon(${name})`;
+  return MaterialIcon;
+};
+
+const actionsSheetItems: ActionsSheetItem[] = [
+  {
+    text: "Add Note",
+    icon: NoteIcon,
+    onPress: () => console.log("Add Note"),
+  },
+  {
+    text: "Add Warm-Up Set",
+    icon: PlusIcon,
+    onPress: () => console.log("Add Warm-Up Set"),
+  },
+  {
+    text: "Adjust Increment",
+    icon: UpArrowIcon,
+    onPress: () => console.log("Adjust Increment"),
+  },
+  {
+    text: "Switch to Kg",
+    icon: WeightIcon,
+    onPress: () => console.log("Switch to Kg"),
+  },
+  {
+    text: "Replace Exercise",
+    icon: SwitchIcon,
+    onPress: () => console.log("Replace Exercise"),
+  },
+  {
+    text: "Delete Exercise",
+    icon: TrashIcon,
+    destructive: true,
+    onPress: () => console.log("Delete Exercise"),
+  },
+];
 
 interface TopDescriptionProps {
   name: string;
@@ -359,6 +417,7 @@ export default function ExcerciseModal() {
                 icon1Click: () => {},
                 icon2Click: () => {},
                 iconsColor: "#262626",
+                menuItems: actionsSheetItems,
                 type: tray.title.type,
                 expanded: true,
                 title: tray.title.title,

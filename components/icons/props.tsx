@@ -4,6 +4,7 @@ type IconProps = {
   width: number;
   height: number;
   color?: ColorProps["color"] | `#${string}`;
+  thickness?: number;
 };
 
 export default IconProps;

@@ -8,6 +8,7 @@ import Animated, {
 } from "react-native-reanimated";
 import ScaledPressable from "../animated/scaled-pressable";
 import FluentDrag from "../icons/fluent-drag";
+import ActionsSheet, { ActionsSheetItem } from "./actions-sheet";
 import StatsButton from "./stats-button";
 import ThreeDotsButton from "./three-dots-button";
 
@@ -20,6 +21,7 @@ export interface ExcerciseTitleProps {
   iconsColor:
     | typeof Colors.general.color.darkTones.bgMiddle
     | typeof Colors.general.color.darkTones.bgLight;
+  menuItems?: ActionsSheetItem[];
   icon1Click: () => void;
   icon2Click: () => void;
   expanded?: boolean;
@@ -107,12 +109,28 @@ export default function ExcerciseTitle(props: ExcerciseTitleProps) {
               onPressIn={props.icon1Click}
             />
           </ScaledPressable>
-          <ScaledPressable scaleDuration={150} scaleTo={0.94}>
-            <ThreeDotsButton
-              color={props.iconsColor}
-              onPressIn={props.icon2Click}
+          {props.menuItems && props.menuItems.length > 0 ? (
+            <ActionsSheet
+              items={props.menuItems}
+              trigger={({ openMenu, triggerRef }) => (
+                <View ref={triggerRef}>
+                  <ScaledPressable scaleDuration={150} scaleTo={0.94}>
+                    <ThreeDotsButton
+                      color={props.iconsColor}
+                      onPress={openMenu}
+                    />
+                  </ScaledPressable>
+                </View>
+              )}
             />
-          </ScaledPressable>
+          ) : (
+            <ScaledPressable scaleDuration={150} scaleTo={0.94}>
+              <ThreeDotsButton
+                color={props.iconsColor}
+                onPressIn={props.icon2Click}
+              />
+            </ScaledPressable>
+          )}
         </Animated.View>
       </View>
     </View>

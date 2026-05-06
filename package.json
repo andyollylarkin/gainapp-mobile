@@ -12,6 +12,8 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@appandflow/expo-context-menu": "^0.1.20",
+    "@expo/react-native-action-sheet": "^4.1.1",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "^3.0.2",
     "@react-navigation/bottom-tabs": "^7.4.0",
