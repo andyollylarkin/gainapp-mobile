@@ -15,11 +15,19 @@ export interface ResetTimeProps {
 }
 
 export default function ResetTimer(props: ResetTimeProps) {
-  const [targetTime, setTargetTime] = useState(props.timeout);
+  const {
+    increaseAmount,
+    decreaseAmount,
+    onTimeout,
+    onTick,
+    timeout,
+    start = false,
+  } = props;
+  const [targetTime, setTargetTime] = useState(timeout);
   const hasMountedRef = useRef(false);
   const hasStartedRef = useRef(false);
 
-  const timeLeft = useCountdown(targetTime, props.start ?? false);
+  const timeLeft = useCountdown(targetTime, start);
 
   const theme = Colors["general"];
 
@@ -29,45 +37,49 @@ export default function ResetTimer(props: ResetTimeProps) {
       return;
     }
 
-    setTargetTime(props.timeout);
-  }, [props.timeout]);
+    setTargetTime(timeout);
+  }, [timeout]);
 
   useEffect(() => {
-    if (props.start) {
+    if (start) {
       hasStartedRef.current = true;
     }
-  }, [props.start]);
+  }, [start]);
 
   useEffect(() => {
-    if (!props.start || !hasStartedRef.current) {
+    if (!start || !hasStartedRef.current) {
       return;
     }
 
     if (timeLeft.real === 0 && targetTime > 0) {
       hasStartedRef.current = false;
       console.warn("Timer out");
-      props.onTimeout?.();
+      onTimeout?.();
     }
-  }, [props, props.onTimeout, props.start, targetTime, timeLeft.real]);
+  }, [onTimeout, start, targetTime, timeLeft.real]);
 
   useEffect(() => {
-    props.onTick?.(timeLeft.real);
-  }, [props, timeLeft.real]);
+    if (!start || !hasStartedRef.current) {
+      return;
+    }
+
+    onTick?.(timeLeft.real);
+  }, [onTick, start, timeLeft.real]);
 
   return (
     <View style={styles.element}>
       <View style={{ maxWidth: 88 }}>
         <TextButton
-          text={"-" + props.decreaseAmount + " sec"}
+          text={"-" + decreaseAmount + " sec"}
           bgColor={theme.color.darkTones.bgLight}
           textColor={theme.color.grayTones.main}
           onPressIn={() => {
-            if (timeLeft.real <= props.decreaseAmount) return;
-            if (timeLeft.real - props.decreaseAmount < 0) {
+            if (timeLeft.real <= decreaseAmount) return;
+            if (timeLeft.real - decreaseAmount < 0) {
               setTargetTime(0);
               return;
             }
-            setTargetTime(timeLeft.real - props.decreaseAmount);
+            setTargetTime(timeLeft.real - decreaseAmount);
           }}
         />
       </View>
@@ -99,14 +111,14 @@ export default function ResetTimer(props: ResetTimeProps) {
       </View>
       <View style={{ maxWidth: 88 }}>
         <TextButton
-          text={"+" + props.increaseAmount + " sec"}
+          text={"+" + increaseAmount + " sec"}
           bgColor={theme.color.darkTones.bgLight}
           textColor={theme.color.grayTones.main}
           onPressIn={() => {
             if (timeLeft.real <= 0) {
               return;
             }
-            setTargetTime(timeLeft.real + props.increaseAmount);
+            setTargetTime(timeLeft.real + increaseAmount);
           }}
         />
       </View>

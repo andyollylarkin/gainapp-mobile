@@ -8,6 +8,12 @@ interface ExcerciseTimerStore {
 export const useExcerciseTimerStore = create<ExcerciseTimerStore>(
   (set, get) => ({
     currentRest: 0,
-    updateCurrentRest: (newRest: number) => set({ currentRest: newRest }),
+    updateCurrentRest: (newRest: number) => {
+      if (get().currentRest === newRest) {
+        return;
+      }
+
+      set({ currentRest: newRest });
+    },
   }),
 );

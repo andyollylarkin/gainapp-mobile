@@ -1,6 +1,6 @@
 import { Day } from "@/types";
 
-const API_BASE_URL = "http://127.0.0.1:9000";
+const API_BASE_URL = "http://192.168.2.131:9000";
 const FIXED_USER_ID = "bebf5efa-ea6e-4025-adb3-edcf0b7c5155";
 
 export interface WorkoutOverviewDescription {

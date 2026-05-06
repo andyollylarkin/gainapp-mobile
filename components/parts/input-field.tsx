@@ -23,6 +23,7 @@ export interface InputFieldProps {
   bgColor: BgColor;
   textColor: TextColor;
   selectColor?: BgColor;
+  showSoftInputOnFocus?: boolean;
   selectTextColor?: TextColor;
   value?: string;
   type?: "text" | "number" | "password";
@@ -44,6 +45,7 @@ export default function InputField(props: InputFieldProps) {
   const [selectedField, setSelectedField] = useState<boolean>(false);
   const [innerValue, setInnerValue] = useState<string>(props.value ?? "");
   const inputRef = useRef<TextInput>(null);
+  const { showSoftInputOnFocus = false } = props;
 
   useEffect(() => {
     if (props.value !== undefined) {
@@ -96,6 +98,8 @@ export default function InputField(props: InputFieldProps) {
 
   return (
     <TextInput
+      disableKeyboardShortcuts
+      showSoftInputOnFocus={showSoftInputOnFocus}
       ref={inputRef}
       value={innerValue}
       onFocus={() => {

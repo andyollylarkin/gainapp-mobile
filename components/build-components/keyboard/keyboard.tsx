@@ -5,8 +5,15 @@ import IconProps from "@/components/icons/props";
 import SuccessIcon from "@/components/icons/sucess-icon";
 import Circle from "@/components/parts/circle";
 import { Colors } from "@/constants/theme";
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
+import * as Haptics from "expo-haptics";
 
 type KeyboardItems =
   | []
@@ -35,6 +42,73 @@ export type RenderItem = {
   onClick?: (value?: string | number) => void;
 };
 
+function BubblePressable({
+  onPress,
+  children,
+  style,
+  bubbleSize = 44,
+}: {
+  onPress: () => void;
+  children: ReactNode;
+  style: object;
+  bubbleSize?: number;
+}) {
+  const bubbleScale = useSharedValue(0);
+  const bubbleOpacity = useSharedValue(0);
+
+  const bubbleAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: bubbleScale.value }],
+    opacity: bubbleOpacity.value,
+  }));
+
+  const handlePress = () => {
+    bubbleScale.value = 0;
+    bubbleOpacity.value = 0;
+    Haptics.impactAsync();
+
+    bubbleScale.value = withSequence(
+      withTiming(1, { duration: 100 }),
+      withTiming(0, { duration: 100 }),
+    );
+    bubbleOpacity.value = withSequence(
+      withTiming(1, { duration: 100 }),
+      withTiming(0, { duration: 100 }),
+    );
+
+    onPress();
+  };
+
+  return (
+    <Pressable onPress={handlePress} style={style}>
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          {
+            position: "absolute",
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            alignItems: "center",
+            justifyContent: "center",
+          },
+          bubbleAnimatedStyle,
+        ]}
+      >
+        <View
+          style={{
+            width: bubbleSize,
+            height: bubbleSize,
+            borderRadius: bubbleSize / 2,
+            backgroundColor: "rgba(165, 165, 165, 0.22)",
+          }}
+        />
+      </Animated.View>
+      {children}
+    </Pressable>
+  );
+}
+
 export default function Keyboard({
   items,
   panel,
@@ -47,42 +121,48 @@ export default function Keyboard({
       const Icon = item.value;
 
       return (
-        <ScaledPressable scaleTo={0.97} scaleDuration={150}>
-          <Pressable
-            onPress={() => item.onClick?.()}
-            style={{
-              width: "100%",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: 30,
-              paddingVertical: 4,
-            }}
-          >
-            <Icon
-              color={Colors.general.color.grayTones.main}
-              width={22}
-              height={22}
-            />
-          </Pressable>
-        </ScaledPressable>
+        <View style={{ alignItems: "center", marginBottom: 30 }}>
+          <ScaledPressable scaleTo={0.97} scaleDuration={150}>
+            <BubblePressable
+              onPress={() => item.onClick?.()}
+              style={{
+                width: 44,
+                height: 44,
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "hidden",
+              }}
+              bubbleSize={40}
+            >
+              <Icon
+                color={Colors.general.color.grayTones.main}
+                width={22}
+                height={22}
+              />
+            </BubblePressable>
+          </ScaledPressable>
+        </View>
       );
     }
 
     return (
-      <ScaledPressable scaleTo={0.98} scaleDuration={150}>
-        <Pressable
-          onPress={() => item.onClick?.(item.value as number)}
-          style={{ width: "100%" }}
-        >
-          <View>
+      <View style={{ alignItems: "center", marginBottom: 30 }}>
+        <ScaledPressable scaleTo={0.98} scaleDuration={150}>
+          <BubblePressable
+            onPress={() => item.onClick?.(item.value as number)}
+            style={{
+              width: 44,
+              height: 44,
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "hidden",
+            }}
+            bubbleSize={40}
+          >
             <Text
               style={{
                 color: Colors.general.color.grayTones.main,
-                paddingVertical: 4,
-                maxWidth: 100,
                 textAlign: "center",
-                width: "100%",
-                marginBottom: 30,
                 fontFamily: "Inter-Medium",
                 fontWeight: "500",
                 fontSize: 22,
@@ -91,9 +171,9 @@ export default function Keyboard({
             >
               {item.value}
             </Text>
-          </View>
-        </Pressable>
-      </ScaledPressable>
+          </BubblePressable>
+        </ScaledPressable>
+      </View>
     );
   };
 
