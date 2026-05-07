@@ -1,5 +1,5 @@
 import type IconProps from "@/components/icons/props";
-import { typography } from "@/constants/theme";
+import { Colors, typography } from "@/constants/theme";
 import { BlurView } from "expo-blur";
 import { LinearGradient as ExpoLinearGradient } from "expo-linear-gradient";
 import {
@@ -40,7 +40,7 @@ interface ActionsSheetProps {
 const MENU_WIDTH = 270;
 const MENU_RADIUS = 28;
 const MENU_ITEM_HEIGHT = 44;
-const MENU_TRIGGER_GAP = -30;
+const MENU_TRIGGER_GAP = 0;
 
 export default function ActionsSheet({ items, trigger }: ActionsSheetProps) {
   const triggerRef = useRef<View>(null);
@@ -293,10 +293,8 @@ const styles = StyleSheet.create({
     columnGap: 8,
   },
   menuItemText: {
-    ...typography.mediumS,
-    fontSize: 17,
-    lineHeight: 17 * 1.2,
-    color: "#F4F7FA",
+    ...typography.sfPro,
+    color: Colors.general.color.grayTones.main,
   },
   menuItemTextDestructive: {
     color: "#FF383C",

@@ -144,6 +144,11 @@ export const typography = StyleSheet.create({
     lineHeight: 16 * 1.25,
     fontWeight: "700",
   },
+  sfPro: {
+    fontSize: 17,
+    lineHeight: 20,
+    fontWeight: "400",
+  },
 });
 
 export function useAppFonts() {
@@ -152,6 +157,7 @@ export function useAppFonts() {
     "Inter-Medium": require("../fonts/Inter-Medium.ttf"),
     "Inter-SemiBold": require("../fonts/Inter-Semibold.ttf"),
     "Inter-Bold": require("../fonts/Inter-Bold.ttf"),
+    "SF-Pro": require("../fonts/SF-Pro.ttf"),
   });
 
   return fontsLoaded;
