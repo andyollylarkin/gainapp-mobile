@@ -24,13 +24,17 @@ import ScaledPressable from "../animated/scaled-pressable";
 
 export interface ActionsSheetItem {
   text: string;
-  icon: ComponentType<IconProps>;
+  icon?: ComponentType<IconProps>;
   onPress: () => void;
   destructive?: boolean;
 }
 
 interface ActionsSheetProps {
   items: ActionsSheetItem[];
+  menuPaddingHorizontal?: number;
+  menuPaddingVertical?: number;
+  itemPaddingHorizontal?: number;
+  itemPaddingVertical?: number;
   trigger: (params: {
     openMenu: () => void;
     triggerRef: RefObject<View | null>;
@@ -42,7 +46,14 @@ const MENU_RADIUS = 28;
 const MENU_ITEM_HEIGHT = 44;
 const MENU_TRIGGER_GAP = 0;
 
-export default function ActionsSheet({ items, trigger }: ActionsSheetProps) {
+export default function ActionsSheet({
+  items,
+  trigger,
+  menuPaddingHorizontal = 16,
+  menuPaddingVertical = 10,
+  itemPaddingHorizontal = 6,
+  itemPaddingVertical = 10,
+}: ActionsSheetProps) {
   const triggerRef = useRef<View>(null);
   const [open, setOpen] = useState(false);
   const [anchor, setAnchor] = useState({ x: 0, y: 0, width: 0, height: 0 });
@@ -206,7 +217,15 @@ export default function ActionsSheet({ items, trigger }: ActionsSheetProps) {
                 style={StyleSheet.absoluteFill}
               />
 
-              <View style={styles.menuContent}>
+              <View
+                style={[
+                  styles.menuContent,
+                  {
+                    paddingHorizontal: menuPaddingHorizontal,
+                    paddingVertical: menuPaddingVertical,
+                  },
+                ]}
+              >
                 {items.map((item, index) => {
                   const Icon = item.icon;
                   return (
@@ -214,18 +233,26 @@ export default function ActionsSheet({ items, trigger }: ActionsSheetProps) {
                       <ScaledPressable scaleDuration={100} scaleTo={0.97}>
                         <Pressable
                           onPress={() => onActionPress(item)}
-                          style={styles.menuItem}
+                          style={[
+                            styles.menuItem,
+                            {
+                              paddingHorizontal: itemPaddingHorizontal,
+                              paddingVertical: itemPaddingVertical,
+                            },
+                          ]}
                         >
-                          <Icon
-                            width={24}
-                            thickness={1}
-                            height={24}
-                            color={
-                              item.destructive
-                                ? "#FF383C"
-                                : "rgba(255,255,255,0.92)"
-                            }
-                          />
+                          {Icon ? (
+                            <Icon
+                              width={24}
+                              thickness={1}
+                              height={24}
+                              color={
+                                item.destructive
+                                  ? "#FF383C"
+                                  : "rgba(255,255,255,0.92)"
+                              }
+                            />
+                          ) : null}
                           <Text
                             style={[
                               styles.menuItemText,
