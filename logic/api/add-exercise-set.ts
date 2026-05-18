@@ -1,4 +1,5 @@
-const API_BASE_URL = "http://192.168.2.131:9000";
+import config from "@/config";
+
 const FIXED_USER_ID = "bebf5efa-ea6e-4025-adb3-edcf0b7c5155";
 
 export interface AddExerciseSetRequest {
@@ -18,7 +19,7 @@ export interface AddExerciseSetResponse {
 export async function addExerciseSet(
   payload: AddExerciseSetRequest,
 ): Promise<AddExerciseSetResponse> {
-  const url = `${API_BASE_URL}/api/users/${FIXED_USER_ID}/workouts/exercise-sets/add`;
+  const url = `${config.apiBaseUrlDev}/api/users/${FIXED_USER_ID}/workouts/exercise-sets/add`;
 
   const response = await fetch(url, {
     method: "POST",

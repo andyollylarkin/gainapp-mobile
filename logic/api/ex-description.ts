@@ -1,6 +1,6 @@
+import config from "@/config";
 import { Day } from "@/types";
 
-const API_BASE_URL = "http://192.168.2.131:9000";
 const FIXED_USER_ID = "bebf5efa-ea6e-4025-adb3-edcf0b7c5155";
 
 export interface WorkoutOverviewDescription {
@@ -27,7 +27,7 @@ export async function getWorkoutOverviewByDay(
   day: Day,
 ): Promise<WorkoutOverviewResponse> {
   const weekday = Day.toNumber(day);
-  const url = `${API_BASE_URL}/api/users/${FIXED_USER_ID}/workouts/weekday/${weekday}/overview`;
+  const url = `${config.apiBaseUrlDev}/api/users/${FIXED_USER_ID}/workouts/weekday/${weekday}/overview`;
 
   const response = await fetch(url, {
     method: "GET",

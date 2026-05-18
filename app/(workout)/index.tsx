@@ -3,7 +3,6 @@ import ExcerciseItem, {
 } from "@/components/build-components/composite/excercise-item";
 import WorkoutPageDesc from "@/components/build-components/composite/workoutpage-desc";
 import DayPicker from "@/components/build-components/day-picker";
-import { DefaultKeyboard } from "@/components/build-components/keyboard/keyboard";
 import GainLogo from "@/components/icons/gain-logo";
 import PlayIcon from "@/components/icons/play";
 import SliderButton from "@/components/parts/slider-button";

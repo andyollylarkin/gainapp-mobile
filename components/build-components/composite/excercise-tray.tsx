@@ -18,6 +18,7 @@ import ColumnDescription, {
   ColumnDescriptionProps,
 } from "../column-description";
 import ExcerciseTitle, { ExcerciseTitleProps } from "../excercise-title";
+import HiddenNote from "../hidden-note";
 import { SetItemProps } from "./set-item";
 import SwipeableSet from "./swipable-set";
 
@@ -285,9 +286,19 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
           setIsExpanded((current) => !current);
         }}
       >
-        <ExcerciseTitle {...props.title} expanded={isExpanded} />
+        <ExcerciseTitle {...props.title} id={props.id} expanded={isExpanded} />
       </Pressable>
       <Accordion isExpanded={isExpanded}>
+        <View
+          style={{
+            paddingHorizontal: 12,
+            paddingVertical: 8,
+            width: "100%",
+            flex: 1,
+          }}
+        >
+          <HiddenNote contextMenuId={props.id} />
+        </View>
         <ColumnDescription {...props.description} />
         {exerciseRows}
         <View style={styles.bottomContainer}>

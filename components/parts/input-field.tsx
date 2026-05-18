@@ -98,6 +98,7 @@ export default function InputField(props: InputFieldProps) {
 
   return (
     <TextInput
+      caretHidden
       disableKeyboardShortcuts
       showSoftInputOnFocus={showSoftInputOnFocus}
       ref={inputRef}

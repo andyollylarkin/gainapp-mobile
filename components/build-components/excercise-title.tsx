@@ -1,6 +1,7 @@
 import { Colors, typography } from "@/constants/theme";
+import { useContextMenu } from "@/store/menu-store";
 import { useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -8,9 +9,15 @@ import Animated, {
 } from "react-native-reanimated";
 import ScaledPressable from "../animated/scaled-pressable";
 import FluentDrag from "../icons/fluent-drag";
+import PlusIcon from "../icons/plus";
+import SwitchIcon from "../icons/switch";
+import TrashIcon from "../icons/trash";
+import UpArrowIcon from "../icons/up-arrow";
+import WeightIcon from "../icons/weight";
 import ActionsSheet, { ActionsSheetItem } from "./actions-sheet";
 import StatsButton from "./stats-button";
 import ThreeDotsButton from "./three-dots-button";
+import NoteIcon from "../icons/note";
 
 export interface ExcerciseTitleProps {
   type: string;
@@ -21,10 +28,64 @@ export interface ExcerciseTitleProps {
   iconsColor:
     | typeof Colors.general.color.darkTones.bgMiddle
     | typeof Colors.general.color.darkTones.bgLight;
-  menuItems?: ActionsSheetItem[];
   icon1Click: () => void;
   icon2Click: () => void;
   expanded?: boolean;
+  id: string;
+}
+
+function ContextMenu(props: { id: string; iconsColor: string }) {
+  const contextMenuNote = useContextMenu<string, TextInput>(props.id);
+
+  const menuItems: ActionsSheetItem[] = [
+    {
+      text: "Add Note",
+      icon: NoteIcon,
+      onPress: () => {
+        contextMenuNote?.click();
+        contextMenuNote?.target?.focus();
+      },
+    },
+    {
+      text: "Add Warm-Up Set",
+      icon: PlusIcon,
+      onPress: () => console.log("Add Warm-Up Set"),
+    },
+    {
+      text: "Adjust Increment",
+      icon: UpArrowIcon,
+      onPress: () => console.log("Adjust Increment"),
+    },
+    {
+      text: "Switch to Kg",
+      icon: WeightIcon,
+      onPress: () => console.log("Switch to Kg"),
+    },
+    {
+      text: "Replace Exercise",
+      icon: SwitchIcon,
+      onPress: () => console.log("Replace Exercise"),
+    },
+    {
+      text: "Delete Exercise",
+      icon: TrashIcon,
+      destructive: true,
+      onPress: () => console.log("Delete Exercise"),
+    },
+  ];
+
+  return (
+    <ActionsSheet
+      items={menuItems}
+      trigger={({ openMenu, triggerRef }) => (
+        <View ref={triggerRef}>
+          <ScaledPressable scaleDuration={150} scaleTo={0.94}>
+            <ThreeDotsButton color={props.iconsColor} onPress={openMenu} />
+          </ScaledPressable>
+        </View>
+      )}
+    />
+  );
 }
 
 export default function ExcerciseTitle(props: ExcerciseTitleProps) {
@@ -109,28 +170,7 @@ export default function ExcerciseTitle(props: ExcerciseTitleProps) {
               onPressIn={props.icon1Click}
             />
           </ScaledPressable>
-          {props.menuItems && props.menuItems.length > 0 ? (
-            <ActionsSheet
-              items={props.menuItems}
-              trigger={({ openMenu, triggerRef }) => (
-                <View ref={triggerRef}>
-                  <ScaledPressable scaleDuration={150} scaleTo={0.94}>
-                    <ThreeDotsButton
-                      color={props.iconsColor}
-                      onPress={openMenu}
-                    />
-                  </ScaledPressable>
-                </View>
-              )}
-            />
-          ) : (
-            <ScaledPressable scaleDuration={150} scaleTo={0.94}>
-              <ThreeDotsButton
-                color={props.iconsColor}
-                onPressIn={props.icon2Click}
-              />
-            </ScaledPressable>
-          )}
+          <ContextMenu id={props.id} iconsColor={props.iconsColor} />
         </Animated.View>
       </View>
     </View>

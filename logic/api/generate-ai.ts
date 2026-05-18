@@ -1,10 +1,10 @@
+import config from "@/config";
 import { WorkoutOverviewResponse } from "@/logic/api/ex-description";
 
-const API_BASE_URL = "http://192.168.2.131:9000";
 const FIXED_USER_ID = "bebf5efa-ea6e-4025-adb3-edcf0b7c5155";
 
 export async function generateAiWorkout(): Promise<WorkoutOverviewResponse> {
-  const url = `${API_BASE_URL}/api/users/${FIXED_USER_ID}/workouts/generate-ai`;
+  const url = `${config.apiBaseUrlDev}/api/users/${FIXED_USER_ID}/workouts/generate-ai`;
 
   const response = await fetch(url, {
     method: "POST",
