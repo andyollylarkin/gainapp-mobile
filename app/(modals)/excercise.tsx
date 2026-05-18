@@ -257,7 +257,7 @@ export default function ExcerciseModal() {
     });
   }, [workoutData]);
 
-  const [modalOpen, setModalOpen] = useState<boolean>(true);
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   return (
     <View

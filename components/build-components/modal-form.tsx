@@ -30,8 +30,7 @@ export default function ModalForm(props: ModalProps) {
       <View
         style={{
           paddingHorizontal: 8,
-          paddingVertical: 8,
-          flex: 1,
+          paddingBottom: 12, // 👈 отступ снизу для всей строки
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
@@ -43,8 +42,6 @@ export default function ModalForm(props: ModalProps) {
           style={{
             ...typography.mediumL,
             color: Colors.general.color.grayTones.main,
-            textAlign: "left",
-            alignSelf: "baseline",
           }}
         >
           {props.title}
