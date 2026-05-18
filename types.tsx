@@ -1,6 +1,8 @@
 export type MaxFourNonEmptyArray<T> = [T, T, T] | [T, T, T, T];
 export type NonEmptyArray<T> = [T, ...T[]];
 
+export type PositiveNumber = number & { __brand: "PositiveNumber" };
+
 export class StartTimerEvent {
   constructor(
     public readonly id: string,

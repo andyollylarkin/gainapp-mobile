@@ -24,6 +24,7 @@ export interface SliderButtonProps<T extends string> {
   holdOverlayColor: ColorValue;
   textColor: ColorValue;
   text: T;
+  fullWidth?: boolean; // 👈 добавленный пропс
 }
 
 export default function SliderButton<T extends string>(
@@ -80,6 +81,7 @@ export default function SliderButton<T extends string>(
       style={[
         styles.container,
         { backgroundColor: props.color },
+        props.fullWidth && styles.fullWidth, // 👈 условный стиль
         animatedContainerStyle,
       ]}
       onLayout={handleContainerLayout}
@@ -119,5 +121,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     overflow: "hidden",
     position: "relative",
+  },
+  fullWidth: {
+    width: "100%",
+    alignSelf: "stretch",
   },
 });

@@ -1,4 +1,5 @@
 import ScaledPressable from "@/components/animated/scaled-pressable";
+import AdjustTimerModal from "@/components/build-components/composite/adjust-timer-modal";
 import ExcerciseCustomKeyboard from "@/components/build-components/composite/excercise-custom-keyboard";
 import ExcerciseTray from "@/components/build-components/composite/excercise-tray";
 import ResetTimer from "@/components/build-components/reset-timer";
@@ -15,7 +16,7 @@ import { useExcerciseTimerStore } from "@/store/excercise-timer-store";
 import { Day, DayEnum } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
 import { RefObject, useEffect, useRef, useState } from "react";
-import { ScrollView, Text, TextInput, View } from "react-native";
+import { ScrollView, Text, TextInput, View, Image } from "react-native";
 import Animated, { useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -45,7 +46,7 @@ function TopDescription({
   onTimePress,
 }: TopDescriptionProps): React.JSX.Element {
   return (
-    <View style={{ gap: 24 }}>
+    <View style={{ gap: 24, position: "relative" }}>
       <View
         style={{
           flexDirection: "row",
@@ -256,6 +257,8 @@ export default function ExcerciseModal() {
     });
   }, [workoutData]);
 
+  const [modalOpen, setModalOpen] = useState<boolean>(true);
+
   return (
     <View
       style={{
@@ -264,6 +267,29 @@ export default function ExcerciseModal() {
         position: "relative",
       }}
     >
+      <View
+        style={{
+          position: "absolute",
+          width: "100%",
+          top: "35%",
+          zIndex: 9999,
+          paddingHorizontal: 8,
+        }}
+      >
+        <AdjustTimerModal
+          onDone={() => {}}
+          currentValue={0}
+          openState={modalOpen}
+          setClose={() => setModalOpen(false)}
+          title="Adjust rest timer"
+          exerciseTitle="Barbell Bench Press"
+          step={1}
+          image={null}
+          caption="Rest 1:30–2:00 min between sets for maximum muscle growth. Take your time if needed"
+          onDecrease={(val) => console.log("VAL DEC", val)}
+          onIncrease={(val) => console.log("VAL INC:", val)}
+        />
+      </View>
       <Animated.View
         style={{
           position: "absolute",
