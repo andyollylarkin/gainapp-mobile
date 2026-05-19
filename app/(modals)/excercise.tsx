@@ -2,6 +2,7 @@ import ScaledPressable from "@/components/animated/scaled-pressable";
 import AdjustTimerModal from "@/components/build-components/composite/adjust-timer-modal";
 import ExcerciseCustomKeyboard from "@/components/build-components/composite/excercise-custom-keyboard";
 import ExcerciseTray from "@/components/build-components/composite/excercise-tray";
+import Modal from "@/components/build-components/composite/modal";
 import ResetTimer from "@/components/build-components/reset-timer";
 import TextButton from "@/components/parts/text-button";
 import { Colors, typography } from "@/constants/theme";
@@ -257,7 +258,7 @@ export default function ExcerciseModal() {
     });
   }, [workoutData]);
 
-  const [modalOpen, setModalOpen] = useState<boolean>(false);
+  const [modalOpen, setModalOpen] = useState<boolean>(true);
 
   return (
     <View
@@ -267,15 +268,7 @@ export default function ExcerciseModal() {
         position: "relative",
       }}
     >
-      <View
-        style={{
-          position: "absolute",
-          width: "100%",
-          top: "35%",
-          zIndex: 9999,
-          paddingHorizontal: 8,
-        }}
-      >
+      <Modal.Container>
         <AdjustTimerModal
           onDone={() => {}}
           currentValue={0}
@@ -289,7 +282,7 @@ export default function ExcerciseModal() {
           onDecrease={(val) => console.log("VAL DEC", val)}
           onIncrease={(val) => console.log("VAL INC:", val)}
         />
-      </View>
+      </Modal.Container>
       <Animated.View
         style={{
           position: "absolute",

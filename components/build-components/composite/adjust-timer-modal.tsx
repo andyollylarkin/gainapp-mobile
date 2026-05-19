@@ -6,13 +6,14 @@ import SliderButton from "@/components/parts/slider-button";
 import { Colors, typography } from "@/constants/theme";
 import { useState } from "react";
 import {
-  Image,
-  ImageSourcePropType,
-  Pressable,
-  Text,
-  View,
+	Image,
+	ImageSourcePropType,
+	Pressable,
+	Text,
+	View,
 } from "react-native";
-import ModalForm, { ModalProps } from "../modal-form";
+import { ModalProps } from "../modal-form";
+import Modal from "./modal";
 
 const MAX_TIME_ONE_HOUR = 3059;
 
@@ -65,7 +66,7 @@ export default function AdjustTimerModal(props: AdjustTimerModalProps) {
   const [timerValue, setTimerValue] = useState<number>(props.currentValue ?? 0);
 
   return (
-    <ModalForm openState={openState} setClose={setClose} title={title}>
+    <Modal.ModalBox openState={openState} setClose={setClose} title={title}>
       <View
         style={{
           flex: 1,
@@ -198,6 +199,6 @@ export default function AdjustTimerModal(props: AdjustTimerModalProps) {
           />
         </View>
       </View>
-    </ModalForm>
+    </Modal.ModalBox>
   );
 }
