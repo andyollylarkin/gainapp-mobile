@@ -17,7 +17,7 @@ import Modal from "./modal";
 
 const MAX_TIME_ONE_HOUR = 3059;
 
-type AdjustTimerProps = {
+type AdjustLbsProps = {
   image: ImageSourcePropType | undefined | null;
   exerciseTitle: string;
   step: number;
@@ -29,7 +29,7 @@ type AdjustTimerProps = {
   onDone: () => void;
 };
 
-type AdjustTimerModalProps = Omit<ModalProps & AdjustTimerProps, "children">;
+type AdjustLbsModalProps = Omit<ModalProps & AdjustLbsProps, "children">;
 
 function ActionButton(props: {
   children: React.ReactNode;
@@ -47,13 +47,7 @@ function ActionButton(props: {
   );
 }
 
-const formatTime = (totalSeconds: number) => {
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${minutes.toString().padStart(minutes > 9 ? 2 : 1, "0")}:${seconds.toString().padStart(2, "0")}`;
-};
-
-export default function AdjustTimerModal(props: AdjustTimerModalProps) {
+export default function AdjustLbsModal(props: AdjustLbsModalProps) {
   const {
     title,
     openState,
@@ -63,7 +57,7 @@ export default function AdjustTimerModal(props: AdjustTimerModalProps) {
     step,
     allowNegative = false,
   } = props;
-  const [timerValue, setTimerValue] = useState<number>(props.currentValue ?? 0);
+  const [lbsValue, setLbsValue] = useState<number>(props.currentValue ?? 0);
 
   return (
     <Modal.ModalBox openState={openState} setClose={setClose} title={title}>
@@ -123,14 +117,14 @@ export default function AdjustTimerModal(props: AdjustTimerModalProps) {
         >
           <ActionButton
             onPress={() => {
-              const newValue = timerValue - step;
+              const newValue = lbsValue - step;
 
               if (newValue < 0 && !allowNegative) return;
 
-              setTimerValue(newValue);
+              setLbsValue(newValue);
               props.onDecrease(newValue);
             }}
-            currentValue={timerValue}
+            currentValue={lbsValue}
           >
             <MinusIcon
               width={43}
@@ -138,24 +132,44 @@ export default function AdjustTimerModal(props: AdjustTimerModalProps) {
               color={Colors.general.color.grayTones.muted40}
             />
           </ActionButton>
-          <Text
+          <View
             style={{
-              fontFamily: "Inter-Medium",
-              fontWeight: 500,
-              fontSize: 48,
-              color: Colors.general.color.grayTones.main,
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "row",
+              gap: 12,
             }}
           >
-            {formatTime(timerValue)}
-          </Text>
+            <Text
+              style={{
+                fontFamily: "Inter-Medium",
+                fontWeight: 500,
+                fontSize: 48,
+                color: Colors.general.color.grayTones.main,
+              }}
+            >
+              {lbsValue}
+            </Text>
+            <Text
+              style={{
+                fontFamily: "Inter-Medium",
+                fontWeight: 500,
+                fontSize: 48,
+                color: Colors.general.color.grayTones.muted40,
+              }}
+            >
+              {"lbs"}
+            </Text>
+          </View>
           <ActionButton
             onPress={() => {
-              const newValue = timerValue + step;
+              const newValue = lbsValue + step;
               if (newValue > MAX_TIME_ONE_HOUR) return;
-              setTimerValue(newValue);
+              setLbsValue(newValue);
               props.onIncrease(newValue);
             }}
-            currentValue={timerValue}
+            currentValue={lbsValue}
           >
             <PlusIcon
               width={43}

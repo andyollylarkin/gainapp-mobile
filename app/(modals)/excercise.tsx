@@ -1,4 +1,5 @@
 import ScaledPressable from "@/components/animated/scaled-pressable";
+import AdjustLbsModal from "@/components/build-components/composite/adjust-lbs-modal";
 import AdjustTimerModal from "@/components/build-components/composite/adjust-timer-modal";
 import ExcerciseCustomKeyboard from "@/components/build-components/composite/excercise-custom-keyboard";
 import ExcerciseTray from "@/components/build-components/composite/excercise-tray";
@@ -17,7 +18,7 @@ import { useExcerciseTimerStore } from "@/store/excercise-timer-store";
 import { Day, DayEnum } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
 import { RefObject, useEffect, useRef, useState } from "react";
-import { ScrollView, Text, TextInput, View, Image } from "react-native";
+import { ScrollView, Text, TextInput, View } from "react-native";
 import Animated, { useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -269,12 +270,12 @@ export default function ExcerciseModal() {
       }}
     >
       <Modal.Container>
-        <AdjustTimerModal
+        <AdjustLbsModal
           onDone={() => {}}
           currentValue={0}
           openState={modalOpen}
           setClose={() => setModalOpen(false)}
-          title="Adjust rest timer"
+          title="Adjust increment"
           exerciseTitle="Barbell Bench Press"
           step={1}
           image={null}
