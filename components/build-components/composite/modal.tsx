@@ -1,24 +1,31 @@
-import { View } from "react-native";
+import { Modal as RNModal, View } from "react-native";
 import ModalForm, { ModalProps } from "../modal-form";
 
 type ModalContainerProps = {
   children?: React.ReactNode;
-  topIndent?: number;
+  visible: boolean;
 };
 
-function Container({ children, topIndent }: ModalContainerProps) {
+function Container({ children, visible }: ModalContainerProps) {
   return (
-    <View
-      style={{
-        position: "absolute",
-        width: "100%",
-        top: topIndent ?? "35%",
-        zIndex: 9999,
-        paddingHorizontal: 8,
-      }}
+    <RNModal
+      transparent
+      visible={visible}
+      animationType="fade"
+      statusBarTranslucent
     >
-      {children}
-    </View>
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          paddingHorizontal: 8,
+          backgroundColor: "rgba(0,0,0,0.5)",
+        }}
+      >
+        {children}
+      </View>
+    </RNModal>
   );
 }
 

@@ -4,7 +4,7 @@
     "slug": "gain-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/gain_icon.png",
     "scheme": "gainapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,

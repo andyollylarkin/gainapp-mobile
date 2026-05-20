@@ -63,7 +63,6 @@ export default function AdjustLbsModal(props: AdjustLbsModalProps) {
     <Modal.ModalBox openState={openState} setClose={setClose} title={title}>
       <View
         style={{
-          flex: 1,
           justifyContent: "center",
           alignItems: "center",
           gap: 24,
@@ -72,7 +71,6 @@ export default function AdjustLbsModal(props: AdjustLbsModalProps) {
         <View
           style={{
             padding: 12,
-            flex: 1,
             justifyContent: "center",
             alignItems: "center",
             borderRadius: 24,
@@ -108,7 +106,6 @@ export default function AdjustLbsModal(props: AdjustLbsModalProps) {
         </View>
         <View
           style={{
-            flex: 1,
             width: "100%",
             justifyContent: "space-between",
             alignItems: "center",
@@ -134,7 +131,6 @@ export default function AdjustLbsModal(props: AdjustLbsModalProps) {
           </ActionButton>
           <View
             style={{
-              flex: 1,
               justifyContent: "center",
               alignItems: "center",
               flexDirection: "row",
@@ -179,7 +175,10 @@ export default function AdjustLbsModal(props: AdjustLbsModalProps) {
           </ActionButton>
         </View>
         <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         >
           <Text
             style={{
@@ -194,7 +193,6 @@ export default function AdjustLbsModal(props: AdjustLbsModalProps) {
 
         <View
           style={{
-            flex: 1,
             justifyContent: "center",
             alignItems: "center",
             width: "100%",

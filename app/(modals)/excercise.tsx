@@ -1,8 +1,6 @@
 import ScaledPressable from "@/components/animated/scaled-pressable";
-import AdjustLbsModal from "@/components/build-components/composite/adjust-lbs-modal";
 import ExcerciseCustomKeyboard from "@/components/build-components/composite/excercise-custom-keyboard";
 import ExcerciseTray from "@/components/build-components/composite/excercise-tray";
-import Modal from "@/components/build-components/composite/modal";
 import ResetTimer from "@/components/build-components/reset-timer";
 import TextButton from "@/components/parts/text-button";
 import { Colors, typography } from "@/constants/theme";
@@ -268,21 +266,6 @@ export default function ExcerciseModal() {
         position: "relative",
       }}
     >
-      <Modal.Container>
-        <AdjustLbsModal
-          onDone={() => {}}
-          currentValue={0}
-          openState={modalOpen}
-          setClose={() => setModalOpen(false)}
-          title="Adjust increment"
-          exerciseTitle="Barbell Bench Press"
-          step={1}
-          image={null}
-          caption="Rest 1:30–2:00 min between sets for maximum muscle growth. Take your time if needed"
-          onDecrease={(val) => console.log("VAL DEC", val)}
-          onIncrease={(val) => console.log("VAL INC:", val)}
-        />
-      </Modal.Container>
       <Animated.View
         style={{
           position: "absolute",

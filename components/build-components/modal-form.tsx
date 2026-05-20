@@ -19,9 +19,9 @@ export default function ModalForm(props: ModalProps) {
       style={{
         borderRadius: 32,
         backgroundColor: Colors.general.color.darkTones.bgTray,
-        width: "100%",
+        alignSelf: "stretch",
         height: "auto",
-        flex: 1,
+        // flex: 1,
         paddingHorizontal: 12,
         paddingVertical: 20,
         gap: 24,
@@ -30,7 +30,7 @@ export default function ModalForm(props: ModalProps) {
       <View
         style={{
           paddingHorizontal: 8,
-          paddingBottom: 12, // 👈 отступ снизу для всей строки
+          paddingBottom: 12,
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",

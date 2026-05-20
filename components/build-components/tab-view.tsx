@@ -1,6 +1,11 @@
 import { Colors, typography } from "@/constants/theme";
 import { Children, type ReactElement, type ReactNode, useState } from "react";
 import { Pressable, Text, View } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  withDelay,
+  withTiming,
+} from "react-native-reanimated";
 
 export type TabViewItemProps = {
   "tab-name": string;
@@ -16,6 +21,21 @@ function TabViewItem(props: TabViewItemProps) {
 function TabView(props: { children: TabViewChild | TabViewChild[] }) {
   const tabs = Children.toArray(props.children) as TabViewChild[];
   const [activeTab, setActiveTab] = useState(0);
+  const styleHide = useAnimatedStyle(() => ({
+    borderColor: Colors.general.color.darkTones.bgMiddle,
+  }));
+  const styleShow = useAnimatedStyle(() => ({
+    borderColor: "transparent",
+  }));
+
+  styleHide.borderColor = withDelay(
+    200,
+    withTiming(Colors.general.color.darkTones.bgMiddle, { duration: 200 }),
+  );
+  styleShow.borderColor = withDelay(
+    500,
+    withTiming("transparent", { duration: 200 }),
+  );
 
   if (tabs.length === 0) {
     return null;
@@ -37,33 +57,36 @@ function TabView(props: { children: TabViewChild | TabViewChild[] }) {
           const isActive = index === activeTab;
 
           return (
-            <Pressable
-              key={index}
-              onPress={() => setActiveTab(index)}
-              style={{
-                flex: 1,
-                borderRadius: 999,
-                paddingHorizontal: 12,
-                paddingVertical: 10,
-                alignItems: "center",
-                backgroundColor: isActive
-                  ? Colors.general.color.darkTones.bgMiddle
-                  : "transparent",
-              }}
-            >
-              <Text
-                numberOfLines={1}
-                ellipsizeMode="tail"
-                style={{
-                  ...typography.mediumM,
-                  color: isActive
-                    ? Colors.general.color.grayTones.main
-                    : Colors.general.color.grayTones.muted30,
-                }}
+            <Animated.View key={index} style={{ flex: 1 }}>
+              <Pressable
+                onPress={() => setActiveTab(index)}
+                style={[
+                  {
+                    flex: 1,
+                    borderRadius: 999,
+                    paddingHorizontal: 12,
+                    paddingVertical: 10,
+                    alignItems: "center",
+                    backgroundColor: isActive
+                      ? Colors.general.color.darkTones.bgMiddle
+                      : "transparent",
+                  },
+                ]}
               >
-                {tab.props["tab-name"]}
-              </Text>
-            </Pressable>
+                <Text
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{
+                    ...typography.mediumM,
+                    color: isActive
+                      ? Colors.general.color.grayTones.main
+                      : Colors.general.color.grayTones.muted30,
+                  }}
+                >
+                  {tab.props["tab-name"]}
+                </Text>
+              </Pressable>
+            </Animated.View>
           );
         })}
       </View>

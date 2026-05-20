@@ -69,7 +69,6 @@ export default function AdjustTimerModal(props: AdjustTimerModalProps) {
     <Modal.ModalBox openState={openState} setClose={setClose} title={title}>
       <View
         style={{
-          flex: 1,
           justifyContent: "center",
           alignItems: "center",
           gap: 24,
@@ -78,7 +77,6 @@ export default function AdjustTimerModal(props: AdjustTimerModalProps) {
         <View
           style={{
             padding: 12,
-            flex: 1,
             justifyContent: "center",
             alignItems: "center",
             borderRadius: 24,
@@ -114,7 +112,6 @@ export default function AdjustTimerModal(props: AdjustTimerModalProps) {
         </View>
         <View
           style={{
-            flex: 1,
             width: "100%",
             justifyContent: "space-between",
             alignItems: "center",
@@ -165,7 +162,10 @@ export default function AdjustTimerModal(props: AdjustTimerModalProps) {
           </ActionButton>
         </View>
         <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         >
           <Text
             style={{
@@ -180,7 +180,6 @@ export default function AdjustTimerModal(props: AdjustTimerModalProps) {
 
         <View
           style={{
-            flex: 1,
             justifyContent: "center",
             alignItems: "center",
             width: "100%",
