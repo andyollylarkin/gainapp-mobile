@@ -392,7 +392,7 @@ function WorkoutContent({
           key={item.id}
           {...item}
           onClick={(id) => {
-            router.push(`/(modals)/excercise?id=${id}&day=${selectedDay.name}`);
+            router.push(`/(info_modals)/info?title=Barbell`);
           }}
           radiusTop={index === 0 ? 24 : 6}
           radiusBottom={index === len - 1 ? 24 : 6}

@@ -34,7 +34,6 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ExpoContextMenuProvider>
         <ThemeProvider value={appTheme}>
-          <View></View>
           <View style={{ flex: 1, position: "relative" }}>
             <Stack
               screenOptions={{
@@ -55,6 +54,13 @@ export default function RootLayout() {
                   presentation: "fullScreenModal",
                 }}
               />
+              <Stack.Screen
+                name="(info_modals)"
+                options={{
+                  headerShown: false,
+                  presentation: "fullScreenModal",
+                }}
+              ></Stack.Screen>
             </Stack>
           </View>
           <StatusBar style="light" translucent backgroundColor="transparent" />

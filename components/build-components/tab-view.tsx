@@ -9,13 +9,11 @@ export type TabViewItemProps = {
 
 type TabViewChild = ReactElement<TabViewItemProps>;
 
-export function TabViewItem(props: TabViewItemProps) {
+function TabViewItem(props: TabViewItemProps) {
   return props.children;
 }
 
-export default function TabView(props: {
-  children: TabViewChild | TabViewChild[];
-}) {
+function TabView(props: { children: TabViewChild | TabViewChild[] }) {
   const tabs = Children.toArray(props.children) as TabViewChild[];
   const [activeTab, setActiveTab] = useState(0);
 
@@ -69,8 +67,19 @@ export default function TabView(props: {
           );
         })}
       </View>
-
       <View>{tabs[activeTab]}</View>
     </View>
   );
 }
+
+interface TabViewInterface {
+  View: typeof TabView;
+  TabItem: typeof TabViewItem;
+}
+
+const TabViewComponent: TabViewInterface = {
+  TabItem: TabViewItem,
+  View: TabView,
+};
+
+export default TabViewComponent;

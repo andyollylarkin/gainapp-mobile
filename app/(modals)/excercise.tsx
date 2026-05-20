@@ -1,6 +1,5 @@
 import ScaledPressable from "@/components/animated/scaled-pressable";
 import AdjustLbsModal from "@/components/build-components/composite/adjust-lbs-modal";
-import AdjustTimerModal from "@/components/build-components/composite/adjust-timer-modal";
 import ExcerciseCustomKeyboard from "@/components/build-components/composite/excercise-custom-keyboard";
 import ExcerciseTray from "@/components/build-components/composite/excercise-tray";
 import Modal from "@/components/build-components/composite/modal";
