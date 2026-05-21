@@ -1,8 +1,16 @@
 import { Colors, typography } from "@/constants/theme";
-import { Children, type ReactElement, type ReactNode, useState } from "react";
+import {
+  Children,
+  type ReactElement,
+  type ReactNode,
+  useRef,
+  useState,
+} from "react";
 import { Pressable, Text, View } from "react-native";
 import Animated, {
+  runOnJS,
   useAnimatedStyle,
+  useSharedValue,
   withDelay,
   withTiming,
 } from "react-native-reanimated";
@@ -21,25 +29,28 @@ function TabViewItem(props: TabViewItemProps) {
 function TabView(props: { children: TabViewChild | TabViewChild[] }) {
   const tabs = Children.toArray(props.children) as TabViewChild[];
   const [activeTab, setActiveTab] = useState(0);
-  const styleHide = useAnimatedStyle(() => ({
-    borderColor: Colors.general.color.darkTones.bgMiddle,
-  }));
-  const styleShow = useAnimatedStyle(() => ({
-    borderColor: "transparent",
-  }));
+  const prevTab = useRef(0);
+  const translateX = useSharedValue(0);
+  const opacity = useSharedValue(1);
 
-  styleHide.borderColor = withDelay(
-    200,
-    withTiming(Colors.general.color.darkTones.bgMiddle, { duration: 200 }),
-  );
-  styleShow.borderColor = withDelay(
-    500,
-    withTiming("transparent", { duration: 200 }),
-  );
+  function switchTab(index: number) {
+    const direction = index > prevTab.current ? 1 : -1;
+    prevTab.current = index;
 
-  if (tabs.length === 0) {
-    return null;
+    opacity.value = withTiming(0, { duration: 100 }, () => {
+      translateX.value = 30 * direction;
+      runOnJS(setActiveTab)(index);
+      translateX.value = withTiming(0, { duration: 200 });
+      opacity.value = withTiming(1, { duration: 200 });
+    });
   }
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+    transform: [{ translateX: translateX.value }],
+  }));
+
+  if (tabs.length === 0) return null;
 
   return (
     <View>
@@ -55,23 +66,20 @@ function TabView(props: { children: TabViewChild | TabViewChild[] }) {
       >
         {tabs.map((tab, index) => {
           const isActive = index === activeTab;
-
           return (
             <Animated.View key={index} style={{ flex: 1 }}>
               <Pressable
-                onPress={() => setActiveTab(index)}
-                style={[
-                  {
-                    flex: 1,
-                    borderRadius: 999,
-                    paddingHorizontal: 12,
-                    paddingVertical: 10,
-                    alignItems: "center",
-                    backgroundColor: isActive
-                      ? Colors.general.color.darkTones.bgMiddle
-                      : "transparent",
-                  },
-                ]}
+                onPress={() => switchTab(index)}
+                style={{
+                  flex: 1,
+                  borderRadius: 999,
+                  paddingHorizontal: 12,
+                  paddingVertical: 10,
+                  alignItems: "center",
+                  backgroundColor: isActive
+                    ? Colors.general.color.darkTones.bgMiddle
+                    : "transparent",
+                }}
               >
                 <Text
                   numberOfLines={1}
@@ -90,7 +98,7 @@ function TabView(props: { children: TabViewChild | TabViewChild[] }) {
           );
         })}
       </View>
-      <View>{tabs[activeTab]}</View>
+      <Animated.View style={animatedStyle}>{tabs[activeTab]}</Animated.View>
     </View>
   );
 }
