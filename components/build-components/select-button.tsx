@@ -1,32 +1,32 @@
 import { Colors, typography } from "@/constants/theme";
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import ScaledPressable from "../animated/scaled-pressable";
 import ActionsSheet, { ActionsSheetItem } from "./actions-sheet";
-import { useEffect, useState } from "react";
 
 export default function SelectButton(props: {
   value: string | number;
   onPress: (val: string | number) => void;
   items: string[] | number[];
 }) {
-  if (!props.items || props.items.length === 0) {
-    props.items = [];
+  let items = props.items;
+  if (!props?.items || props?.items?.length === 0) {
+    items = [];
   }
 
-  const actions: ActionsSheetItem[] = props?.items?.map((val, _) => {
-    return {
-      text: val.toString(),
-      onPress: () => {
-        (props.onPress(val), setCurrentText(val));
-      },
-    };
-  });
+  const [currentText, setCurrentText] = useState<string | number>(props.value);
 
   useEffect(() => {
-    if (props.items.length > 0) setCurrentText(props.items[0].toString());
-  }, [props.items]);
+    if (items.length > 0) setCurrentText(items[0].toString());
+  }, [items]);
 
-  const [currentText, setCurrentText] = useState<string | number>(props.value);
+  const actions: ActionsSheetItem[] = items?.map((val) => ({
+    text: val.toString(),
+    onPress: () => {
+      props.onPress(val);
+      setCurrentText(val);
+    },
+  }));
 
   return (
     <View
@@ -36,7 +36,6 @@ export default function SelectButton(props: {
         alignSelf: "flex-start",
         paddingHorizontal: 24,
         paddingVertical: 8,
-        display: "flex",
         alignItems: "center",
         justifyContent: "center",
       }}
@@ -46,6 +45,8 @@ export default function SelectButton(props: {
         menuPaddingHorizontal={16}
         menuPaddingVertical={10}
         itemPaddingHorizontal={0}
+        forceBelow
+        maxHeight={500}
         trigger={({ openMenu, triggerRef }) => (
           <View ref={triggerRef}>
             <ScaledPressable scaleDuration={100} scaleTo={0.97}>

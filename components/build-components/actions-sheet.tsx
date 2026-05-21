@@ -16,6 +16,7 @@ import {
   Easing,
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -35,6 +36,8 @@ interface ActionsSheetProps {
   menuPaddingVertical?: number;
   itemPaddingHorizontal?: number;
   itemPaddingVertical?: number;
+  forceBelow?: boolean;
+  maxHeight?: number;
   trigger: (params: {
     openMenu: () => void;
     triggerRef: RefObject<View | null>;
@@ -53,6 +56,8 @@ export default function ActionsSheet({
   menuPaddingVertical = 10,
   itemPaddingHorizontal = 6,
   itemPaddingVertical = 10,
+  forceBelow = false,
+  maxHeight = 300,
 }: ActionsSheetProps) {
   const triggerRef = useRef<View>(null);
   const [open, setOpen] = useState(false);
@@ -146,24 +151,21 @@ export default function ActionsSheet({
   const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
   const horizontalPadding = 12;
   const verticalPadding = 16;
+
   const preferredX = anchor.x + anchor.width - MENU_WIDTH;
   const clampedX = Math.max(
     horizontalPadding,
     Math.min(preferredX, screenWidth - MENU_WIDTH - horizontalPadding),
   );
 
-  const showAbove =
-    anchor.y + anchor.height + MENU_TRIGGER_GAP + menuHeight >
-    screenHeight - verticalPadding;
-  const belowTop = anchor.y + anchor.height + MENU_TRIGGER_GAP;
+  const showAbove = forceBelow
+    ? false
+    : anchor.y + anchor.height + MENU_TRIGGER_GAP + menuHeight >
+      screenHeight - verticalPadding;
+
+  const belowTop = anchor.y + anchor.height + MENU_TRIGGER_GAP + 8;
   const aboveTop = anchor.y - menuHeight - MENU_TRIGGER_GAP;
-  const finalTop = Math.max(
-    verticalPadding,
-    Math.min(
-      showAbove ? aboveTop : belowTop,
-      screenHeight - menuHeight - verticalPadding,
-    ),
-  );
+  const finalTop = showAbove ? aboveTop : belowTop;
 
   return (
     <>
@@ -226,47 +228,53 @@ export default function ActionsSheet({
                   },
                 ]}
               >
-                {items.map((item, index) => {
-                  const Icon = item.icon;
-                  return (
-                    <View key={`${item.text}-${index}`}>
-                      <ScaledPressable scaleDuration={100} scaleTo={0.97}>
-                        <Pressable
-                          onPress={() => onActionPress(item)}
-                          style={[
-                            styles.menuItem,
-                            {
-                              paddingHorizontal: itemPaddingHorizontal,
-                              paddingVertical: itemPaddingVertical,
-                            },
-                          ]}
-                        >
-                          {Icon ? (
-                            <Icon
-                              width={24}
-                              thickness={1}
-                              height={24}
-                              color={
-                                item.destructive
-                                  ? "#FF383C"
-                                  : "rgba(255,255,255,0.92)"
-                              }
-                            />
-                          ) : null}
-                          <Text
+                <ScrollView
+                  style={{ maxHeight }}
+                  showsVerticalScrollIndicator={false}
+                  bounces={false}
+                >
+                  {items.map((item, index) => {
+                    const Icon = item.icon;
+                    return (
+                      <View key={`${item.text}-${index}`}>
+                        <ScaledPressable scaleDuration={100} scaleTo={0.97}>
+                          <Pressable
+                            onPress={() => onActionPress(item)}
                             style={[
-                              styles.menuItemText,
-                              item.destructive &&
-                                styles.menuItemTextDestructive,
+                              styles.menuItem,
+                              {
+                                paddingHorizontal: itemPaddingHorizontal,
+                                paddingVertical: itemPaddingVertical,
+                              },
                             ]}
                           >
-                            {item.text}
-                          </Text>
-                        </Pressable>
-                      </ScaledPressable>
-                    </View>
-                  );
-                })}
+                            {Icon ? (
+                              <Icon
+                                width={24}
+                                thickness={1}
+                                height={24}
+                                color={
+                                  item.destructive
+                                    ? "#FF383C"
+                                    : "rgba(255,255,255,0.92)"
+                                }
+                              />
+                            ) : null}
+                            <Text
+                              style={[
+                                styles.menuItemText,
+                                item.destructive &&
+                                  styles.menuItemTextDestructive,
+                              ]}
+                            >
+                              {item.text}
+                            </Text>
+                          </Pressable>
+                        </ScaledPressable>
+                      </View>
+                    );
+                  })}
+                </ScrollView>
               </View>
             </View>
           </Animated.View>
