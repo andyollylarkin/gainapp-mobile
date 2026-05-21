@@ -1,12 +1,9 @@
-import AdjustTimerModal from "@/components/build-components/composite/adjust-timer-modal";
 import GuideTab from "@/components/build-components/composite/info-tab/guide-tab";
 import InfoTab from "@/components/build-components/composite/info-tab/info-tab";
 import StatsTab from "@/components/build-components/composite/info-tab/stats-tab";
-import Modal from "@/components/build-components/composite/modal";
 import TabViewComponent from "@/components/build-components/tab-view";
 import { Colors, typography } from "@/constants/theme";
 import { useLocalSearchParams } from "expo-router";
-import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 

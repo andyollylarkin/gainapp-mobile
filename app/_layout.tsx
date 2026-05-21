@@ -61,6 +61,13 @@ export default function RootLayout() {
                   presentation: "fullScreenModal",
                 }}
               ></Stack.Screen>
+              <Stack.Screen
+                name="(add_ex_modals)"
+                options={{
+                  headerShown: false,
+                  presentation: "fullScreenModal",
+                }}
+              ></Stack.Screen>
             </Stack>
           </View>
           <StatusBar style="light" translucent backgroundColor="transparent" />

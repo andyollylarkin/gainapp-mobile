@@ -15,7 +15,7 @@ import { useExcerciseTimerStore } from "@/store/excercise-timer-store";
 import { Day, DayEnum } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
 import { RefObject, useEffect, useRef, useState } from "react";
-import { ScrollView, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import Animated, { useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -393,6 +393,22 @@ export default function ExcerciseModal() {
             />
           ))
         )}
+        <Pressable
+          onPress={() => {
+            router.push(`/(add_ex_modals)/add_ex?day=${requestDayEnum}`); // TODO: pass excercise name and details to the info modal
+          }}
+          style={{ alignItems: "center", marginTop: 12 }}
+        >
+          <Text
+            style={{
+              ...typography.mediumM,
+              color: Colors.general.color.grayTones.muted40,
+              textAlign: "center",
+            }}
+          >
+            Add exercise
+          </Text>
+        </Pressable>
       </ScrollView>
       <ExcerciseCustomKeyboard
         visible={isKeyboardVisible}

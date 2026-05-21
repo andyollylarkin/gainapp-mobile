@@ -159,11 +159,7 @@ export default function HomeScreen() {
         ) : overview?.isRestDay ? (
           <RestDayContent />
         ) : overview ? (
-          <WorkoutContent
-            items={items}
-            description={overview?.description}
-            selectedDay={currentDaySelected}
-          />
+          <WorkoutContent items={items} description={overview?.description} />
         ) : (
           <View style={{ flex: 1, width: "100%", justifyContent: "center" }}>
             <GenerateContent
@@ -201,22 +197,22 @@ export default function HomeScreen() {
           {overview && (
             <SliderButton<"Go to next workout" | "Start today's workout">
               color={
-                currentDay === currentDaySelected && !overview.isRestDay
+                currentDay.equals(currentDaySelected) && !overview.isRestDay
                   ? Colors.general.color.grayTones.main
                   : Colors.general.color.darkTones.bgLight
               }
               textColor={
-                currentDay === currentDaySelected && !overview.isRestDay
+                currentDay.equals(currentDaySelected) && !overview.isRestDay
                   ? Colors.general.color.darkTones.bg
                   : Colors.general.color.grayTones.main
               }
               text={
-                currentDay === currentDaySelected && !overview.isRestDay
+                currentDay.equals(currentDaySelected) && !overview.isRestDay
                   ? "Start today's workout"
                   : "Go to next workout"
               }
               onHoldEnd={() => {
-                if (currentDay === currentDaySelected && items.length > 0) {
+                if (currentDay.equals(currentDaySelected) && items.length > 0) {
                   router.push(
                     `/(modals)/excercise?id=${items[0].id}&day=${currentDaySelected.name}`,
                   );
@@ -234,7 +230,7 @@ export default function HomeScreen() {
                   width={20}
                   height={20}
                   color={
-                    currentDay === currentDaySelected && !overview.isRestDay
+                    currentDay.equals(currentDaySelected) && !overview.isRestDay
                       ? Colors.general.color.darkTones.bg
                       : Colors.general.color.grayTones.main
                   }
@@ -363,11 +359,9 @@ function RestDayContent() {
 function WorkoutContent({
   items,
   description,
-  selectedDay,
 }: {
   items: ExcerciseItemProps[];
   description?: WorkoutOverviewResponse["description"];
-  selectedDay: Day;
 }) {
   const len = items.length;
 

@@ -38,6 +38,10 @@ export class Day {
     return DAY_ORDER.map((day) => new Day(day));
   }
 
+  equals(other: Day): boolean {
+    return this.name === other.name;
+  }
+
   static map<T>(callback: (day: Day, index: number) => T): T[] {
     return Day.values().map(callback);
   }
