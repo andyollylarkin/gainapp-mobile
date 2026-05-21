@@ -11,8 +11,7 @@ import Animated, {
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
-  withDelay,
-  withTiming,
+  withTiming
 } from "react-native-reanimated";
 
 export type TabViewItemProps = {

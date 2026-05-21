@@ -1,22 +1,23 @@
 import IncreaseIcon from "@/components/icons/increase";
+import BackBodyView, { MuscleGroup } from "@/components/icons/muscle-body/back";
 import {
   FrontBodyProps,
   FrontBodyView,
 } from "@/components/icons/muscle-body/front";
 import TimerIcon from "@/components/icons/timer";
 import { Colors, typography } from "@/constants/theme";
-import { Image, Pressable, Text, View } from "react-native";
-import { Box, BoxList } from "./box";
-import Modal from "../modal";
-import AdjustTimerModal from "../adjust-timer-modal";
-import { useState } from "react";
-import AdjustLbsModal from "../adjust-lbs-modal";
 import { useExerciseSettings } from "@/store/excercise-settings-store";
+import { useState } from "react";
+import { Image, Pressable, Text, View } from "react-native";
+import AdjustLbsModal from "../adjust-lbs-modal";
+import AdjustTimerModal from "../adjust-timer-modal";
+import Modal from "../modal";
+import { Box, BoxList } from "./box";
 
 interface InfoTabProps {
   muscles: {
-    primary: keyof FrontBodyProps | null | undefined;
-    secondary: keyof FrontBodyProps | null | undefined;
+    primary: MuscleGroup;
+    secondary: MuscleGroup;
   };
   equipment: {
     imageUrl: string;
@@ -284,8 +285,12 @@ function BodyInfo(props: InfoTabProps) {
         }}
       >
         <FrontBodyView
-          partPrimary={props?.muscles?.primary}
-          partSecondary={props?.muscles?.secondary}
+          partPrimary={props?.muscles?.primary?.split(",") as MuscleGroup}
+          partSecondary={props?.muscles?.secondary?.split(",") as MuscleGroup}
+        />
+        <BackBodyView
+          partPrimary={props?.muscles?.primary?.split(",") as MuscleGroup}
+          partSecondary={props?.muscles?.secondary?.split(",") as MuscleGroup}
         />
       </View>
       <View

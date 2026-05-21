@@ -61,8 +61,8 @@ export default function InfoModal() {
               <TabViewComponent.TabItem tab-name="Info">
                 <InfoTab
                   muscles={{
-                    primary: "Biceps",
-                    secondary: "Chest",
+                    primary: "Abs,Biceps,Forearms",
+                    secondary: "ReadDelts",
                   }}
                   equipment={[
                     { imageUrl: "", name: "Barbell" },
