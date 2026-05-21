@@ -8,6 +8,7 @@ export type MuscleGroup =
   | FullMusclesKeys
   | `${FullMusclesKeys},${FullMusclesKeys}`
   | `${FullMusclesKeys},${FullMusclesKeys},${FullMusclesKeys}`
+  | `${FullMusclesKeys},${FullMusclesKeys},${FullMusclesKeys},${FullMusclesKeys}`
   | null
   | undefined;
 
