@@ -104,7 +104,10 @@ export default function SliderButton<T extends string>(
             color: props.textColor,
             ...typography.mediumM,
             textAlign: "center",
+            flexWrap: "nowrap", // ✅ запрещаем перенос
+            overflow: "hidden", // ✅ скрываем overflow
           }}
+          numberOfLines={1} // ✅ ограничиваем одной строкой (React Native)
         >
           {props.text}
         </Text>

@@ -1,28 +1,17 @@
-import CheckCircle from "@/components/build-components/check-circle";
+import List from "@/components/build-components/composite/add-exercises/item-list";
+import SelectButtons from "@/components/build-components/composite/add-exercises/select-buttons-row";
 import {
-  Box,
-  BoxList,
-} from "@/components/build-components/composite/info-tab/box";
+  Equipment,
+  Exercise,
+} from "@/components/build-components/composite/add-exercises/types";
 import SearchInput from "@/components/build-components/search-input";
 import SelectButton from "@/components/build-components/select-button";
-import { MuscleGroup } from "@/components/icons/muscle-body/back";
 import { Colors, typography } from "@/constants/theme";
 import { DayEnum } from "@/types";
 import { useLocalSearchParams } from "expo-router";
-import { useMemo, useState } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import { useState } from "react";
+import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-enum Equipment {
-  Barbell = "Barbell",
-  Dumbbell = "Dumbbell",
-  Machine = "Machine",
-  Bodyweight = "Bodyweight",
-  CableMachine = "Cable Machine",
-  SmithMachine = "Smith Machine",
-  CurlBar = "Curl Bar",
-  Other = "Other",
-}
 
 const MUSCLE_GROUPS = [
   "Abs",
@@ -127,6 +116,7 @@ export default function AddExerciseModal() {
         position: "relative",
       }}
     >
+      <SelectButtons selectedExercises={selectedExercises} />
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
@@ -134,6 +124,7 @@ export default function AddExerciseModal() {
           paddingTop: modalHeaderOverlayHeight,
           paddingBottom: 24 + insets.bottom,
           paddingHorizontal: 8,
+          position: "relative",
         }}
       >
         <View
@@ -213,165 +204,13 @@ export default function AddExerciseModal() {
           onExerciseSelect={(exercise) => {
             setSelectedExercises((curr) => [...curr, exercise]);
           }}
+          onExerciseDeselect={(exercise) => {
+            setSelectedExercises((curr) =>
+              curr.filter((ex) => ex.id !== exercise.id),
+            );
+          }}
         />
       </ScrollView>
     </View>
-  );
-}
-
-type Exercise = {
-  id: string | number;
-  imgUrl: string;
-  name: string;
-  equipment: Equipment;
-  category?: MuscleGroup;
-};
-
-function List(props: {
-  exercises: Exercise[];
-  onExerciseSelect: (exercise: Exercise) => void;
-}): React.ReactElement {
-  const grouped = useMemo(() => {
-    const sorted = [...props.exercises].sort((a, b) => {
-      const catA = a.category ?? "";
-      const catB = b.category ?? "";
-      return catA.localeCompare(catB);
-    });
-
-    const map = new Map<string, Exercise[]>();
-    for (const ex of sorted) {
-      const key = ex.category ?? "Other";
-      if (!map.has(key)) map.set(key, []);
-      map.get(key)!.push(ex);
-    }
-    return map;
-  }, [props.exercises]);
-
-  const [checked, setChecked] = useState<Set<string | number>>(new Set());
-
-  return (
-    <View style={{ flex: 1, width: "100%" }}>
-      {Array.from(grouped.entries()).map((entry) => {
-        const [category, exercises] = entry;
-        return (
-          <View key={category} style={{ marginBottom: 24 }}>
-            <Text
-              style={{
-                ...typography.mediumL,
-                color: Colors.general.color.grayTones.muted40,
-                paddingHorizontal: 12,
-                marginBottom: 12,
-              }}
-            >
-              {category}
-            </Text>
-            <BoxList>
-              {exercises.map((exercise) => (
-                <ItemBox
-                  checked={checked.has(exercise.id)}
-                  key={exercise.id}
-                  exercise={exercise}
-                  onCheckedChange={(isChecked) => {
-                    props.onExerciseSelect(exercise);
-                    setChecked((prev) => {
-                      const next = new Set(prev);
-                      if (isChecked) {
-                        next.add(exercise.id);
-                      } else {
-                        next.delete(exercise.id);
-                      }
-                      return next;
-                    });
-                  }}
-                />
-              ))}
-            </BoxList>
-          </View>
-        );
-      })}
-    </View>
-  );
-}
-
-function ItemBox(props: {
-  exercise: Exercise;
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-}): React.ReactElement {
-  return (
-    <Pressable onPress={() => props.onCheckedChange(!props.checked)}>
-      <Box key={props?.exercise?.id}>
-        <View
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            justifyContent: "flex-start",
-            gap: 12,
-            alignItems: "center",
-            paddingRight: 24,
-            paddingLeft: 12,
-          }}
-        >
-          {props.exercise.imgUrl ? (
-            <Image
-              src={props.exercise.imgUrl}
-              style={{
-                maxWidth: 56,
-                aspectRatio: "1",
-                borderRadius: 12,
-              }}
-            />
-          ) : (
-            <View
-              style={{
-                width: 56,
-                borderRadius: 12,
-                maxWidth: 56,
-                aspectRatio: "1",
-                backgroundColor: Colors.general.color.grayTones.muted40,
-              }}
-            />
-          )}
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
-            <View
-              style={{
-                flex: 1,
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "flex-start",
-                height: "100%",
-                gap: 6,
-              }}
-            >
-              <Text
-                style={{
-                  ...typography.mediumM,
-                  color: Colors.general.color.grayTones.main,
-                }}
-              >
-                {props.exercise.name}
-              </Text>
-              <Text
-                style={{
-                  ...typography.mediumM,
-                  color: Colors.general.color.grayTones.muted50,
-                }}
-              >
-                {props.exercise.equipment}
-              </Text>
-            </View>
-          </View>
-          <View>
-            <CheckCircle checked={props.checked} size={22} />
-          </View>
-        </View>
-      </Box>
-    </Pressable>
   );
 }
