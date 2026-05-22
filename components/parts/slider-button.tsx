@@ -22,6 +22,7 @@ export interface SliderButtonProps<T extends string> {
   onHoldEnd: () => void;
   color: ColorValue;
   holdOverlayColor: ColorValue;
+  disabled?: boolean;
   textColor: ColorValue;
   text: T;
   fullWidth?: boolean; // 👈 добавленный пропс
@@ -58,6 +59,7 @@ export default function SliderButton<T extends string>(
   const handleHoldStart = () => {
     props.onHoldStart();
     cancelAnimation(holdProgress);
+    if (props.disabled) return;
     holdProgress.value = withTiming(1, { duration: props.holdDuration });
     // shrink button
     scale.value = withTiming(0.98, { duration: 60 });
@@ -65,6 +67,7 @@ export default function SliderButton<T extends string>(
 
   const handleHoldEnd = useCallback(() => {
     // return to normal size
+    if (props.disabled) return;
     scale.value = withTiming(1, { duration: 60 });
     if (holdProgress.value < 1) {
       cancelAnimation(holdProgress);
@@ -104,10 +107,10 @@ export default function SliderButton<T extends string>(
             color: props.textColor,
             ...typography.mediumM,
             textAlign: "center",
-            flexWrap: "nowrap", // ✅ запрещаем перенос
-            overflow: "hidden", // ✅ скрываем overflow
+            flexWrap: "nowrap",
+            overflow: "hidden",
           }}
-          numberOfLines={1} // ✅ ограничиваем одной строкой (React Native)
+          numberOfLines={1}
         >
           {props.text}
         </Text>

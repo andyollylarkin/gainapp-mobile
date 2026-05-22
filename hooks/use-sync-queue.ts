@@ -1,12 +1,11 @@
 import { addExerciseSet } from "@/logic/api/add-exercise-set";
 import { deleteExerciseSet } from "@/logic/api/delete-exercise-set";
 import { completeExerciseSet } from "@/logic/api/update-exercise-set";
-import apiDataFetchAvailable from "@/utils/data-fetch-available";
-import { useEffect, useRef } from "react";
 import {
   PendingSyncActionType,
   useExcerciseStore,
 } from "@/store/excercise-store";
+import { useEffect, useRef } from "react";
 import useApiReached from "./use-api-reached";
 
 async function runAction(
@@ -27,10 +26,11 @@ async function runAction(
 
 function getServerSetId(result: unknown): string {
   const id = (result as { id?: unknown } | undefined)?.id;
+
   return typeof id === "string" ? id : "";
 }
 
-// Hook that periodically checks for pending sync actions and tries to execute them when the API is reachable
+// Hook that periodically checks for pending sync actions and tries to execute them when the API is reachable.
 export function useSyncQueue() {
   const pendingSyncActions = useExcerciseStore((s) => s.pendingSyncActions);
   const removePendingSyncAction = useExcerciseStore(

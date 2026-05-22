@@ -395,7 +395,9 @@ export default function ExcerciseModal() {
         )}
         <Pressable
           onPress={() => {
-            router.push(`/(add_ex_modals)/add_ex?day=${requestDayEnum}`); // TODO: pass excercise name and details to the info modal
+            router.push(
+              `/(add_ex_modals)/add_ex?day=${requestDayEnum}&trayId=${""}`,
+            ); // TODO: pass excercise name and details to the info modal
           }}
           style={{ alignItems: "center", marginTop: 12 }}
         >

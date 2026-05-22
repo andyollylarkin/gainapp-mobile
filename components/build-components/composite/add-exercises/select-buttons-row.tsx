@@ -29,12 +29,16 @@ export default function SelectButtons(props: {
           <SliderButton
             color={"#001D33"}
             textColor={Colors.general.color.blueTones.main}
+            fullWidth
             holdDuration={0}
-            holdOverlayColor={Colors.general.color.grayTones.main}
+            holdOverlayColor={"#001D33"}
             text={`Add superset (${selectedExercises.length})`}
             icon={<></>}
             onHoldStart={function (): void {}}
             onHoldEnd={function (): void {
+              if (selectedExercises.length === 0) {
+                return;
+              }
               props.onAddSuperset?.(selectedExercises);
             }}
           />
@@ -44,14 +48,21 @@ export default function SelectButtons(props: {
         <SliderButton
           color={Colors.general.color.grayTones.main}
           textColor={Colors.general.color.darkTones.bg}
+          fullWidth
           holdDuration={0}
+          disabled={selectedExercises.length === 0}
           holdOverlayColor={Colors.general.color.grayTones.main}
           text={`Add exercise ${selectedExercises.length > 0 ? `(${selectedExercises.length})` : ""}`}
           icon={<></>}
           onHoldStart={function (): void {
-            throw new Error("Function not implemented.");
+            if (selectedExercises.length === 0) {
+              return;
+            }
           }}
           onHoldEnd={function (): void {
+            if (selectedExercises.length === 0) {
+              return;
+            }
             props.onAddToWorkout?.(selectedExercises);
           }}
         />

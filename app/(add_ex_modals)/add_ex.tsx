@@ -95,7 +95,7 @@ const TEST_EX: Exercise[] = [
 ];
 
 export default function AddExerciseModal() {
-  const params: { day: DayEnum } = useLocalSearchParams();
+  const params: { day: DayEnum; trayId: string } = useLocalSearchParams();
   const insets = useSafeAreaInsets();
   const modalHeaderOverlayHeight = insets.top + 22;
   const [searchValue, setSearchValue] = useState<string>("");
