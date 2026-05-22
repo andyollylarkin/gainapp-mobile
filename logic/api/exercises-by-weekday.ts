@@ -39,6 +39,55 @@ export interface WorkoutByWeekdayResponse {
   trays: WorkoutWeekdayTray[];
 }
 
+function pickString(
+  source: Record<string, unknown>,
+  keys: string[],
+): string | undefined {
+  for (const key of keys) {
+    const value = source[key];
+    if (typeof value === "string" && value.length > 0) return value;
+  }
+  return undefined;
+}
+
+function normalizeWorkoutByWeekdayResponse(
+  raw: unknown,
+): WorkoutByWeekdayResponse {
+  const response = raw as {
+    description?: WorkoutOverviewDescription;
+    isRestDay?: boolean;
+    trays?: unknown;
+  };
+
+  const normalizedTrays: WorkoutWeekdayTray[] = Array.isArray(response.trays)
+    ? response.trays.map((trayRaw) => {
+        const trayObj = (trayRaw ?? {}) as Record<string, unknown>;
+
+        const id = pickString(trayObj, ["id", "trayId", "tray_id"]) ?? "";
+        const workoutDayExerciseId = pickString(trayObj, [
+          "workoutDayExerciseId",
+          "workout_day_exercise_id",
+          "workoutDayExerciseID",
+          "workoutDayExcerciseId",
+          "exerciseId",
+          "exercise_id",
+        ]);
+
+        return {
+          ...(trayObj as unknown as WorkoutWeekdayTray),
+          id,
+          workoutDayExerciseId,
+        };
+      })
+    : [];
+
+  return {
+    description: response.description as WorkoutOverviewDescription,
+    isRestDay: Boolean(response.isRestDay),
+    trays: normalizedTrays,
+  };
+}
+
 export async function getWorkoutByWeekday(
   day: Day,
 ): Promise<WorkoutByWeekdayResponse> {
@@ -57,5 +106,5 @@ export async function getWorkoutByWeekday(
 
   const js = await response.json();
 
-  return js as WorkoutByWeekdayResponse;
+  return normalizeWorkoutByWeekdayResponse(js);
 }

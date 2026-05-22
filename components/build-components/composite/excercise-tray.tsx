@@ -4,23 +4,18 @@ import TimerIcon from "@/components/icons/timer";
 import Accordion from "@/components/parts/accordion";
 import TextButton from "@/components/parts/text-button";
 import { Colors } from "@/constants/theme";
+import { WorkoutWeekdaySet } from "@/logic/api/exercises-by-weekday";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { DayEnum } from "@/types";
-import { debounce } from "@/utils/debounce";
-import React, { RefObject, useMemo } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-  unstable_batchedUpdates,
-} from "react-native";
+import * as Crypto from "expo-crypto";
+import React, { RefObject, useCallback, useMemo } from "react";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import ColumnDescription, {
   ColumnDescriptionProps,
 } from "../column-description";
 import ExcerciseTitle, { ExcerciseTitleProps } from "../excercise-title";
 import HiddenNote from "../hidden-note";
-import { SetItemProps } from "./set-item";
+import { SetItemProps, SetState } from "./set-item";
 import SwipeableSet from "./swipable-set";
 
 export interface ExcerciseTrayProps {
@@ -52,15 +47,9 @@ interface ExerciseRowProps {
   index: number;
   activeIndex: number;
   total: number;
-  trayId: string;
+  workoutDayExerciseId: string;
   disable?: boolean;
-  updateExcercise: (
-    id: string,
-    updatedExcercise: Partial<TrayExercise>,
-    trayId: string,
-  ) => void;
-  removeExcercise: (id: string, trayId: string) => void;
-  setTrayActiveIndex: (id: string, activeIndex: number) => void;
+  queueUpdateExerciseSetParams: (payload: Record<string, unknown>) => void;
   onExcerciseChange?: (excercise: SetItemProps, id: string) => void;
   onExcerciseComplete?: (
     excercise: SetItemProps,
@@ -68,12 +57,6 @@ interface ExerciseRowProps {
     { total, currentCompleted }: { total: number; currentCompleted: number },
   ) => void;
   onExcerciseRemove?: (excercise: SetItemProps, id: string) => void;
-  updateSetParams: (
-    f1: string,
-    f2: string | null,
-    id: string,
-    setNumber?: string | number,
-  ) => void;
   onInputFocus?: (
     obj: RefObject<TextInput | null>,
     value: string,
@@ -82,21 +65,42 @@ interface ExerciseRowProps {
   onInputBlur?: () => void;
 }
 
+function calculateActiveIndex(sets: WorkoutWeekdaySet[]): number {
+  let lastSequentialIndex = 0;
+  for (let i = 0; i < sets.length; i++) {
+    if (sets[i].completed) {
+      lastSequentialIndex = i + 1;
+    } else {
+      break;
+    }
+  }
+  return lastSequentialIndex;
+}
+
+function toSetItemProps(set: WorkoutWeekdaySet, index: number, trayId: string): TrayExercise {
+  return {
+    id: set.id,
+    history: set.history,
+    excerciseOrder: index === 0 ? "W" : index,
+    maxInputValue: 500,
+    initialState: (set.completed ? "done" : "progress") as SetState,
+    input: { field1: String(set.parameter1), field2: String(set.parameter2) },
+    trayId,
+  };
+}
+
 const ExerciseRow = React.memo(function ExerciseRow(props: ExerciseRowProps) {
   const {
     excercise,
     index,
     activeIndex,
     total,
-    trayId,
+    workoutDayExerciseId,
     disable,
-    updateExcercise,
-    removeExcercise,
-    setTrayActiveIndex,
+    queueUpdateExerciseSetParams,
     onExcerciseChange,
     onExcerciseComplete,
     onExcerciseRemove,
-    updateSetParams,
   } = props;
 
   return (
@@ -106,9 +110,7 @@ const ExerciseRow = React.memo(function ExerciseRow(props: ExerciseRowProps) {
         onInputBlur={props.onInputBlur}
         disabledSwipe={index === 0 || activeIndex > index}
         onSwipeEnd={() => {
-          onExcerciseChange?.(excercise, excercise.id);
           onExcerciseRemove?.(excercise, excercise.id);
-          removeExcercise(excercise.id, trayId);
         }}
         {...excercise}
         initialState={
@@ -125,12 +127,6 @@ const ExerciseRow = React.memo(function ExerciseRow(props: ExerciseRowProps) {
           if (initialState === "current" || initialState === "progress") {
             stateTransition("done");
             const nextCompleted = activeIndex + 1;
-
-            unstable_batchedUpdates(() => {
-              setTrayActiveIndex(trayId, nextCompleted);
-              updateExcercise(excercise.id, { initialState: "done" }, trayId);
-            });
-
             onExcerciseComplete?.(excercise, excercise.id, {
               total,
               currentCompleted: nextCompleted,
@@ -140,15 +136,12 @@ const ExerciseRow = React.memo(function ExerciseRow(props: ExerciseRowProps) {
           onExcerciseChange?.(excercise, excercise.id);
         }}
         onInputChange={(field1, field2) => {
-          updateExcercise(
-            excercise.id,
-            {
-              input: { field1, field2 },
-            },
-            trayId,
-          );
-          const setNumber = index + 1;
-          updateSetParams(field1, field2, trayId, setNumber);
+          queueUpdateExerciseSetParams({
+            workoutDayExerciseId,
+            parameter1: Number(field1),
+            parameter2: Number(field2 ?? 0),
+            setNumber: index + 1,
+          });
         }}
         excerciseOrder={index === 0 ? "W" : index}
       />
@@ -161,89 +154,51 @@ function areExerciseRowPropsEqual(
   next: ExerciseRowProps,
 ) {
   return (
-    prev.excercise === next.excercise &&
+    prev.excercise.id === next.excercise.id &&
+    prev.excercise.initialState === next.excercise.initialState &&
+    prev.excercise.input.field1 === next.excercise.input.field1 &&
+    prev.excercise.input.field2 === next.excercise.input.field2 &&
     prev.index === next.index &&
     prev.activeIndex === next.activeIndex &&
     prev.total === next.total &&
-    prev.trayId === next.trayId &&
+    prev.workoutDayExerciseId === next.workoutDayExerciseId &&
     prev.disable === next.disable
   );
 }
 
 export default function ExcerciseTray(props: ExcerciseTrayProps) {
   const [isExpanded, setIsExpanded] = React.useState<boolean>(true);
-  const {
-    excercises,
-    addExcercise,
-    updateExcercise,
-    removeExcercise,
-    setTrayActiveIndex,
-    getActiveIndex,
-    queueAddExerciseSet,
-    queueUpdateExerciseSetParams,
-  } = useExcerciseStore();
 
-  const createDefaultExcercise = (base: SetItemProps): SetItemProps => ({
-    ...base,
-    id: `exercise-${Date.now()}-${Math.random()}`,
-    initialState: "progress",
-  });
-
-  const fallbackSet: SetItemProps = {
-    id: "fallback",
-    history: {
-      firstText: 0,
-      secondText: 0,
-      delimiter: "x",
-    },
-    excerciseOrder: "W",
-    maxInputValue: 500,
-    initialState: "progress",
-    input: { field1: "0", field2: "0" },
-  };
-
-  const trayExcercises = excercises.filter(
-    (excercise) => excercise.trayId === props.id,
+  const tray = useExcerciseStore(
+    useCallback(
+      (state) =>
+        state.workoutByWeekdayByDay[props.day]?.trays.find(
+          (t) => t.id === props.id,
+        ) ?? null,
+      [props.day, props.id],
+    ),
   );
-  const activeIndex = getActiveIndex(props.id);
-  const totalExercises = trayExcercises.length;
 
-  const updateSetParams = useMemo<
-    (
-      f1: string,
-      f2: string | null,
-      id: string,
-      setNumber?: string | number,
-    ) => void
-  >(() => {
-    return debounce(
-      async (
-        f1: string,
-        f2: string | null,
-        id: string,
-        setNumber?: string | number,
-      ) => {
-        if (setNumber === "W") setNumber = 1;
+  const queueAddExerciseSet = useExcerciseStore(
+    (s) => s.queueAddExerciseSet,
+  );
+  const queueUpdateExerciseSetParams = useExcerciseStore(
+    (s) => s.queueUpdateExerciseSetParams,
+  );
 
-        queueUpdateExerciseSetParams({
-          workoutDayExerciseId: id,
-          parameter1: Number(f1),
-          parameter2: Number(f2 ?? 0),
-          setNumber: Number(setNumber),
-        });
-      },
-      800,
-    ) as (
-      f1: string,
-      f2: string | null,
-      id: string,
-      setNumber?: string | number,
-    ) => void;
-  }, [queueUpdateExerciseSetParams]);
+  const sets = useMemo(() => tray?.sets ?? [], [tray]);
+  const activeIndex = calculateActiveIndex(sets);
+  const totalExercises = sets.length;
+  const workoutDayExerciseId = tray?.workoutDayExerciseId ?? props.id;
+
+  const setItems = useMemo(
+    () => sets.map((set, index) => toSetItemProps(set, index, props.id)),
+    [sets, props.id],
+  );
 
   const exerciseRows = useMemo(
     () =>
-      trayExcercises.map((excercise, index) => (
+      setItems.map((excercise, index) => (
         <ExerciseRow
           onInputFocus={props.onInputFocus}
           onInputBlur={props.onInputBlur}
@@ -252,30 +207,24 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
           index={index}
           activeIndex={activeIndex}
           total={totalExercises}
-          trayId={props.id}
+          workoutDayExerciseId={workoutDayExerciseId}
           disable={props.disable}
-          updateExcercise={updateExcercise}
-          removeExcercise={removeExcercise}
-          setTrayActiveIndex={setTrayActiveIndex}
+          queueUpdateExerciseSetParams={queueUpdateExerciseSetParams}
           onExcerciseChange={props.onExcerciseChange}
           onExcerciseComplete={props.onExcerciseComplete}
           onExcerciseRemove={props.onExcerciseRemove}
-          updateSetParams={updateSetParams}
         />
       )),
     [
-      trayExcercises,
+      setItems,
       activeIndex,
       totalExercises,
-      props.id,
+      workoutDayExerciseId,
       props.disable,
       props.onExcerciseChange,
       props.onExcerciseComplete,
       props.onExcerciseRemove,
-      updateExcercise,
-      removeExcercise,
-      setTrayActiveIndex,
-      updateSetParams,
+      queueUpdateExerciseSetParams,
       props.onInputFocus,
       props.onInputBlur,
     ],
@@ -288,7 +237,12 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
           setIsExpanded((current) => !current);
         }}
       >
-        <ExcerciseTitle {...props.title} id={props.id} expanded={isExpanded} day={props.day} />
+        <ExcerciseTitle
+          {...props.title}
+          id={props.id}
+          expanded={isExpanded}
+          day={props.day}
+        />
       </Pressable>
       <Accordion isExpanded={isExpanded}>
         <View
@@ -323,31 +277,17 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
               <TextButton
                 text={"Add Set"}
                 onPressIn={() => {
-                  const previousSet =
-                    trayExcercises[trayExcercises.length - 1] ?? fallbackSet;
-                  const previousInput = {
-                    field1: previousSet.input.field1 ?? "0",
-                    field2: previousSet.input.field2 ?? "0",
-                  };
-                  const parameter1 = Number(previousInput.field1) || 0;
-                  const parameter2 = Number(previousInput.field2) || 0;
-
-                  const nextExcercise = {
-                    ...createDefaultExcercise(previousSet),
-                    input: previousInput,
-                    trayId: props.id,
-                  };
-                  addExcercise(nextExcercise, props.id);
+                  const lastSet = sets[sets.length - 1];
+                  const parameter1 = lastSet?.parameter1 ?? 0;
+                  const parameter2 = lastSet?.parameter2 ?? 0;
+                  const newSetId = Crypto.randomUUID();
 
                   queueAddExerciseSet({
-                    workoutDayExerciseId: props.id,
-                    id: nextExcercise.id,
+                    workoutDayExerciseId,
+                    id: newSetId,
                     parameter1,
                     parameter2,
-                    metrics: {
-                      field1: parameter1,
-                      field2: parameter2,
-                    },
+                    metrics: { field1: parameter1, field2: parameter2 },
                     completed: false,
                     restSecondsActual: null,
                   });

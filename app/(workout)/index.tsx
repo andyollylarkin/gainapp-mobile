@@ -19,7 +19,7 @@ import { generateAiWorkout } from "@/logic/api/generate-ai";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { Day } from "@/types";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -41,6 +41,13 @@ export default function HomeScreen() {
     setWorkoutOverviewForDay,
     setWorkoutByWeekdayForDay,
   } = useExcerciseStore();
+
+  const workoutByWeekday = useExcerciseStore(
+    useCallback(
+      (state) => state.workoutByWeekdayByDay[currentDaySelected.name] ?? null,
+      [currentDaySelected.name],
+    ),
+  );
 
   useSyncQueue();
 
@@ -69,7 +76,10 @@ export default function HomeScreen() {
           void getWorkoutByWeekday(currentDaySelected)
             .then((weekdayWorkout) => {
               if (!isActive) return;
-              setWorkoutByWeekdayForDay(currentDaySelected.name, weekdayWorkout);
+              setWorkoutByWeekdayForDay(
+                currentDaySelected.name,
+                weekdayWorkout,
+              );
             })
             .catch((weekdayError) => {
               if (!isActive) return;
@@ -97,14 +107,19 @@ export default function HomeScreen() {
     isStoreHydrated,
   ]);
 
-  const items: ExcerciseItemProps[] = (overview?.exercises ?? []).map(
-    (exercise) => ({
-      excerciseName: exercise.excerciseName,
-      reps: exercise.reps,
-      sets: exercise.sets,
-      id: exercise.id,
-    }),
-  );
+  const items: ExcerciseItemProps[] = workoutByWeekday
+    ? workoutByWeekday.trays.map((tray) => ({
+        excerciseName: tray.title.title,
+        sets: tray.sets.length,
+        reps: tray.sets[0]?.parameter2 ?? 0,
+        id: tray.id,
+      }))
+    : (overview?.exercises ?? []).map((exercise) => ({
+        excerciseName: exercise.excerciseName,
+        reps: exercise.reps,
+        sets: exercise.sets,
+        id: exercise.id,
+      }));
 
   const snapOffsets = items.map(
     (_, index) => index * snapStep + (contentTopOffset - 8),
@@ -223,7 +238,7 @@ export default function HomeScreen() {
                   : "Go to next workout"
               }
               onHoldEnd={() => {
-                if (!currentDay.equals(currentDaySelected) && items.length > 0) {
+                if (currentDay.equals(currentDaySelected) && items.length > 0) {
                   router.push(
                     `/(modals)/excercise?id=${items[0].id}&day=${currentDaySelected.name}`,
                   );
@@ -387,7 +402,7 @@ function WorkoutContent({
       >
         <WorkoutPageDesc
           workoutName={description?.workoutName ?? "Workout"}
-          excercisesCount={description?.excercisesCount ?? items.length}
+          excercisesCount={items.length}
           durationMinutes={description?.durationMinutes ?? 0}
         />
       </View>

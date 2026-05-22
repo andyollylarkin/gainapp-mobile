@@ -1,4 +1,3 @@
-import { SetItemProps } from "@/components/build-components/composite/set-item";
 import { WorkoutOverviewResponse } from "@/logic/api/ex-description";
 import {
   WorkoutByWeekdayResponse,
@@ -8,8 +7,6 @@ import { DayEnum } from "@/types";
 import { safeStateStorage } from "@/utils/safe-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-
-type StoredProps = SetItemProps & { trayId: string };
 
 export type PendingSyncActionType =
   | "addExerciseSet"
@@ -166,25 +163,9 @@ function patchWorkoutsDeleteSet(
 }
 
 interface ExcerciseStore {
-  excercises: Omit<StoredProps, "activeIndex">[];
-  trayActiveIndex: Record<string, number>;
   workoutOverviewByDay: Partial<Record<DayEnum, WorkoutOverviewResponse>>;
   workoutByWeekdayByDay: Partial<Record<DayEnum, WorkoutByWeekdayResponse>>;
   pendingSyncActions: PendingSyncAction[];
-  addExcercise: (
-    excercise: Omit<StoredProps, "activeIndex">,
-    trayId: string,
-  ) => void;
-  updateExcercise: (
-    id: string,
-    updatedExcercise: Partial<StoredProps>,
-    trayId: string,
-  ) => void;
-  removeExcercise: (id: string, trayId: string) => void;
-  setTrayActiveIndex: (id: string, activeIndex: number) => void;
-  getActiveIndex: (id: string) => number;
-  getTotalExcercises: (trayId: string) => number;
-  getCompletedExcercises: (trayId: string) => number;
   setWorkoutOverviewForDay: (
     day: DayEnum,
     overview: WorkoutOverviewResponse,
@@ -205,14 +186,6 @@ interface ExcerciseStore {
   queueDeleteExerciseSet: (payload: { id: string }) => void;
   removePendingSyncAction: (id: string) => void;
   clearPendingSyncActions: () => void;
-  addExerciseTray: (
-    day: DayEnum,
-    exercises: {
-      id: string | number;
-      name: string;
-      equipment: string;
-    }[],
-  ) => void;
   addExerciseTrayWithId: (
     day: DayEnum,
     exercises: {
@@ -224,69 +197,45 @@ interface ExcerciseStore {
   ) => void;
   queueAddExercise: (
     day: DayEnum,
-    exercise: { id: string | number; name: string; equipment: string; category?: string },
+    exercise: {
+      id: string | number;
+      name: string;
+      equipment: string;
+      category?: string;
+    },
   ) => void;
   queueAddSuperset: (
     day: DayEnum,
-    exercises: { id: string | number; name: string; equipment: string; category?: string }[],
+    exercises: {
+      id: string | number;
+      name: string;
+      equipment: string;
+      category?: string;
+    }[],
   ) => void;
-  queueDeleteExercise: (day: DayEnum, trayId: string) => void;
+  queueDeleteExercise: (
+    day: DayEnum,
+    trayId: string,
+    workoutDayExerciseId?: string,
+  ) => void;
   replaceSetId: (
     tempId: string,
     serverId: string,
     currentActionId: string,
   ) => void;
-  replaceTrayId: (tempId: string, serverId: string) => void;
+  replaceTrayId: (
+    tempId: string,
+    trayId: string,
+    workoutDayExerciseId?: string,
+  ) => void;
 }
 
 export const useExcerciseStore = create<ExcerciseStore>()(
   persist(
     (set, get) => ({
-      excercises: [],
-      trayActiveIndex: {},
       workoutOverviewByDay: {},
       workoutByWeekdayByDay: {},
       pendingSyncActions: [],
-
-      addExcercise: (excercise, trayId) =>
-        set((state) => ({
-          excercises: state.excercises.some(
-            (item) => item.id === excercise.id && item.trayId === trayId,
-          )
-            ? state.excercises
-            : [...state.excercises, { ...excercise, trayId }],
-        })),
-
-      updateExcercise: (id, updatedExcercise, trayId) =>
-        set((state) => ({
-          excercises: state.excercises.map((excercise) =>
-            excercise.id === id && excercise.trayId === trayId
-              ? { ...excercise, ...updatedExcercise }
-              : excercise,
-          ),
-        })),
-
-      removeExcercise: (id, trayId) =>
-        set((state) => ({
-          excercises: state.excercises.filter(
-            (excercise) => excercise.id !== id || excercise.trayId !== trayId,
-          ),
-        })),
-
-      setTrayActiveIndex: (id, activeIndex) =>
-        set((state) => ({
-          trayActiveIndex: { ...state.trayActiveIndex, [id]: activeIndex },
-        })),
-
-      getActiveIndex: (id) => get().trayActiveIndex[id] || 0,
-
-      getTotalExcercises: (trayId) =>
-        get().excercises.filter((val) => val.trayId === trayId).length,
-
-      getCompletedExcercises: (trayId) =>
-        get().excercises.filter(
-          (val) => val.trayId === trayId && val.initialState === "done",
-        ).length,
 
       setWorkoutOverviewForDay: (day, overview) =>
         set((state) => ({
@@ -438,90 +387,10 @@ export const useExcerciseStore = create<ExcerciseStore>()(
         }));
       },
 
-      addExerciseTray: (day, exercises) => {
-        const newTrays: WorkoutWeekdayTray[] = exercises.map((ex) => {
-          const trayId = `tray-${Date.now()}-${Math.random()}-${ex.id}`;
-          const warmupSetId = `exercise-${Date.now()}-${Math.random()}`;
-
-          return {
-            id: trayId,
-            workoutDayExerciseId: trayId,
-            title: {
-              type: String(ex.equipment),
-              title: String(ex.name),
-            },
-            description: {
-              items: ["Set", "Previous", "kg", "Reps"] as ["Set", "Previous", "kg", "Reps"],
-            },
-            history: {
-              firstText: 0,
-              secondText: 0,
-              delimiter: "x",
-            },
-            sets: [
-              {
-                id: warmupSetId,
-                setNumber: 1,
-                parameter1: 0,
-                parameter2: 0,
-                completed: false,
-                history: {
-                  firstText: 0,
-                  secondText: 0,
-                  delimiter: "x",
-                },
-              },
-            ],
-          };
-        });
-
-        set((state) => {
-          const existing = state.workoutByWeekdayByDay[day];
-          const updatedWorkout: WorkoutByWeekdayResponse = existing
-            ? {
-                ...existing,
-                trays: [...existing.trays, ...newTrays],
-              }
-            : {
-                description: {
-                  workoutName: "Workout",
-                  excercisesCount: newTrays.length,
-                  durationMinutes: 0,
-                },
-                isRestDay: false,
-                trays: newTrays,
-              };
-
-          // Also add warmup sets to the excercises array so the tray renders them
-          const newExcercises: Omit<StoredProps, "activeIndex">[] = newTrays.map(
-            (tray) => ({
-              id: tray.sets[0].id,
-              history: {
-                firstText: 0,
-                secondText: 0,
-                delimiter: "x",
-              },
-              excerciseOrder: "W" as const,
-              maxInputValue: 500,
-              initialState: "progress" as const,
-              input: { field1: "0", field2: "0" },
-              trayId: tray.id,
-            }),
-          );
-
-          return {
-            workoutByWeekdayByDay: {
-              ...state.workoutByWeekdayByDay,
-              [day]: updatedWorkout,
-            },
-            excercises: [...state.excercises, ...newExcercises],
-          };
-        });
-      },
-
       addExerciseTrayWithId: (day, exercises, trayIds) => {
         const newTrays: WorkoutWeekdayTray[] = exercises.map((ex, idx) => {
-          const trayId = trayIds[idx] ?? `tray-${Date.now()}-${Math.random()}-${ex.id}`;
+          const trayId =
+            trayIds[idx] ?? `tray-${Date.now()}-${Math.random()}-${ex.id}`;
           const warmupSetId = `exercise-${Date.now()}-${Math.random()}`;
 
           return {
@@ -532,7 +401,12 @@ export const useExcerciseStore = create<ExcerciseStore>()(
               title: String(ex.name),
             },
             description: {
-              items: ["Set", "Previous", "kg", "Reps"] as ["Set", "Previous", "kg", "Reps"],
+              items: ["Set", "Previous", "kg", "Reps"] as [
+                "Set",
+                "Previous",
+                "kg",
+                "Reps",
+              ],
             },
             history: {
               firstText: 0,
@@ -573,35 +447,16 @@ export const useExcerciseStore = create<ExcerciseStore>()(
                 trays: newTrays,
               };
 
-          // Also add warmup sets to the excercises array so the tray renders them
-          const newExcercises: Omit<StoredProps, "activeIndex">[] = newTrays.map(
-            (tray) => ({
-              id: tray.sets[0].id,
-              history: {
-                firstText: 0,
-                secondText: 0,
-                delimiter: "x",
-              },
-              excerciseOrder: "W" as const,
-              maxInputValue: 500,
-              initialState: "progress" as const,
-              input: { field1: "0", field2: "0" },
-              trayId: tray.id,
-            }),
-          );
-
           return {
             workoutByWeekdayByDay: {
               ...state.workoutByWeekdayByDay,
               [day]: updatedWorkout,
             },
-            excercises: [...state.excercises, ...newExcercises],
           };
         });
       },
 
       queueAddExercise: (day, exercise) => {
-        // Generate temp trayId first so we can track it for replacement
         const tempTrayId = `tray-${Date.now()}-${Math.random()}-${exercise.id}`;
         get().enqueueSyncAction("addExercise", {
           day,
@@ -615,7 +470,6 @@ export const useExcerciseStore = create<ExcerciseStore>()(
       },
 
       queueAddSuperset: (day, exercises) => {
-        // Generate temp trayIds first so we can track them for replacement
         const tempTrayIds = exercises.map(
           (ex) => `tray-${Date.now()}-${Math.random()}-${ex.id}`,
         );
@@ -632,38 +486,36 @@ export const useExcerciseStore = create<ExcerciseStore>()(
         get().addExerciseTrayWithId(day, exercises, tempTrayIds);
       },
 
-      queueDeleteExercise: (day, trayId) => {
+      queueDeleteExercise: (day, trayId, workoutDayExerciseId) => {
+        const resolvedWorkoutDayExerciseId =
+          workoutDayExerciseId ||
+          get()
+            .getWorkoutByWeekdayForDay(day)
+            ?.trays.find((t) => t.id === trayId)?.workoutDayExerciseId ||
+          trayId;
+
         get().enqueueSyncAction("deleteExercise", {
           day,
-          trayId,
+          trayId: resolvedWorkoutDayExerciseId,
         });
         set((state) => {
           const workout = state.workoutByWeekdayByDay[day];
           if (!workout) return state;
-
-          const updatedTrays = workout.trays.filter((t) => t.id !== trayId);
-          const updatedExcercises = state.excercises.filter(
-            (e) => e.trayId !== trayId,
-          );
 
           return {
             workoutByWeekdayByDay: {
               ...state.workoutByWeekdayByDay,
               [day]: {
                 ...workout,
-                trays: updatedTrays,
+                trays: workout.trays.filter((t) => t.id !== trayId),
               },
             },
-            excercises: updatedExcercises,
           };
         });
       },
 
       replaceSetId: (tempId, serverId, currentActionId) =>
         set((state) => ({
-          excercises: state.excercises.map((e) =>
-            e.id === tempId ? { ...e, id: serverId } : e,
-          ),
           workoutByWeekdayByDay: Object.fromEntries(
             Object.entries(state.workoutByWeekdayByDay).map(
               ([day, workout]) => [
@@ -702,11 +554,8 @@ export const useExcerciseStore = create<ExcerciseStore>()(
           ),
         })),
 
-      replaceTrayId: (tempId, serverId) =>
+      replaceTrayId: (tempId, trayId, workoutDayExerciseId) =>
         set((state) => ({
-          excercises: state.excercises.map((e) =>
-            e.trayId === tempId ? { ...e, trayId: serverId } : e,
-          ),
           workoutByWeekdayByDay: Object.fromEntries(
             Object.entries(state.workoutByWeekdayByDay).map(
               ([day, workout]) => [
@@ -716,7 +565,14 @@ export const useExcerciseStore = create<ExcerciseStore>()(
                       ...workout,
                       trays: workout.trays.map((tray) =>
                         tray.id === tempId
-                          ? { ...tray, id: serverId, workoutDayExerciseId: serverId }
+                          ? {
+                              ...tray,
+                              id: trayId,
+                              workoutDayExerciseId:
+                                workoutDayExerciseId ??
+                                tray.workoutDayExerciseId ??
+                                trayId,
+                            }
                           : tray,
                       ),
                     }
@@ -728,9 +584,9 @@ export const useExcerciseStore = create<ExcerciseStore>()(
             ...action,
             payload: (() => {
               const next = { ...action.payload };
-              if (next.trayId === tempId) next.trayId = serverId;
+              if (next.trayId === tempId) next.trayId = trayId;
               if (next.workoutDayExerciseId === tempId) {
-                next.workoutDayExerciseId = serverId;
+                next.workoutDayExerciseId = workoutDayExerciseId ?? trayId;
               }
               return next;
             })(),
@@ -747,11 +603,9 @@ export const useExcerciseStore = create<ExcerciseStore>()(
       clearPendingSyncActions: () => set({ pendingSyncActions: [] }),
     }),
     {
-      name: "excercise-store-v9",
+      name: "excercise-store-v1",
       storage: createJSONStorage(() => safeStateStorage),
       partialize: (state: ExcerciseStore) => ({
-        excercises: state.excercises,
-        trayActiveIndex: state.trayActiveIndex,
         workoutOverviewByDay: state.workoutOverviewByDay,
         workoutByWeekdayByDay: state.workoutByWeekdayByDay,
         pendingSyncActions: state.pendingSyncActions,

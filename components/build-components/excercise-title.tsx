@@ -34,10 +34,16 @@ export interface ExcerciseTitleProps {
   icon2Click: () => void;
   expanded?: boolean;
   id: string;
+  workoutDayExerciseId?: string;
   day: DayEnum;
 }
 
-function ContextMenu(props: { id: string; iconsColor: string; day: DayEnum }) {
+function ContextMenu(props: {
+  id: string;
+  workoutDayExerciseId?: string;
+  iconsColor: string;
+  day: DayEnum;
+}) {
   const contextMenuNote = useContextMenu<string, TextInput>(props.id);
   const queueDeleteExercise = useExcerciseStore(
     (state) => state.queueDeleteExercise,
@@ -78,7 +84,7 @@ function ContextMenu(props: { id: string; iconsColor: string; day: DayEnum }) {
       destructive: true,
       onPress: () => {
         console.log("[EXCERCISE_TITLE] Deleting exercise tray:", props.id);
-        queueDeleteExercise(props.day, props.id);
+        queueDeleteExercise(props.day, props.id, props.workoutDayExerciseId);
       },
     },
   ];
@@ -179,7 +185,12 @@ export default function ExcerciseTitle(props: ExcerciseTitleProps) {
               onPressIn={props.icon1Click}
             />
           </ScaledPressable>
-          <ContextMenu id={props.id} iconsColor={props.iconsColor} day={props.day} />
+          <ContextMenu
+            id={props.id}
+            workoutDayExerciseId={props.workoutDayExerciseId}
+            iconsColor={props.iconsColor}
+            day={props.day}
+          />
         </Animated.View>
       </View>
     </View>

@@ -6,10 +6,7 @@ import TextButton from "@/components/parts/text-button";
 import { Colors, typography } from "@/constants/theme";
 import useCurrentDay from "@/hooks/use-current-day";
 import { useStoreHydrated } from "@/hooks/use-store-hydrated";
-import {
-  getWorkoutByWeekday,
-  WorkoutWeekdaySet
-} from "@/logic/api/exercises-by-weekday";
+import { getWorkoutByWeekday } from "@/logic/api/exercises-by-weekday";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { useExcerciseTimerStore } from "@/store/excercise-timer-store";
 import { Day, DayEnum } from "@/types";
@@ -23,20 +20,6 @@ interface TopDescriptionProps {
   name: string;
   time: string;
   onTimePress?: () => void;
-}
-
-function calculateActiveIndex(sets: WorkoutWeekdaySet[]): number {
-  let lastSequentialIndex = 0;
-
-  for (let i = 0; i < sets.length; i++) {
-    if (sets[i].completed) {
-      lastSequentialIndex = i + 1;
-    } else {
-      break;
-    }
-  }
-
-  return lastSequentialIndex;
 }
 
 function TopDescription({
@@ -226,55 +209,12 @@ export default function ExcerciseModal() {
     return () => {
       isActive = false;
     };
-  }, [requestDayName, requestDayEnum, setWorkoutByWeekdayForDay, isStoreHydrated]);
-
-  const hasInitialized = useRef(false);
-
-  // Reset hasInitialized when day changes
-  useEffect(() => {
-    hasInitialized.current = false;
-  }, [requestDayEnum]);
-
-  useEffect(() => {
-    console.log("[EXERCISE_MODAL] workoutData effect fired, trays:", workoutData?.trays?.length, "isRestDay:", workoutData?.isRestDay);
-    if (!workoutData || workoutData.isRestDay || hasInitialized.current) {
-      return;
-    }
-
-    hasInitialized.current = true;
-
-    const { addExcercise, setTrayActiveIndex } = useExcerciseStore.getState();
-
-    useExcerciseStore.setState({ excercises: [], trayActiveIndex: {} });
-
-    workoutData.trays.forEach((tray) => {
-      tray.sets.forEach((set) => {
-        addExcercise(
-          {
-            id: set.id,
-            history: {
-              firstText: set.history.firstText,
-              secondText: set.history.secondText,
-              delimiter: set.history.delimiter,
-            },
-            excerciseOrder: "W",
-            maxInputValue: 500,
-            initialState: set.completed ? "done" : "progress",
-            input: {
-              field1: String(set.parameter1),
-              field2: String(set.parameter2),
-            },
-            trayId: tray.id,
-          },
-          tray.id,
-        );
-      });
-
-      setTrayActiveIndex(tray.id, calculateActiveIndex(tray.sets));
-    });
-  }, [workoutData]);
-
-  const [modalOpen, setModalOpen] = useState<boolean>(true);
+  }, [
+    requestDayName,
+    requestDayEnum,
+    setWorkoutByWeekdayForDay,
+    isStoreHydrated,
+  ]);
 
   return (
     <View
@@ -384,6 +324,7 @@ export default function ExcerciseModal() {
                 expanded: true,
                 title: tray.title.title,
                 id: tray.id,
+                workoutDayExerciseId: tray.workoutDayExerciseId,
                 day: requestDayEnum,
               }}
               onExcerciseChange={(_, id) => {
