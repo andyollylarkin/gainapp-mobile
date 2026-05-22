@@ -3,7 +3,6 @@ import ExcerciseItem, {
 } from "@/components/build-components/composite/excercise-item";
 import WorkoutPageDesc from "@/components/build-components/composite/workoutpage-desc";
 import DayPicker from "@/components/build-components/day-picker";
-import GainLogo from "@/components/icons/gain-logo";
 import PlayIcon from "@/components/icons/play";
 import SliderButton from "@/components/parts/slider-button";
 import { Colors, typography } from "@/constants/theme";
@@ -14,9 +13,8 @@ import {
   getWorkoutOverviewByDay,
   WorkoutOverviewResponse,
 } from "@/logic/api/ex-description";
-import { generateAiWorkout } from "@/logic/api/generate-ai";
 import { useExcerciseStore } from "@/store/excercise-store";
-import { Day } from "@/types";
+import { useDayStore } from "@/store/day-store";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -28,12 +26,13 @@ const ITEM_GAP = 2;
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const currentDay = useCurrentDay();
-  const [currentDaySelected, setCurrentDay] = useState<Day>(currentDay);
+  const { selectedDay, setSelectedDay } = useDayStore();
+  const currentDaySelected = selectedDay ?? currentDay;
+  const setCurrentDay = setSelectedDay;
   const [overview, setOverview] = useState<WorkoutOverviewResponse | null>(
     null,
   );
   const [isLoadingOverview, setIsLoadingOverview] = useState(false);
-  const [isGeneratingWorkout, setIsGeneratingWorkout] = useState(false);
   const { getWorkoutOverviewForDay, setWorkoutOverviewForDay } =
     useExcerciseStore();
   const { workout: workoutByWeekday } = useWorkoutData(currentDaySelected);
@@ -87,20 +86,6 @@ export default function HomeScreen() {
     (_, index) => index * snapStep + (contentTopOffset - 8),
   );
 
-  const handleGenerateWorkout = async () => {
-    if (isGeneratingWorkout) return;
-
-    setIsGeneratingWorkout(true);
-    try {
-      const generatedOverview = await generateAiWorkout();
-      setOverview(generatedOverview);
-      setWorkoutOverviewForDay(currentDaySelected.name, generatedOverview);
-    } catch (error) {
-      console.warn("Failed to generate AI workout", error);
-    } finally {
-      setIsGeneratingWorkout(false);
-    }
-  };
 
   return (
     <View
@@ -143,14 +128,7 @@ export default function HomeScreen() {
           <RestDayContent />
         ) : overview ? (
           <WorkoutContent items={items} description={overview?.description} />
-        ) : (
-          <View style={{ flex: 1, width: "100%", justifyContent: "center" }}>
-            <GenerateContent
-              onGenerate={handleGenerateWorkout}
-              isGenerating={isGeneratingWorkout}
-            />
-          </View>
-        )}
+        ) : null}
         {overview && !overview.isRestDay && (
           <Text
             style={{
@@ -200,7 +178,7 @@ export default function HomeScreen() {
                     `/(modals)/excercise?id=${items[0]?.id}&day=${currentDaySelected.name}`,
                   );
                 } else {
-                  setCurrentDay((prev) => prev.nextDay());
+                  setCurrentDay(currentDaySelected.nextDay());
                 }
               }}
               onHoldStart={() => console.log("Hold start")}
@@ -222,112 +200,6 @@ export default function HomeScreen() {
             />
           )}
         </View>
-      </View>
-    </View>
-  );
-}
-
-function GenerateContent({
-  onGenerate,
-  isGenerating,
-}: {
-  onGenerate: () => void;
-  isGenerating: boolean;
-}) {
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "column",
-        gap: 24,
-      }}
-    >
-      <View
-        style={{
-          flexDirection: "column",
-          gap: 6,
-          alignItems: "center",
-          justifyContent: "flex-start",
-        }}
-      >
-        <Text
-          style={{
-            ...typography.mediumL,
-            color: Colors.general.color.grayTones.main,
-            textAlign: "center",
-          }}
-        >
-          No exercises here yet
-        </Text>
-        <Text
-          style={{
-            ...typography.regularM,
-            color: Colors.general.color.grayTones.muted40,
-            textAlign: "center",
-            wordWrap: "break-word",
-            maxWidth: 270,
-          }}
-        >
-          You can generate workout with Ai or add exercises manually
-        </Text>
-      </View>
-      <View style={{ flexDirection: "column", gap: 12 }}>
-        <SliderButton
-          color={Colors.general.color.grayTones.main}
-          textColor={Colors.general.color.darkTones.bg}
-          text={isGenerating ? "Generating..." : "Generate Workout"}
-          holdDuration={0}
-          onHoldStart={() => {}}
-          onHoldEnd={onGenerate}
-          icon={
-            <GainLogo
-              width={20}
-              height={20}
-              color={Colors.general.color.darkTones.bg}
-              secondaryColor={Colors.general.color.grayTones.main}
-            />
-          }
-          holdOverlayColor={Colors.general.color.grayTones.main}
-        />
-        <View style={{ flexDirection: "column", gap: 12 }}>
-          <SliderButton
-            color={Colors.general.color.grayTones.main}
-            textColor={Colors.general.color.darkTones.bg}
-            text={isGenerating ? "Generating..." : "Generate Workout"}
-            holdDuration={0}
-            onHoldStart={() => {}}
-            onHoldEnd={onGenerate}
-            icon={
-              <GainLogo
-                width={20}
-                height={20}
-                color={Colors.general.color.darkTones.bg}
-                secondaryColor={Colors.general.color.grayTones.main}
-              />
-            }
-            holdOverlayColor={Colors.general.color.grayTones.main}
-          />
-          <Text
-            style={{
-              ...typography.mediumM,
-              color: Colors.general.color.grayTones.muted40,
-              textAlign: "center",
-            }}
-          >
-            Add exercise
-          </Text>
-        </View>
-        <Text
-          style={{
-            ...typography.mediumM,
-            color: Colors.general.color.grayTones.muted40,
-            textAlign: "center",
-          }}
-        >
-          Add exercise
-        </Text>
       </View>
     </View>
   );

@@ -2,11 +2,13 @@ import ScaledPressable from "@/components/animated/scaled-pressable";
 import ExcerciseCustomKeyboard from "@/components/build-components/composite/excercise-custom-keyboard";
 import ExcerciseTray from "@/components/build-components/composite/excercise-tray";
 import ResetTimer from "@/components/build-components/reset-timer";
+import GainLogo from "@/components/icons/gain-logo";
+import SliderButton from "@/components/parts/slider-button";
 import TextButton from "@/components/parts/text-button";
 import { Colors, typography } from "@/constants/theme";
 import useCurrentDay from "@/hooks/use-current-day";
-import { useStoreHydrated } from "@/hooks/use-store-hydrated";
-import { getWorkoutByWeekday } from "@/logic/api/exercises-by-weekday";
+import { useWorkoutData } from "@/hooks/use-workout-data";
+import { generateAiWorkout } from "@/logic/api/generate-ai";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { useExcerciseTimerStore } from "@/store/excercise-timer-store";
 import { Day, DayEnum } from "@/types";
@@ -20,6 +22,93 @@ interface TopDescriptionProps {
   name: string;
   time: string;
   onTimePress?: () => void;
+}
+
+function EmptyWorkoutContent({
+  isGenerating,
+  onGenerate,
+  day,
+}: {
+  isGenerating: boolean;
+  onGenerate: () => void;
+  day: string;
+}) {
+  return (
+    <View
+      style={{
+        flex: 1,
+        flexDirection: "column",
+        gap: 24,
+        justifyContent: "center",
+      }}
+    >
+      <View
+        style={{
+          flexDirection: "column",
+          gap: 6,
+          alignItems: "center",
+          alignSelf: "center",
+          maxWidth: 248,
+        }}
+      >
+        <Text
+          style={{
+            ...typography.mediumL,
+            color: Colors.general.color.grayTones.main,
+            textAlign: "center",
+          }}
+        >
+          No exercises here yet
+        </Text>
+        <Text
+          style={{
+            ...typography.regularM,
+            color: Colors.general.color.grayTones.muted40,
+            textAlign: "center",
+          }}
+          numberOfLines={2}
+        >
+          You can generate workout with Ai or add exercises manually
+        </Text>
+      </View>
+      <View style={{ gap: 12, alignItems: "center" }}>
+        <View style={{ width: "100%", maxWidth: 248 }}>
+          <SliderButton
+            color={Colors.general.color.grayTones.main}
+            textColor={Colors.general.color.darkTones.bg}
+            text={isGenerating ? "Generating..." : "Generate Workout"}
+            holdDuration={0}
+            onHoldStart={() => {}}
+            onHoldEnd={onGenerate}
+            icon={
+              <GainLogo
+                width={20}
+                height={20}
+                color={Colors.general.color.darkTones.bg}
+                secondaryColor={Colors.general.color.grayTones.main}
+              />
+            }
+            holdOverlayColor={Colors.general.color.grayTones.main}
+          />
+        </View>
+        <Pressable
+          onPress={() =>
+            router.push(`/(add_ex_modals)/add_ex?day=${day}&trayId=${""}`)
+          }
+        >
+          <Text
+            style={{
+              ...typography.mediumM,
+              color: Colors.general.color.grayTones.muted40,
+              textAlign: "center",
+            }}
+          >
+            Add exercise
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  );
 }
 
 function TopDescription({
@@ -98,14 +187,9 @@ export default function ExcerciseModal() {
   const modalHeaderOverlayHeight = insets.top + 22;
   const [timerStarted, setTimerStarted] = useState<boolean>(false);
   const [timerKey, setTimerKey] = useState<number>(0);
-  const workoutData = useExcerciseStore(
-    (state) => state.workoutByWeekdayByDay[requestDayEnum] ?? null,
+  const { workout: workoutData, isLoading: isLoadingWorkout } = useWorkoutData(
+    Day.fromString(requestDayName),
   );
-  const setWorkoutByWeekdayForDay = useExcerciseStore(
-    (state) => state.setWorkoutByWeekdayForDay,
-  );
-  const [isLoadingWorkout, setIsLoadingWorkout] = useState(false);
-  const isStoreHydrated = useStoreHydrated();
   const queueCompleteExerciseSet = useExcerciseStore(
     (state) => state.queueCompleteExerciseSet,
   );
@@ -166,6 +250,23 @@ export default function ExcerciseModal() {
     focusedInputRef.current = null;
   };
 
+  const [isGeneratingWorkout, setIsGeneratingWorkout] = useState(false);
+  const { setWorkoutOverviewForDay } = useExcerciseStore();
+
+  const handleGenerateWorkout = async () => {
+    if (isGeneratingWorkout) return;
+
+    setIsGeneratingWorkout(true);
+    try {
+      const generatedOverview = await generateAiWorkout();
+      setWorkoutOverviewForDay(requestDayEnum as DayEnum, generatedOverview);
+    } catch (error) {
+      console.warn("Failed to generate AI workout", error);
+    } finally {
+      setIsGeneratingWorkout(false);
+    }
+  };
+
   useEffect(() => {
     return () => {
       if (blurHideTimeoutRef.current) {
@@ -173,48 +274,6 @@ export default function ExcerciseModal() {
       }
     };
   }, []);
-
-  useEffect(() => {
-    // Wait for store to be hydrated before loading from API
-    if (!isStoreHydrated) return;
-
-    let isActive = true;
-    setIsLoadingWorkout(true);
-
-    // Check cached workout BEFORE API call to see if we have local data
-    const cachedWorkout = useExcerciseStore
-      .getState()
-      .getWorkoutByWeekdayForDay(requestDayEnum);
-
-    // If we have cached workout, don't overwrite it with API data
-    if (cachedWorkout) {
-      setIsLoadingWorkout(false);
-      return;
-    }
-
-    getWorkoutByWeekday(Day.fromString(requestDayName))
-      .then((response) => {
-        if (!isActive) return;
-        setWorkoutByWeekdayForDay(requestDayEnum, response);
-      })
-      .catch((error) => {
-        if (!isActive) return;
-        console.warn("Failed to load weekday workout", error);
-      })
-      .finally(() => {
-        if (!isActive) return;
-        setIsLoadingWorkout(false);
-      });
-
-    return () => {
-      isActive = false;
-    };
-  }, [
-    requestDayName,
-    requestDayEnum,
-    setWorkoutByWeekdayForDay,
-    isStoreHydrated,
-  ]);
 
   return (
     <View
@@ -255,6 +314,7 @@ export default function ExcerciseModal() {
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
+          flexGrow: 1,
           gap: 12,
           paddingTop: modalHeaderOverlayHeight,
           paddingBottom: 24 + insets.bottom,
@@ -354,24 +414,15 @@ export default function ExcerciseModal() {
             />
           ))
         )}
-        <Pressable
-          onPress={() => {
-            router.push(
-              `/(add_ex_modals)/add_ex?day=${requestDayEnum}&trayId=${""}`,
-            ); // TODO: pass excercise name and details to the info modal
-          }}
-          style={{ alignItems: "center", marginTop: 12 }}
-        >
-          <Text
-            style={{
-              ...typography.mediumM,
-              color: Colors.general.color.grayTones.muted40,
-              textAlign: "center",
-            }}
-          >
-            Add exercise
-          </Text>
-        </Pressable>
+        {!isLoadingWorkout &&
+          !workoutData?.isRestDay &&
+          (!workoutData || workoutData.trays.length === 0) && (
+            <EmptyWorkoutContent
+              isGenerating={isGeneratingWorkout}
+              onGenerate={handleGenerateWorkout}
+              day={requestDayEnum}
+            />
+          )}
       </ScrollView>
       <ExcerciseCustomKeyboard
         visible={isKeyboardVisible}
