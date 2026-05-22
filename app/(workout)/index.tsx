@@ -8,18 +8,17 @@ import PlayIcon from "@/components/icons/play";
 import SliderButton from "@/components/parts/slider-button";
 import { Colors, typography } from "@/constants/theme";
 import useCurrentDay from "@/hooks/use-current-day";
-import { useStoreHydrated } from "@/hooks/use-store-hydrated";
 import { useSyncQueue } from "@/hooks/use-sync-queue";
+import { useWorkoutData } from "@/hooks/use-workout-data";
 import {
   getWorkoutOverviewByDay,
   WorkoutOverviewResponse,
 } from "@/logic/api/ex-description";
-import { getWorkoutByWeekday } from "@/logic/api/exercises-by-weekday";
 import { generateAiWorkout } from "@/logic/api/generate-ai";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { Day } from "@/types";
 import { router } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -29,25 +28,15 @@ const ITEM_GAP = 2;
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const currentDay = useCurrentDay();
-  const isStoreHydrated = useStoreHydrated();
   const [currentDaySelected, setCurrentDay] = useState<Day>(currentDay);
   const [overview, setOverview] = useState<WorkoutOverviewResponse | null>(
     null,
   );
   const [isLoadingOverview, setIsLoadingOverview] = useState(false);
   const [isGeneratingWorkout, setIsGeneratingWorkout] = useState(false);
-  const {
-    getWorkoutOverviewForDay,
-    setWorkoutOverviewForDay,
-    setWorkoutByWeekdayForDay,
-  } = useExcerciseStore();
-
-  const workoutByWeekday = useExcerciseStore(
-    useCallback(
-      (state) => state.workoutByWeekdayByDay[currentDaySelected.name] ?? null,
-      [currentDaySelected.name],
-    ),
-  );
+  const { getWorkoutOverviewForDay, setWorkoutOverviewForDay } =
+    useExcerciseStore();
+  const { workout: workoutByWeekday } = useWorkoutData(currentDaySelected);
 
   useSyncQueue();
 
@@ -55,8 +44,6 @@ export default function HomeScreen() {
   const snapStep = SNAP_ITEM_HEIGHT + ITEM_GAP;
 
   useEffect(() => {
-    if (!isStoreHydrated) return;
-
     let isActive = true;
 
     setOverview(getWorkoutOverviewForDay(currentDaySelected.name));
@@ -67,29 +54,10 @@ export default function HomeScreen() {
         if (!isActive) return;
         setOverview(response);
         setWorkoutOverviewForDay(currentDaySelected.name, response);
-
-        const cachedWorkout = useExcerciseStore
-          .getState()
-          .getWorkoutByWeekdayForDay(currentDaySelected.name);
-
-        if (!cachedWorkout) {
-          void getWorkoutByWeekday(currentDaySelected)
-            .then((weekdayWorkout) => {
-              if (!isActive) return;
-              setWorkoutByWeekdayForDay(
-                currentDaySelected.name,
-                weekdayWorkout,
-              );
-            })
-            .catch((weekdayError) => {
-              if (!isActive) return;
-              console.warn("Failed to cache weekday workout", weekdayError);
-            });
-        }
       })
       .catch((error) => {
-        console.warn("Failed to load workout overview", error);
         if (!isActive) return;
+        console.warn("Failed to load workout overview", error);
       })
       .finally(() => {
         if (!isActive) return;
@@ -99,13 +67,7 @@ export default function HomeScreen() {
     return () => {
       isActive = false;
     };
-  }, [
-    currentDaySelected,
-    getWorkoutOverviewForDay,
-    setWorkoutOverviewForDay,
-    setWorkoutByWeekdayForDay,
-    isStoreHydrated,
-  ]);
+  }, [currentDaySelected, getWorkoutOverviewForDay, setWorkoutOverviewForDay]);
 
   const items: ExcerciseItemProps[] = workoutByWeekday
     ? workoutByWeekday.trays.map((tray) => ({
@@ -126,18 +88,13 @@ export default function HomeScreen() {
   );
 
   const handleGenerateWorkout = async () => {
-    if (isGeneratingWorkout) {
-      return;
-    }
+    if (isGeneratingWorkout) return;
 
     setIsGeneratingWorkout(true);
     try {
       const generatedOverview = await generateAiWorkout();
       setOverview(generatedOverview);
       setWorkoutOverviewForDay(currentDaySelected.name, generatedOverview);
-
-      const weekdayWorkout = await getWorkoutByWeekday(currentDaySelected);
-      setWorkoutByWeekdayForDay(currentDaySelected.name, weekdayWorkout);
     } catch (error) {
       console.warn("Failed to generate AI workout", error);
     } finally {
@@ -238,9 +195,9 @@ export default function HomeScreen() {
                   : "Go to next workout"
               }
               onHoldEnd={() => {
-                if (currentDay.equals(currentDaySelected) && items.length > 0) {
+                if (currentDay.equals(currentDaySelected)) {
                   router.push(
-                    `/(modals)/excercise?id=${items[0].id}&day=${currentDaySelected.name}`,
+                    `/(modals)/excercise?id=${items[0]?.id}&day=${currentDaySelected.name}`,
                   );
                 } else {
                   setCurrentDay((prev) => prev.nextDay());
@@ -334,6 +291,34 @@ function GenerateContent({
           }
           holdOverlayColor={Colors.general.color.grayTones.main}
         />
+        <View style={{ flexDirection: "column", gap: 12 }}>
+          <SliderButton
+            color={Colors.general.color.grayTones.main}
+            textColor={Colors.general.color.darkTones.bg}
+            text={isGenerating ? "Generating..." : "Generate Workout"}
+            holdDuration={0}
+            onHoldStart={() => {}}
+            onHoldEnd={onGenerate}
+            icon={
+              <GainLogo
+                width={20}
+                height={20}
+                color={Colors.general.color.darkTones.bg}
+                secondaryColor={Colors.general.color.grayTones.main}
+              />
+            }
+            holdOverlayColor={Colors.general.color.grayTones.main}
+          />
+          <Text
+            style={{
+              ...typography.mediumM,
+              color: Colors.general.color.grayTones.muted40,
+              textAlign: "center",
+            }}
+          >
+            Add exercise
+          </Text>
+        </View>
         <Text
           style={{
             ...typography.mediumM,
