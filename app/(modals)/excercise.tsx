@@ -5,10 +5,10 @@ import ResetTimer from "@/components/build-components/reset-timer";
 import TextButton from "@/components/parts/text-button";
 import { Colors, typography } from "@/constants/theme";
 import useCurrentDay from "@/hooks/use-current-day";
+import { useStoreHydrated } from "@/hooks/use-store-hydrated";
 import {
   getWorkoutByWeekday,
-  WorkoutByWeekdayResponse,
-  WorkoutWeekdaySet,
+  WorkoutWeekdaySet
 } from "@/logic/api/exercises-by-weekday";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { useExcerciseTimerStore } from "@/store/excercise-timer-store";
@@ -115,9 +115,14 @@ export default function ExcerciseModal() {
   const modalHeaderOverlayHeight = insets.top + 22;
   const [timerStarted, setTimerStarted] = useState<boolean>(false);
   const [timerKey, setTimerKey] = useState<number>(0);
-  const [workoutData, setWorkoutData] =
-    useState<WorkoutByWeekdayResponse | null>(null);
+  const workoutData = useExcerciseStore(
+    (state) => state.workoutByWeekdayByDay[requestDayEnum] ?? null,
+  );
+  const setWorkoutByWeekdayForDay = useExcerciseStore(
+    (state) => state.setWorkoutByWeekdayForDay,
+  );
   const [isLoadingWorkout, setIsLoadingWorkout] = useState(false);
+  const isStoreHydrated = useStoreHydrated();
   const queueCompleteExerciseSet = useExcerciseStore(
     (state) => state.queueCompleteExerciseSet,
   );
@@ -187,24 +192,27 @@ export default function ExcerciseModal() {
   }, []);
 
   useEffect(() => {
+    // Wait for store to be hydrated before loading from API
+    if (!isStoreHydrated) return;
+
     let isActive = true;
+    setIsLoadingWorkout(true);
+
+    // Check cached workout BEFORE API call to see if we have local data
     const cachedWorkout = useExcerciseStore
       .getState()
       .getWorkoutByWeekdayForDay(requestDayEnum);
-    setWorkoutData(cachedWorkout);
-    setIsLoadingWorkout(true);
+
+    // If we have cached workout, don't overwrite it with API data
+    if (cachedWorkout) {
+      setIsLoadingWorkout(false);
+      return;
+    }
 
     getWorkoutByWeekday(Day.fromString(requestDayName))
       .then((response) => {
         if (!isActive) return;
-
-        // Keep local unsynced progress if cached data for this day already exists.
-        if (!cachedWorkout) {
-          setWorkoutData(response);
-          useExcerciseStore
-            .getState()
-            .setWorkoutByWeekdayForDay(requestDayEnum, response);
-        }
+        setWorkoutByWeekdayForDay(requestDayEnum, response);
       })
       .catch((error) => {
         if (!isActive) return;
@@ -218,12 +226,22 @@ export default function ExcerciseModal() {
     return () => {
       isActive = false;
     };
-  }, [requestDayName, requestDayEnum]);
+  }, [requestDayName, requestDayEnum, setWorkoutByWeekdayForDay, isStoreHydrated]);
+
+  const hasInitialized = useRef(false);
+
+  // Reset hasInitialized when day changes
+  useEffect(() => {
+    hasInitialized.current = false;
+  }, [requestDayEnum]);
 
   useEffect(() => {
-    if (!workoutData || workoutData.isRestDay) {
+    console.log("[EXERCISE_MODAL] workoutData effect fired, trays:", workoutData?.trays?.length, "isRestDay:", workoutData?.isRestDay);
+    if (!workoutData || workoutData.isRestDay || hasInitialized.current) {
       return;
     }
+
+    hasInitialized.current = true;
 
     const { addExcercise, setTrayActiveIndex } = useExcerciseStore.getState();
 
@@ -348,6 +366,7 @@ export default function ExcerciseModal() {
               }}
               key={tray.id}
               id={tray.id}
+              day={requestDayEnum}
               description={{ items: tray.description.items }}
               disable={timerStarted}
               history={{
@@ -365,6 +384,7 @@ export default function ExcerciseModal() {
                 expanded: true,
                 title: tray.title.title,
                 id: tray.id,
+                day: requestDayEnum,
               }}
               onExcerciseChange={(_, id) => {
                 console.log(`Excercise with id ${id} changed`);

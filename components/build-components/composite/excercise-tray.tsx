@@ -5,6 +5,7 @@ import Accordion from "@/components/parts/accordion";
 import TextButton from "@/components/parts/text-button";
 import { Colors } from "@/constants/theme";
 import { useExcerciseStore } from "@/store/excercise-store";
+import { DayEnum } from "@/types";
 import { debounce } from "@/utils/debounce";
 import React, { RefObject, useMemo } from "react";
 import {
@@ -27,6 +28,7 @@ export interface ExcerciseTrayProps {
   description: ColumnDescriptionProps;
   history: HistoryTextProps;
   id: string;
+  day: DayEnum;
   onExcerciseChange?: (excercise: SetItemProps, id: string) => void;
   onExcerciseComplete?: (
     excercise: SetItemProps,
@@ -286,7 +288,7 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
           setIsExpanded((current) => !current);
         }}
       >
-        <ExcerciseTitle {...props.title} id={props.id} expanded={isExpanded} />
+        <ExcerciseTitle {...props.title} id={props.id} expanded={isExpanded} day={props.day} />
       </Pressable>
       <Accordion isExpanded={isExpanded}>
         <View

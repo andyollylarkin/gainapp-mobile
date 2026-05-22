@@ -1,6 +1,9 @@
 import { SetItemProps } from "@/components/build-components/composite/set-item";
 import { WorkoutOverviewResponse } from "@/logic/api/ex-description";
-import { WorkoutByWeekdayResponse } from "@/logic/api/exercises-by-weekday";
+import {
+  WorkoutByWeekdayResponse,
+  WorkoutWeekdayTray,
+} from "@/logic/api/exercises-by-weekday";
 import { DayEnum } from "@/types";
 import { safeStateStorage } from "@/utils/safe-storage";
 import { create } from "zustand";
@@ -12,7 +15,10 @@ export type PendingSyncActionType =
   | "addExerciseSet"
   | "updateExerciseSetParams"
   | "completeExerciseSet"
-  | "deleteExerciseSet";
+  | "deleteExerciseSet"
+  | "addExercise"
+  | "addSuperset"
+  | "deleteExercise";
 
 export interface PendingSyncAction {
   id: string;
@@ -199,11 +205,38 @@ interface ExcerciseStore {
   queueDeleteExerciseSet: (payload: { id: string }) => void;
   removePendingSyncAction: (id: string) => void;
   clearPendingSyncActions: () => void;
+  addExerciseTray: (
+    day: DayEnum,
+    exercises: {
+      id: string | number;
+      name: string;
+      equipment: string;
+    }[],
+  ) => void;
+  addExerciseTrayWithId: (
+    day: DayEnum,
+    exercises: {
+      id: string | number;
+      name: string;
+      equipment: string;
+    }[],
+    trayIds: string[],
+  ) => void;
+  queueAddExercise: (
+    day: DayEnum,
+    exercise: { id: string | number; name: string; equipment: string; category?: string },
+  ) => void;
+  queueAddSuperset: (
+    day: DayEnum,
+    exercises: { id: string | number; name: string; equipment: string; category?: string }[],
+  ) => void;
+  queueDeleteExercise: (day: DayEnum, trayId: string) => void;
   replaceSetId: (
     tempId: string,
     serverId: string,
     currentActionId: string,
   ) => void;
+  replaceTrayId: (tempId: string, serverId: string) => void;
 }
 
 export const useExcerciseStore = create<ExcerciseStore>()(
@@ -405,6 +438,227 @@ export const useExcerciseStore = create<ExcerciseStore>()(
         }));
       },
 
+      addExerciseTray: (day, exercises) => {
+        const newTrays: WorkoutWeekdayTray[] = exercises.map((ex) => {
+          const trayId = `tray-${Date.now()}-${Math.random()}-${ex.id}`;
+          const warmupSetId = `exercise-${Date.now()}-${Math.random()}`;
+
+          return {
+            id: trayId,
+            workoutDayExerciseId: trayId,
+            title: {
+              type: String(ex.equipment),
+              title: String(ex.name),
+            },
+            description: {
+              items: ["Set", "Previous", "kg", "Reps"] as ["Set", "Previous", "kg", "Reps"],
+            },
+            history: {
+              firstText: 0,
+              secondText: 0,
+              delimiter: "x",
+            },
+            sets: [
+              {
+                id: warmupSetId,
+                setNumber: 1,
+                parameter1: 0,
+                parameter2: 0,
+                completed: false,
+                history: {
+                  firstText: 0,
+                  secondText: 0,
+                  delimiter: "x",
+                },
+              },
+            ],
+          };
+        });
+
+        set((state) => {
+          const existing = state.workoutByWeekdayByDay[day];
+          const updatedWorkout: WorkoutByWeekdayResponse = existing
+            ? {
+                ...existing,
+                trays: [...existing.trays, ...newTrays],
+              }
+            : {
+                description: {
+                  workoutName: "Workout",
+                  excercisesCount: newTrays.length,
+                  durationMinutes: 0,
+                },
+                isRestDay: false,
+                trays: newTrays,
+              };
+
+          // Also add warmup sets to the excercises array so the tray renders them
+          const newExcercises: Omit<StoredProps, "activeIndex">[] = newTrays.map(
+            (tray) => ({
+              id: tray.sets[0].id,
+              history: {
+                firstText: 0,
+                secondText: 0,
+                delimiter: "x",
+              },
+              excerciseOrder: "W" as const,
+              maxInputValue: 500,
+              initialState: "progress" as const,
+              input: { field1: "0", field2: "0" },
+              trayId: tray.id,
+            }),
+          );
+
+          return {
+            workoutByWeekdayByDay: {
+              ...state.workoutByWeekdayByDay,
+              [day]: updatedWorkout,
+            },
+            excercises: [...state.excercises, ...newExcercises],
+          };
+        });
+      },
+
+      addExerciseTrayWithId: (day, exercises, trayIds) => {
+        const newTrays: WorkoutWeekdayTray[] = exercises.map((ex, idx) => {
+          const trayId = trayIds[idx] ?? `tray-${Date.now()}-${Math.random()}-${ex.id}`;
+          const warmupSetId = `exercise-${Date.now()}-${Math.random()}`;
+
+          return {
+            id: trayId,
+            workoutDayExerciseId: trayId,
+            title: {
+              type: String(ex.equipment),
+              title: String(ex.name),
+            },
+            description: {
+              items: ["Set", "Previous", "kg", "Reps"] as ["Set", "Previous", "kg", "Reps"],
+            },
+            history: {
+              firstText: 0,
+              secondText: 0,
+              delimiter: "x",
+            },
+            sets: [
+              {
+                id: warmupSetId,
+                setNumber: 1,
+                parameter1: 0,
+                parameter2: 0,
+                completed: false,
+                history: {
+                  firstText: 0,
+                  secondText: 0,
+                  delimiter: "x",
+                },
+              },
+            ],
+          };
+        });
+
+        set((state) => {
+          const existing = state.workoutByWeekdayByDay[day];
+          const updatedWorkout: WorkoutByWeekdayResponse = existing
+            ? {
+                ...existing,
+                trays: [...existing.trays, ...newTrays],
+              }
+            : {
+                description: {
+                  workoutName: "Workout",
+                  excercisesCount: newTrays.length,
+                  durationMinutes: 0,
+                },
+                isRestDay: false,
+                trays: newTrays,
+              };
+
+          // Also add warmup sets to the excercises array so the tray renders them
+          const newExcercises: Omit<StoredProps, "activeIndex">[] = newTrays.map(
+            (tray) => ({
+              id: tray.sets[0].id,
+              history: {
+                firstText: 0,
+                secondText: 0,
+                delimiter: "x",
+              },
+              excerciseOrder: "W" as const,
+              maxInputValue: 500,
+              initialState: "progress" as const,
+              input: { field1: "0", field2: "0" },
+              trayId: tray.id,
+            }),
+          );
+
+          return {
+            workoutByWeekdayByDay: {
+              ...state.workoutByWeekdayByDay,
+              [day]: updatedWorkout,
+            },
+            excercises: [...state.excercises, ...newExcercises],
+          };
+        });
+      },
+
+      queueAddExercise: (day, exercise) => {
+        // Generate temp trayId first so we can track it for replacement
+        const tempTrayId = `tray-${Date.now()}-${Math.random()}-${exercise.id}`;
+        get().enqueueSyncAction("addExercise", {
+          day,
+          exerciseId: exercise.id,
+          name: exercise.name,
+          equipment: exercise.equipment,
+          category: exercise.category,
+          trayId: tempTrayId,
+        });
+        get().addExerciseTrayWithId(day, [exercise], [tempTrayId]);
+      },
+
+      queueAddSuperset: (day, exercises) => {
+        // Generate temp trayIds first so we can track them for replacement
+        const tempTrayIds = exercises.map(
+          (ex) => `tray-${Date.now()}-${Math.random()}-${ex.id}`,
+        );
+        get().enqueueSyncAction("addSuperset", {
+          day,
+          exercises: exercises.map((ex, idx) => ({
+            exerciseId: ex.id,
+            name: ex.name,
+            equipment: ex.equipment,
+            category: ex.category,
+            trayId: tempTrayIds[idx],
+          })),
+        });
+        get().addExerciseTrayWithId(day, exercises, tempTrayIds);
+      },
+
+      queueDeleteExercise: (day, trayId) => {
+        get().enqueueSyncAction("deleteExercise", {
+          day,
+          trayId,
+        });
+        set((state) => {
+          const workout = state.workoutByWeekdayByDay[day];
+          if (!workout) return state;
+
+          const updatedTrays = workout.trays.filter((t) => t.id !== trayId);
+          const updatedExcercises = state.excercises.filter(
+            (e) => e.trayId !== trayId,
+          );
+
+          return {
+            workoutByWeekdayByDay: {
+              ...state.workoutByWeekdayByDay,
+              [day]: {
+                ...workout,
+                trays: updatedTrays,
+              },
+            },
+            excercises: updatedExcercises,
+          };
+        });
+      },
+
       replaceSetId: (tempId, serverId, currentActionId) =>
         set((state) => ({
           excercises: state.excercises.map((e) =>
@@ -446,6 +700,41 @@ export const useExcerciseStore = create<ExcerciseStore>()(
                   })(),
                 },
           ),
+        })),
+
+      replaceTrayId: (tempId, serverId) =>
+        set((state) => ({
+          excercises: state.excercises.map((e) =>
+            e.trayId === tempId ? { ...e, trayId: serverId } : e,
+          ),
+          workoutByWeekdayByDay: Object.fromEntries(
+            Object.entries(state.workoutByWeekdayByDay).map(
+              ([day, workout]) => [
+                day,
+                workout
+                  ? {
+                      ...workout,
+                      trays: workout.trays.map((tray) =>
+                        tray.id === tempId
+                          ? { ...tray, id: serverId, workoutDayExerciseId: serverId }
+                          : tray,
+                      ),
+                    }
+                  : workout,
+              ],
+            ),
+          ),
+          pendingSyncActions: state.pendingSyncActions.map((action) => ({
+            ...action,
+            payload: (() => {
+              const next = { ...action.payload };
+              if (next.trayId === tempId) next.trayId = serverId;
+              if (next.workoutDayExerciseId === tempId) {
+                next.workoutDayExerciseId = serverId;
+              }
+              return next;
+            })(),
+          })),
         })),
 
       removePendingSyncAction: (id) =>

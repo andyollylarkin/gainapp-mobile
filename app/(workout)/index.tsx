@@ -8,6 +8,7 @@ import PlayIcon from "@/components/icons/play";
 import SliderButton from "@/components/parts/slider-button";
 import { Colors, typography } from "@/constants/theme";
 import useCurrentDay from "@/hooks/use-current-day";
+import { useStoreHydrated } from "@/hooks/use-store-hydrated";
 import { useSyncQueue } from "@/hooks/use-sync-queue";
 import {
   getWorkoutOverviewByDay,
@@ -28,6 +29,7 @@ const ITEM_GAP = 2;
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const currentDay = useCurrentDay();
+  const isStoreHydrated = useStoreHydrated();
   const [currentDaySelected, setCurrentDay] = useState<Day>(currentDay);
   const [overview, setOverview] = useState<WorkoutOverviewResponse | null>(
     null,
@@ -46,6 +48,8 @@ export default function HomeScreen() {
   const snapStep = SNAP_ITEM_HEIGHT + ITEM_GAP;
 
   useEffect(() => {
+    if (!isStoreHydrated) return;
+
     let isActive = true;
 
     setOverview(getWorkoutOverviewForDay(currentDaySelected.name));
@@ -57,15 +61,21 @@ export default function HomeScreen() {
         setOverview(response);
         setWorkoutOverviewForDay(currentDaySelected.name, response);
 
-        void getWorkoutByWeekday(currentDaySelected)
-          .then((weekdayWorkout) => {
-            if (!isActive) return;
-            setWorkoutByWeekdayForDay(currentDaySelected.name, weekdayWorkout);
-          })
-          .catch((weekdayError) => {
-            if (!isActive) return;
-            console.warn("Failed to cache weekday workout", weekdayError);
-          });
+        const cachedWorkout = useExcerciseStore
+          .getState()
+          .getWorkoutByWeekdayForDay(currentDaySelected.name);
+
+        if (!cachedWorkout) {
+          void getWorkoutByWeekday(currentDaySelected)
+            .then((weekdayWorkout) => {
+              if (!isActive) return;
+              setWorkoutByWeekdayForDay(currentDaySelected.name, weekdayWorkout);
+            })
+            .catch((weekdayError) => {
+              if (!isActive) return;
+              console.warn("Failed to cache weekday workout", weekdayError);
+            });
+        }
       })
       .catch((error) => {
         console.warn("Failed to load workout overview", error);
@@ -84,6 +94,7 @@ export default function HomeScreen() {
     getWorkoutOverviewForDay,
     setWorkoutOverviewForDay,
     setWorkoutByWeekdayForDay,
+    isStoreHydrated,
   ]);
 
   const items: ExcerciseItemProps[] = (overview?.exercises ?? []).map(

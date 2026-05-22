@@ -7,9 +7,10 @@ import {
 import SearchInput from "@/components/build-components/search-input";
 import SelectButton from "@/components/build-components/select-button";
 import { Colors, typography } from "@/constants/theme";
+import { useExcerciseStore } from "@/store/excercise-store";
 import { DayEnum } from "@/types";
-import { useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useCallback, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -108,6 +109,70 @@ export default function AddExerciseModal() {
 
   const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
 
+  const queueAddExercise = useExcerciseStore((state) => state.queueAddExercise);
+  const queueAddSuperset = useExcerciseStore((state) => state.queueAddSuperset);
+
+  const handleAddToWorkout = useCallback(
+    (exercises: Exercise[]) => {
+      if (exercises.length === 0) return;
+
+      console.log(
+        "[ADD_EX] Adding exercises to day:",
+        params.day,
+        "exercises:",
+        exercises.map((e) => e.name),
+      );
+
+      // Add each exercise individually using queueAddExercise
+      exercises.forEach((ex) => {
+        queueAddExercise(params.day, {
+          id: ex.id,
+          name: ex.name,
+          equipment: ex.equipment,
+          category: ex.category ?? undefined,
+        });
+      });
+
+      console.log(
+        "[ADD_EX] Store after add:",
+        JSON.stringify(
+          useExcerciseStore.getState().workoutByWeekdayByDay[params.day]?.trays
+            ?.length,
+        ),
+      );
+
+      router.back();
+    },
+    [queueAddExercise, params.day],
+  );
+
+  const handleAddSuperset = useCallback(
+    (exercises: Exercise[]) => {
+      if (exercises.length < 2) return;
+
+      console.log(
+        "[ADD_EX] Adding superset to day:",
+        params.day,
+        "exercises:",
+        exercises.map((e) => e.name),
+      );
+
+      // Add all exercises as a superset using queueAddSuperset
+      queueAddSuperset(
+        params.day,
+        exercises.map((ex) => ({
+          id: ex.id,
+          name: ex.name,
+          equipment: ex.equipment,
+          category: ex.category ?? undefined,
+        })),
+      );
+
+      router.back();
+    },
+    [queueAddSuperset, params.day],
+  );
+
   return (
     <View
       style={{
@@ -116,7 +181,11 @@ export default function AddExerciseModal() {
         position: "relative",
       }}
     >
-      <SelectButtons selectedExercises={selectedExercises} />
+      <SelectButtons
+        selectedExercises={selectedExercises}
+        onAddToWorkout={handleAddToWorkout}
+        onAddSuperset={handleAddSuperset}
+      />
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{

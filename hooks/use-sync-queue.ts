@@ -1,4 +1,7 @@
+import { addExercise } from "@/logic/api/add-exercise";
 import { addExerciseSet } from "@/logic/api/add-exercise-set";
+import { addSuperset } from "@/logic/api/add-superset";
+import { deleteExercise } from "@/logic/api/delete-exercise";
 import { deleteExerciseSet } from "@/logic/api/delete-exercise-set";
 import { completeExerciseSet } from "@/logic/api/update-exercise-set";
 import {
@@ -22,12 +25,21 @@ async function runAction(
     if (!id) throw new Error("Invalid payload for deleteExerciseSet");
     return deleteExerciseSet(id);
   }
+  if (type === "addExercise") return addExercise(payload as any);
+  if (type === "addSuperset") return addSuperset(payload as any);
+  if (type === "deleteExercise") return deleteExercise(payload as any);
 }
 
 function getServerSetId(result: unknown): string {
   const id = (result as { id?: unknown } | undefined)?.id;
 
   return typeof id === "string" ? id : "";
+}
+
+function getServerTrayId(result: unknown): string {
+  const trayId = (result as { trayId?: unknown } | undefined)?.trayId;
+
+  return typeof trayId === "string" ? trayId : "";
 }
 
 // Hook that periodically checks for pending sync actions and tries to execute them when the API is reachable.
@@ -37,6 +49,7 @@ export function useSyncQueue() {
     (s) => s.removePendingSyncAction,
   );
   const replaceSetId = useExcerciseStore((s) => s.replaceSetId);
+  const replaceTrayId = useExcerciseStore((s) => s.replaceTrayId);
   const isSyncing = useRef(false);
   const { isReached, stopWatching } = useApiReached();
 
@@ -60,6 +73,17 @@ export function useSyncQueue() {
               }
             }
 
+            if (action.type === "addExercise" || action.type === "addSuperset") {
+              const tempTrayId =
+                typeof action.payload.trayId === "string"
+                  ? action.payload.trayId
+                  : "";
+              const serverTrayId = getServerTrayId(result);
+              if (tempTrayId && serverTrayId && tempTrayId !== serverTrayId) {
+                replaceTrayId(tempTrayId, serverTrayId);
+              }
+            }
+
             removePendingSyncAction(action.id);
           } catch (e) {
             console.warn("Sync action failed:", action.type, e);
@@ -71,5 +95,5 @@ export function useSyncQueue() {
     }
 
     if (isReached) flush();
-  }, [pendingSyncActions, isReached, stopWatching]);
+  }, [pendingSyncActions, isReached, stopWatching, replaceSetId, replaceTrayId, removePendingSyncAction]);
 }

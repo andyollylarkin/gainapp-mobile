@@ -2,7 +2,7 @@ import BlurHeader from "@/components/blur-header";
 import { Colors } from "@/constants/theme";
 import { Stack } from "expo-router";
 
-export default function ModalsLayout() {
+export default function ExerciseModalsLayout() {
   return (
     <Stack>
       <Stack.Screen

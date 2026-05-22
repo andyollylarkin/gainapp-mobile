@@ -1,5 +1,7 @@
 import { Colors, typography } from "@/constants/theme";
+import { useExcerciseStore } from "@/store/excercise-store";
 import { useContextMenu } from "@/store/menu-store";
+import { DayEnum } from "@/types";
 import { useEffect } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import Animated, {
@@ -32,10 +34,14 @@ export interface ExcerciseTitleProps {
   icon2Click: () => void;
   expanded?: boolean;
   id: string;
+  day: DayEnum;
 }
 
-function ContextMenu(props: { id: string; iconsColor: string }) {
+function ContextMenu(props: { id: string; iconsColor: string; day: DayEnum }) {
   const contextMenuNote = useContextMenu<string, TextInput>(props.id);
+  const queueDeleteExercise = useExcerciseStore(
+    (state) => state.queueDeleteExercise,
+  );
 
   const menuItems: ActionsSheetItem[] = [
     {
@@ -70,7 +76,10 @@ function ContextMenu(props: { id: string; iconsColor: string }) {
       text: "Delete Exercise",
       icon: TrashIcon,
       destructive: true,
-      onPress: () => console.log("Delete Exercise"),
+      onPress: () => {
+        console.log("[EXCERCISE_TITLE] Deleting exercise tray:", props.id);
+        queueDeleteExercise(props.day, props.id);
+      },
     },
   ];
 
@@ -170,7 +179,7 @@ export default function ExcerciseTitle(props: ExcerciseTitleProps) {
               onPressIn={props.icon1Click}
             />
           </ScaledPressable>
-          <ContextMenu id={props.id} iconsColor={props.iconsColor} />
+          <ContextMenu id={props.id} iconsColor={props.iconsColor} day={props.day} />
         </Animated.View>
       </View>
     </View>

@@ -60,6 +60,7 @@ export default function SelectButtons(props: {
             }
           }}
           onHoldEnd={function (): void {
+            console.log("Add to workout", selectedExercises);
             if (selectedExercises.length === 0) {
               return;
             }
