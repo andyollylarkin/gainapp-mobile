@@ -1,6 +1,7 @@
 import ScaledPressable from "@/components/animated/scaled-pressable";
 import ExcerciseCustomKeyboard from "@/components/build-components/composite/excercise-custom-keyboard";
 import ExcerciseTray from "@/components/build-components/composite/excercise-tray";
+import NoteInput from "@/components/build-components/note-input";
 import ResetTimer from "@/components/build-components/reset-timer";
 import GainLogo from "@/components/icons/gain-logo";
 import SliderButton from "@/components/parts/slider-button";
@@ -22,6 +23,7 @@ interface TopDescriptionProps {
   name: string;
   time: string;
   onTimePress?: () => void;
+  id: string;
 }
 
 function EmptyWorkoutContent({
@@ -137,6 +139,7 @@ function TopDescription({
   name,
   time,
   onTimePress,
+  id,
 }: TopDescriptionProps): React.JSX.Element {
   return (
     <View style={{ gap: 24, position: "relative" }}>
@@ -183,14 +186,7 @@ function TopDescription({
           </View>
         </View>
       </View>
-      <Text
-        style={{
-          ...typography.regularL,
-          color: Colors.general.color.grayTones.muted40,
-        }}
-      >
-        Add note
-      </Text>
+      <NoteInput exerciseId={id} />
     </View>
   );
 }
@@ -198,7 +194,10 @@ function TopDescription({
 export default function ExcerciseModal() {
   const insets = useSafeAreaInsets();
   const currentDay = useCurrentDay();
-  const params = useLocalSearchParams();
+  const params = useLocalSearchParams() as unknown as {
+    day: Day;
+    id: string;
+  };
   const dayParam = Array.isArray(params.day) ? params.day[0] : params.day;
   const requestDayName: keyof typeof DayEnum =
     typeof dayParam === "string" &&
@@ -227,7 +226,7 @@ export default function ExcerciseModal() {
   const showOrHideTimer = (show: boolean) => {
     if (show) {
       updateCurrentRest(120);
-      setTimerKey((k) => k + 1); // перемонтируем ResetTimer
+      setTimerKey((k) => k + 1);
       setTimerStarted(true);
       timerOpacity.value = withTiming(1, { duration: 220 });
     } else {
@@ -346,6 +345,7 @@ export default function ExcerciseModal() {
         <TopDescription
           name={workoutData?.description.workoutName ?? "Workout"}
           time={`${workoutData?.description.durationMinutes ?? 0}m`}
+          id={params.id}
         />
 
         {isLoadingWorkout && !workoutData ? (
