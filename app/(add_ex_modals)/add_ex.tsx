@@ -228,6 +228,7 @@ export default function AddExerciseModal() {
               placeholder="Search"
               onChange={setSearchValue}
               value={searchValue}
+              setValue={setSearchValue}
             />
             <View
               style={{
@@ -242,6 +243,16 @@ export default function AddExerciseModal() {
               <SelectButton
                 items={["All Muscles", ...MUSCLE_GROUPS]}
                 value={muscleGroupSelected}
+                color={
+                  muscleGroupSelected !== "All Muscles"
+                    ? Colors.general.color.grayTones.main
+                    : Colors.general.color.darkTones.bgTray
+                }
+                textColor={
+                  muscleGroupSelected !== "All Muscles"
+                    ? Colors.general.color.darkTones.bg
+                    : Colors.general.color.grayTones.muted50
+                }
                 onPress={function (val: string | number): void {
                   setMuscleGroupSelected(val);
                 }}
@@ -249,6 +260,16 @@ export default function AddExerciseModal() {
               <SelectButton
                 items={["All Equipment", ...EQUIPMENT]}
                 value={equipmentSelected}
+                color={
+                  equipmentSelected !== "All Equipment"
+                    ? Colors.general.color.grayTones.main
+                    : Colors.general.color.darkTones.bgTray
+                }
+                textColor={
+                  equipmentSelected !== "All Equipment"
+                    ? Colors.general.color.darkTones.bg
+                    : Colors.general.color.grayTones.muted50
+                }
                 onPress={function (val: string | number): void {
                   setEquipmentSelected(val);
                 }}

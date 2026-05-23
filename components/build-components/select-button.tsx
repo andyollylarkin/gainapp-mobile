@@ -8,6 +8,8 @@ export default function SelectButton(props: {
   value: string | number;
   onPress: (val: string | number) => void;
   items: string[] | number[];
+  color?: string;
+  textColor?: string;
 }) {
   let items = props.items;
   if (!props?.items || props?.items?.length === 0) {
@@ -31,7 +33,7 @@ export default function SelectButton(props: {
   return (
     <View
       style={{
-        backgroundColor: Colors.general.color.darkTones.bgTray,
+        backgroundColor: props.color ?? Colors.general.color.darkTones.bgTray,
         borderRadius: 20,
         alignSelf: "flex-start",
         paddingHorizontal: 24,
@@ -52,7 +54,7 @@ export default function SelectButton(props: {
             <ScaledPressable scaleDuration={100} scaleTo={0.97}>
               <Text
                 style={{
-                  color: Colors.general.color.grayTones.muted50,
+                  color: props.textColor ?? Colors.general.color.grayTones.muted50,
                   ...typography.mediumM,
                 }}
                 onPress={openMenu}

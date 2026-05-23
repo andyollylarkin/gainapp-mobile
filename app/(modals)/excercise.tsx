@@ -28,11 +28,33 @@ function EmptyWorkoutContent({
   isGenerating,
   onGenerate,
   day,
+  showGenerateBtn,
 }: {
   isGenerating: boolean;
   onGenerate: () => void;
+  showGenerateBtn: boolean | undefined;
   day: string;
 }) {
+  if (!showGenerateBtn) {
+    return (
+      <Pressable
+        onPress={() =>
+          router.push(`/(add_ex_modals)/add_ex?day=${day}&trayId=${""}`)
+        }
+      >
+        <Text
+          style={{
+            ...typography.mediumM,
+            color: Colors.general.color.grayTones.muted40,
+            textAlign: "center",
+          }}
+        >
+          Add exercise
+        </Text>
+      </Pressable>
+    );
+  }
+
   return (
     <View
       style={{
@@ -414,15 +436,17 @@ export default function ExcerciseModal() {
             />
           ))
         )}
-        {!isLoadingWorkout &&
-          !workoutData?.isRestDay &&
-          (!workoutData || workoutData.trays.length === 0) && (
-            <EmptyWorkoutContent
-              isGenerating={isGeneratingWorkout}
-              onGenerate={handleGenerateWorkout}
-              day={requestDayEnum}
-            />
-          )}
+        <EmptyWorkoutContent
+          showGenerateBtn={
+            workoutData?.trays?.length === undefined ||
+            workoutData.trays.length === 0
+              ? true
+              : false
+          }
+          isGenerating={isGeneratingWorkout}
+          onGenerate={handleGenerateWorkout}
+          day={requestDayEnum}
+        />
       </ScrollView>
       <ExcerciseCustomKeyboard
         visible={isKeyboardVisible}
