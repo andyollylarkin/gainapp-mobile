@@ -14,7 +14,7 @@ import ColumnDescription, {
   ColumnDescriptionProps,
 } from "../column-description";
 import ExcerciseTitle, { ExcerciseTitleProps } from "../excercise-title";
-import HiddenNote from "../hidden-note";
+import HideableNote from "../hidden-note";
 import { SetItemProps, SetState } from "./set-item";
 import SwipeableSet from "./swipable-set";
 
@@ -77,7 +77,11 @@ function calculateActiveIndex(sets: WorkoutWeekdaySet[]): number {
   return lastSequentialIndex;
 }
 
-function toSetItemProps(set: WorkoutWeekdaySet, index: number, trayId: string): TrayExercise {
+function toSetItemProps(
+  set: WorkoutWeekdaySet,
+  index: number,
+  trayId: string,
+): TrayExercise {
   return {
     id: set.id,
     history: set.history,
@@ -179,9 +183,7 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
     ),
   );
 
-  const queueAddExerciseSet = useExcerciseStore(
-    (s) => s.queueAddExerciseSet,
-  );
+  const queueAddExerciseSet = useExcerciseStore((s) => s.queueAddExerciseSet);
   const queueUpdateExerciseSetParams = useExcerciseStore(
     (s) => s.queueUpdateExerciseSetParams,
   );
@@ -253,7 +255,7 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
             flex: 1,
           }}
         >
-          <HiddenNote contextMenuId={props.id} />
+          <HideableNote contextMenuId={props.id} />
         </View>
         <ColumnDescription {...props.description} />
         {exerciseRows}

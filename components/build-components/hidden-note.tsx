@@ -1,20 +1,43 @@
+import { menuStore, useContextMenu } from "@/store/menu-store";
+import { useNoteStore } from "@/store/note-store";
 import { Colors, typography } from "@/constants/theme";
-import { useContextMenu } from "@/store/menu-store";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { TextInput, View } from "react-native";
 
-export default function HiddenNote(props: {
+export default function HideableNote(props: {
   onPress?: () => void;
   contextMenuId: string;
 }) {
   const menu = useContextMenu<string, TextInput>(props.contextMenuId);
   const ref = useRef<TextInput | null>(null);
-  const [hidden, setHidden] = useState(!menu?.value);
+  const note = useNoteStore((s) => s.getExerciseSetNotes(props.contextMenuId));
+  const [hidden, setHidden] = useState(!menu?.value && !note);
+
+  useEffect(() => {
+    const storedNote = useNoteStore
+      .getState()
+      .getExerciseSetNotes(props.contextMenuId);
+    if (storedNote) {
+      menuStore.getState().updateValue(props.contextMenuId, storedNote);
+    }
+  }, [props.contextMenuId]);
+
+  const onChangeValue = useCallback(
+    (v: string) => {
+      menuStore.getState().updateValue(props.contextMenuId, v);
+      useNoteStore.getState().setExerciseSetNotes(props.contextMenuId, v);
+    },
+    [props.contextMenuId],
+  );
 
   const updateVisibility = useCallback(() => {
-    const shouldHide = !menu?.value;
-    setHidden(shouldHide);
-  }, [menu?.value]);
+    const currentNote = useNoteStore
+      .getState()
+      .getExerciseSetNotes(props.contextMenuId);
+    const currentMenuValue =
+      menuStore.getState().menus[props.contextMenuId.toLowerCase()]?.value;
+    setHidden(!currentMenuValue && !currentNote);
+  }, [props.contextMenuId]);
 
   useEffect(() => {
     if (menu?.clicks && menu.clicks > 0) {
@@ -23,8 +46,12 @@ export default function HiddenNote(props: {
   }, [menu?.clicks]);
 
   useEffect(() => {
-    if (ref.current && !ref.current.isFocused()) ref.current.focus();
-  }, [ref.current]);
+    const storedNote = useNoteStore
+      .getState()
+      .getExerciseSetNotes(props.contextMenuId);
+    if (ref.current && !ref.current.isFocused() && !storedNote)
+      ref.current.focus();
+  }, [props.contextMenuId]);
 
   useEffect(() => {
     if (ref.current) {
@@ -45,7 +72,7 @@ export default function HiddenNote(props: {
         placeholderTextColor={Colors.general.color.grayTones.muted40}
         onEndEditing={updateVisibility}
         scrollEnabled={false}
-        onChangeText={(text) => menu?.setValue(text)}
+        onChangeText={(text) => onChangeValue(text)}
         style={{
           ...typography.regularM,
           color: Colors.general.color.grayTones.muted40,
