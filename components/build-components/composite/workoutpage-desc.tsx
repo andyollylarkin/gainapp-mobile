@@ -2,9 +2,6 @@ import LightningIcon from "@/components/icons/lightning";
 import WorkoutTimerIcon from "@/components/icons/workout-timer";
 import { Colors, typography } from "@/constants/theme";
 import { Text, View } from "react-native";
-import StatsButton from "../stats-button";
-import ThreeDotsButton from "../three-dots-button";
-import ScaledPressable from "@/components/animated/scaled-pressable";
 
 export interface WorkoutPageDescProps {
   workoutName: string;
