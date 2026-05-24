@@ -64,7 +64,7 @@ export default function WorkoutPageDesc(props: WorkoutPageDescProps) {
           </View>
         </View>
       </View>
-      <View
+      {/* <View
         style={{
           flexDirection: "row-reverse",
           gap: 12,
@@ -86,7 +86,7 @@ export default function WorkoutPageDesc(props: WorkoutPageDescProps) {
             onPressIn={() => {}}
           />
         </ScaledPressable>
-      </View>
+      </View> */}
     </View>
   );
 }
