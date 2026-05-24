@@ -24,7 +24,8 @@ export default function SelectButtons(props: {
         alignItems: "center",
       }}
     >
-      {selectedExercises.length > 1 && (
+      {/* TODO: добавим позже когда будут суперсеты */}
+      {/* {selectedExercises.length > 1 && (
         <View style={{ flex: 1 }}>
           <SliderButton
             color={"#001D33"}
@@ -43,31 +44,33 @@ export default function SelectButtons(props: {
             }}
           />
         </View>
+      )} */}
+      {selectedExercises.length > 0 && (
+        <View style={{ flex: selectedExercises.length > 1 ? 1 : 1 }}>
+          <SliderButton
+            color={Colors.general.color.grayTones.main}
+            textColor={Colors.general.color.darkTones.bg}
+            fullWidth
+            holdDuration={0}
+            disabled={selectedExercises.length === 0}
+            holdOverlayColor={Colors.general.color.grayTones.main}
+            text={`Add exercise ${selectedExercises.length > 0 ? `(${selectedExercises.length})` : ""}`}
+            icon={<></>}
+            onHoldStart={function (): void {
+              if (selectedExercises.length === 0) {
+                return;
+              }
+            }}
+            onHoldEnd={function (): void {
+              console.log("Add to workout", selectedExercises);
+              if (selectedExercises.length === 0) {
+                return;
+              }
+              props.onAddToWorkout?.(selectedExercises);
+            }}
+          />
+        </View>
       )}
-      <View style={{ flex: selectedExercises.length > 1 ? 1 : 1 }}>
-        <SliderButton
-          color={Colors.general.color.grayTones.main}
-          textColor={Colors.general.color.darkTones.bg}
-          fullWidth
-          holdDuration={0}
-          disabled={selectedExercises.length === 0}
-          holdOverlayColor={Colors.general.color.grayTones.main}
-          text={`Add exercise ${selectedExercises.length > 0 ? `(${selectedExercises.length})` : ""}`}
-          icon={<></>}
-          onHoldStart={function (): void {
-            if (selectedExercises.length === 0) {
-              return;
-            }
-          }}
-          onHoldEnd={function (): void {
-            console.log("Add to workout", selectedExercises);
-            if (selectedExercises.length === 0) {
-              return;
-            }
-            props.onAddToWorkout?.(selectedExercises);
-          }}
-        />
-      </View>
     </View>
   );
 }

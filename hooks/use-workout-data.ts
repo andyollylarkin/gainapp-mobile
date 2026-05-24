@@ -1,4 +1,5 @@
 import { getWorkoutByWeekday, WorkoutByWeekdayResponse } from "@/logic/api/exercises-by-weekday";
+import useApiReached from "@/hooks/use-api-reached";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { Day, DayEnum } from "@/types";
 import { useCallback, useEffect, useState } from "react";
@@ -14,6 +15,7 @@ export function useWorkoutData(day: Day): {
   const setWorkoutByWeekdayForDay = useExcerciseStore(
     (s) => s.setWorkoutByWeekdayForDay,
   );
+  const { isReached: isApiReached } = useApiReached();
   const [isLoading, setIsLoading] = useState(() => workout === null);
 
   useEffect(() => {
@@ -31,12 +33,13 @@ export function useWorkoutData(day: Day): {
 
       if (!isActive) return;
 
-      const cached = useExcerciseStore.getState().workoutByWeekdayByDay[dayKey];
-      if (cached) {
+      // If API is unreachable, use whatever is in local storage cache
+      if (!isApiReached) {
         setIsLoading(false);
         return;
       }
 
+      // API is reachable — always fetch fresh data from API
       try {
         const response = await getWorkoutByWeekday(
           Day.fromString(dayKey as keyof typeof DayEnum),
@@ -54,7 +57,7 @@ export function useWorkoutData(day: Day): {
     return () => {
       isActive = false;
     };
-  }, [dayKey, setWorkoutByWeekdayForDay]);
+  }, [dayKey, setWorkoutByWeekdayForDay, isApiReached]);
 
   return { workout, isLoading };
 }

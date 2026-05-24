@@ -46,12 +46,10 @@ export default function HideableNote(props: {
   }, [menu?.clicks]);
 
   useEffect(() => {
-    const storedNote = useNoteStore
-      .getState()
-      .getExerciseSetNotes(props.contextMenuId);
-    if (ref.current && !ref.current.isFocused() && !storedNote)
+    if (!hidden && ref.current && !ref.current.isFocused() && menu?.clicks && menu.clicks > 0) {
       ref.current.focus();
-  }, [props.contextMenuId]);
+    }
+  }, [hidden, menu?.clicks]);
 
   useEffect(() => {
     if (ref.current) {

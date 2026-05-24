@@ -24,6 +24,7 @@ interface TopDescriptionProps {
   time: string;
   onTimePress?: () => void;
   id: string;
+  show: boolean;
 }
 
 function EmptyWorkoutContent({
@@ -139,6 +140,7 @@ function TopDescription({
   name,
   time,
   onTimePress,
+  show,
   id,
 }: TopDescriptionProps): React.JSX.Element {
   return (
@@ -186,7 +188,7 @@ function TopDescription({
           </View>
         </View>
       </View>
-      <NoteInput exerciseId={id} />
+      {show && <NoteInput exerciseId={id} />}
     </View>
   );
 }
@@ -346,6 +348,7 @@ export default function ExcerciseModal() {
           name={workoutData?.description.workoutName ?? "Workout"}
           time={`${workoutData?.description.durationMinutes ?? 0}m`}
           id={params.id}
+          show={!workoutData?.isRestDay}
         />
 
         {isLoadingWorkout && !workoutData ? (
@@ -448,6 +451,19 @@ export default function ExcerciseModal() {
           day={requestDayEnum}
         />
       </ScrollView>
+      {isKeyboardVisible && (
+        <Pressable
+          onPress={hideCustomKeyboard}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 50,
+          }}
+        />
+      )}
       <ExcerciseCustomKeyboard
         visible={isKeyboardVisible}
         onAppend={appendInputValue}

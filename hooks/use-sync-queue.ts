@@ -4,10 +4,12 @@ import { addSuperset } from "@/logic/api/add-superset";
 import { deleteExercise } from "@/logic/api/delete-exercise";
 import { deleteExerciseSet } from "@/logic/api/delete-exercise-set";
 import { completeExerciseSet } from "@/logic/api/update-exercise-set";
+import { getWorkoutByWeekday } from "@/logic/api/exercises-by-weekday";
 import {
   PendingSyncActionType,
   useExcerciseStore,
 } from "@/store/excercise-store";
+import { Day, DayEnum } from "@/types";
 import { useEffect, useRef } from "react";
 import useApiReached from "./use-api-reached";
 
@@ -145,6 +147,17 @@ export function useSyncQueue() {
                   serverWorkoutDayExerciseId || undefined,
                 );
               }
+              const day = typeof action.payload.day === "string"
+                ? action.payload.day as keyof typeof DayEnum
+                : null;
+              if (day) {
+                try {
+                  const freshWorkout = await getWorkoutByWeekday(Day.fromString(day));
+                  useExcerciseStore.getState().setWorkoutByWeekdayForDay(day as DayEnum, freshWorkout);
+                } catch (e) {
+                  console.warn("Failed to refetch workout after addExercise", e);
+                }
+              }
             }
 
             if (action.type === "addSuperset") {
@@ -188,6 +201,17 @@ export function useSyncQueue() {
                     singleServerId,
                     singleWorkoutDayExerciseId || undefined,
                   );
+                }
+              }
+              const supersetDay = typeof action.payload.day === "string"
+                ? action.payload.day as keyof typeof DayEnum
+                : null;
+              if (supersetDay) {
+                try {
+                  const freshWorkout = await getWorkoutByWeekday(Day.fromString(supersetDay));
+                  useExcerciseStore.getState().setWorkoutByWeekdayForDay(supersetDay as DayEnum, freshWorkout);
+                } catch (e) {
+                  console.warn("Failed to refetch workout after addSuperset", e);
                 }
               }
             }

@@ -603,7 +603,7 @@ export const useExcerciseStore = create<ExcerciseStore>()(
       clearPendingSyncActions: () => set({ pendingSyncActions: [] }),
     }),
     {
-      name: "excercise-store-v1",
+      name: "excercise-store-v2",
       storage: createJSONStorage(() => safeStateStorage),
       partialize: (state: ExcerciseStore) => ({
         workoutOverviewByDay: state.workoutOverviewByDay,
