@@ -89,7 +89,7 @@ const colorSchemes = {
     inputFieldColor: Colors.general.color.darkTones.bgMiddle,
     inputFieldTextColor: Colors.general.color.grayTones.main,
     inputFieldDelimiterColor: Colors.general.color.grayTones.muted50,
-    selectColor: Colors.general.color.darkTones.bgMiddle,
+    selectColor: Colors.general.color.blueTones.main,
     selectTextColor: Colors.general.color.grayTones.main,
   },
   current: {
@@ -101,7 +101,7 @@ const colorSchemes = {
     inputFieldColor: Colors.general.color.darkTones.bgLight,
     inputFieldTextColor: Colors.general.color.grayTones.main,
     inputFieldDelimiterColor: Colors.general.color.grayTones.muted50,
-    selectColor: Colors.general.color.darkTones.bgLight,
+    selectColor: Colors.general.color.blueTones.main,
     selectTextColor: Colors.general.color.grayTones.main,
   },
 } as const;
