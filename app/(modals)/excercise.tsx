@@ -1,5 +1,7 @@
 import ScaledPressable from "@/components/animated/scaled-pressable";
-import ExcerciseCustomKeyboard from "@/components/build-components/composite/excercise-custom-keyboard";
+import ExcerciseCustomKeyboard, {
+  EXCERCISE_KEYBOARD_HEIGHT,
+} from "@/components/build-components/composite/excercise-custom-keyboard";
 import ExcerciseTray from "@/components/build-components/composite/excercise-tray";
 import NoteInput from "@/components/build-components/note-input";
 import ResetTimer from "@/components/build-components/reset-timer";
@@ -15,7 +17,14 @@ import { useExcerciseTimerStore } from "@/store/excercise-timer-store";
 import { Day, DayEnum } from "@/types";
 import { router, useLocalSearchParams } from "expo-router";
 import { RefObject, useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import {
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import Animated, { useSharedValue, withTiming } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -195,6 +204,7 @@ function TopDescription({
 
 export default function ExcerciseModal() {
   const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
   const currentDay = useCurrentDay();
   const params = useLocalSearchParams() as unknown as {
     day: Day;
@@ -237,6 +247,8 @@ export default function ExcerciseModal() {
     }
   };
 
+  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollOffsetRef = useRef(0);
   const currentSetValueRef = useRef<((next: string) => void) | null>(null);
   const focusedInputRef = useRef<RefObject<TextInput | null> | null>(null);
   const currentValueRef = useRef<string>("");
@@ -250,9 +262,7 @@ export default function ExcerciseModal() {
 
   const appendInputValue = (val?: string | number) => {
     const chunk = String(val ?? "");
-
     if (!chunk) return;
-
     const nextValue = `${currentValueRef.current}${chunk}`;
     applyInputValue(nextValue);
   };
@@ -267,7 +277,6 @@ export default function ExcerciseModal() {
       clearTimeout(blurHideTimeoutRef.current);
       blurHideTimeoutRef.current = null;
     }
-
     setIsKeyboardVisible(false);
     focusedInputRef.current?.current?.blur();
     focusedInputRef.current = null;
@@ -278,7 +287,6 @@ export default function ExcerciseModal() {
 
   const handleGenerateWorkout = async () => {
     if (isGeneratingWorkout) return;
-
     setIsGeneratingWorkout(true);
     try {
       const generatedOverview = await generateAiWorkout();
@@ -298,12 +306,29 @@ export default function ExcerciseModal() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!isKeyboardVisible || !focusedInputRef.current?.current) return;
+    const timeout = setTimeout(() => {
+      focusedInputRef.current?.current?.measureInWindow((_x, y, _w, h) => {
+        const keyboardTop = windowHeight - EXCERCISE_KEYBOARD_HEIGHT;
+        const inputBottom = y + h;
+        if (inputBottom > keyboardTop - 16) {
+          const delta = inputBottom - keyboardTop + 16;
+          scrollViewRef.current?.scrollTo({
+            y: scrollOffsetRef.current + delta,
+            animated: true,
+          });
+        }
+      });
+    }, 250);
+    return () => clearTimeout(timeout);
+  }, [isKeyboardVisible, windowHeight]);
+
   return (
     <View
       style={{
         flex: 1,
         backgroundColor: Colors.general.color.darkTones.bg,
-        position: "relative",
       }}
     >
       <Animated.View
@@ -335,6 +360,7 @@ export default function ExcerciseModal() {
         </View>
       </Animated.View>
       <ScrollView
+        ref={scrollViewRef}
         style={{ flex: 1 }}
         contentContainerStyle={{
           flexGrow: 1,
@@ -343,6 +369,10 @@ export default function ExcerciseModal() {
           paddingBottom: 24 + insets.bottom,
           paddingHorizontal: 8,
         }}
+        onScroll={(e) => {
+          scrollOffsetRef.current = e.nativeEvent.contentOffset.y;
+        }}
+        scrollEventThrottle={16}
       >
         <TopDescription
           name={workoutData?.description.workoutName ?? "Workout"}
@@ -370,14 +400,13 @@ export default function ExcerciseModal() {
             Rest day
           </Text>
         ) : (
-          workoutData?.trays.map((tray, idx) => (
+          workoutData?.trays.map((tray) => (
             <ExcerciseTray
               onInputFocus={(obj, value, setValue) => {
                 if (blurHideTimeoutRef.current) {
                   clearTimeout(blurHideTimeoutRef.current);
                   blurHideTimeoutRef.current = null;
                 }
-
                 currentSetValueRef.current = setValue;
                 currentValueRef.current = value;
                 focusedInputRef.current = obj;
@@ -421,7 +450,6 @@ export default function ExcerciseModal() {
                 );
                 const resolvedWorkoutDayExerciseId =
                   tray.workoutDayExerciseId ?? tray.id;
-
                 queueCompleteExerciseSet({
                   workoutDayExerciseId: resolvedWorkoutDayExerciseId,
                   setNumber: currentCompleted,
@@ -451,19 +479,6 @@ export default function ExcerciseModal() {
           day={requestDayEnum}
         />
       </ScrollView>
-      {isKeyboardVisible && (
-        <Pressable
-          onPress={hideCustomKeyboard}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 50,
-          }}
-        />
-      )}
       <ExcerciseCustomKeyboard
         visible={isKeyboardVisible}
         onAppend={appendInputValue}

@@ -1,10 +1,6 @@
 import { DefaultKeyboard } from "@/components/build-components/keyboard/keyboard";
-import React, { useEffect, useMemo } from "react";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+import React, { useEffect, useMemo, useRef } from "react";
+import { Animated } from "react-native";
 
 export const EXCERCISE_KEYBOARD_HEIGHT = 320;
 
@@ -21,18 +17,20 @@ export default function ExcerciseCustomKeyboard({
   onBackspace,
   onHide,
 }: ExcerciseCustomKeyboardProps) {
-  const keyboardTranslateY = useSharedValue(EXCERCISE_KEYBOARD_HEIGHT);
+  const keyboardHeightAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    keyboardTranslateY.value = withTiming(
-      visible ? 0 : EXCERCISE_KEYBOARD_HEIGHT,
-      { duration: 220 },
-    );
-  }, [visible, keyboardTranslateY]);
+    Animated.timing(keyboardHeightAnim, {
+      toValue: visible ? EXCERCISE_KEYBOARD_HEIGHT : 0,
+      duration: 220,
+      useNativeDriver: false,
+    }).start();
+  }, [visible, keyboardHeightAnim]);
 
-  const keyboardAnimatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateY: keyboardTranslateY.value }],
-  }));
+  const innerTranslateY = keyboardHeightAnim.interpolate({
+    inputRange: [0, EXCERCISE_KEYBOARD_HEIGHT],
+    outputRange: [-EXCERCISE_KEYBOARD_HEIGHT, 0],
+  });
 
   const keyboardHandlers = useMemo(
     () => ({
@@ -64,22 +62,15 @@ export default function ExcerciseCustomKeyboard({
     <Animated.View
       pointerEvents={visible ? "auto" : "none"}
       style={{
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 100,
-        elevation: 100,
-        height: EXCERCISE_KEYBOARD_HEIGHT,
+        height: keyboardHeightAnim,
+        overflow: "hidden",
       }}
     >
       <Animated.View
-        style={[
-          {
-            height: EXCERCISE_KEYBOARD_HEIGHT,
-          },
-          keyboardAnimatedStyle,
-        ]}
+        style={{
+          height: EXCERCISE_KEYBOARD_HEIGHT,
+          transform: [{ translateY: innerTranslateY }],
+        }}
       >
         <DefaultKeyboard keyboard={keyboardHandlers} panel={panelHandlers} />
       </Animated.View>
