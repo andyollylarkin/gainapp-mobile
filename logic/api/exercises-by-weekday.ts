@@ -27,7 +27,7 @@ export interface WorkoutWeekdayTray {
     title: string;
   };
   description: {
-    items: ["Set", "Previous", "kg", "Reps"] | ["Set", "Previous", "kg"];
+    items: ["Set", "Previous", "kg", "Reps"];
   };
   history: WorkoutWeekdaySetHistory;
   sets: WorkoutWeekdaySet[];
@@ -77,6 +77,14 @@ function normalizeWorkoutByWeekdayResponse(
           ...(trayObj as unknown as WorkoutWeekdayTray),
           id,
           workoutDayExerciseId,
+          description: {
+            items: ["Set", "Previous", "kg", "Reps"] as [
+              "Set",
+              "Previous",
+              "kg",
+              "Reps",
+            ],
+          },
         };
       })
     : [];
