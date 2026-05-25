@@ -72,7 +72,7 @@ function ContextMenu(props: {
       onPress: () => console.log("Adjust Increment"),
     },
     {
-      text: measurementUnit === "kg" ? "Switch to lbs" : "Switch to kg",
+      text: measurementUnit === "kg" ? "Switch to Lbs" : "Switch to Kg",
       icon: WeightIcon,
       onPress: () => {
         if (measurementUnit === "kg") {
