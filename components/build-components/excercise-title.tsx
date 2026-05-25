@@ -1,4 +1,5 @@
 import { Colors, typography } from "@/constants/theme";
+import { useSettingsStore } from "@/store/excercise-settings-store";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { useContextMenu } from "@/store/menu-store";
 import { DayEnum } from "@/types";
@@ -11,6 +12,7 @@ import Animated, {
 } from "react-native-reanimated";
 import ScaledPressable from "../animated/scaled-pressable";
 import FluentDrag from "../icons/fluent-drag";
+import NoteIcon from "../icons/note";
 import PlusIcon from "../icons/plus";
 import SwitchIcon from "../icons/switch";
 import TrashIcon from "../icons/trash";
@@ -19,7 +21,6 @@ import WeightIcon from "../icons/weight";
 import ActionsSheet, { ActionsSheetItem } from "./actions-sheet";
 import StatsButton from "./stats-button";
 import ThreeDotsButton from "./three-dots-button";
-import NoteIcon from "../icons/note";
 
 export interface ExcerciseTitleProps {
   type: string;
@@ -49,6 +50,8 @@ function ContextMenu(props: {
     (state) => state.queueDeleteExercise,
   );
 
+  const { measurementUnit, setMeasurementUnit } = useSettingsStore();
+
   const menuItems: ActionsSheetItem[] = [
     {
       text: "Add Note",
@@ -69,9 +72,13 @@ function ContextMenu(props: {
       onPress: () => console.log("Adjust Increment"),
     },
     {
-      text: "Switch to Kg",
+      text: measurementUnit === "kg" ? "Switch to lbs" : "Switch to kg",
       icon: WeightIcon,
-      onPress: () => console.log("Switch to Kg"),
+      onPress: () => {
+        if (measurementUnit === "kg") {
+          setMeasurementUnit("lbs");
+        } else setMeasurementUnit("kg");
+      },
     },
     {
       text: "Replace Exercise",

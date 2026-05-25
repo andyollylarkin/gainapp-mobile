@@ -2,9 +2,13 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+type KgOrLbs = "kg" | "lbs";
+
 type SettingsStore = {
   restTime: number;
+  measurementUnit: KgOrLbs;
   increment: number;
+  setMeasurementUnit: (val: KgOrLbs) => void;
   setRestTime: (v: number) => void;
   setIncrement: (v: number) => void;
   incrementRestTime: (v: number) => void;
@@ -18,6 +22,7 @@ export const useSettingsStore = create<SettingsStore>()(
     (set) => ({
       restTime: 90,
       increment: 1,
+      measurementUnit: "lbs",
       setRestTime: (v) => set({ restTime: v }),
       setIncrement: (v) => set({ increment: v }),
       incrementIncrement: (v) =>
@@ -28,6 +33,7 @@ export const useSettingsStore = create<SettingsStore>()(
         set((state) => ({ restTime: state.restTime - v })),
       decrementIncrement: (v) =>
         set((state) => ({ increment: state.increment - v })),
+      setMeasurementUnit: (v) => set(() => ({ measurementUnit: v })),
     }),
     {
       name: "settings-storage",
@@ -53,6 +59,9 @@ export function useExerciseSettings() {
   const decrementIncrement = useSettingsStore(
     (state) => state.decrementIncrement,
   );
+  const setMeasurementUnit = useSettingsStore(
+    (state) => state.setMeasurementUnit,
+  );
 
   return {
     restTime,
@@ -63,5 +72,6 @@ export function useExerciseSettings() {
     incrementIncrement,
     decrementRestTime,
     decrementIncrement,
+    setMeasurementUnit,
   };
 }
