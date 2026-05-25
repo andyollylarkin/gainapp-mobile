@@ -2,6 +2,7 @@ import { Colors } from "@/constants/theme";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
+import { Circle } from "react-native-progress";
 
 export default function VideoPlayer({
   videoUrl,
@@ -31,6 +32,7 @@ export default function VideoPlayer({
   }, [videoUrl]);
 
   useEffect(() => {
+    console.log("THIS");
     const subscription = player.addListener("statusChange", (status) => {
       if (status.error) {
         console.error("Video error:", status.error);
@@ -62,11 +64,17 @@ export default function VideoPlayer({
       }}
     >
       <Text style={{ color: Colors.general.color.grayTones.main }}>
-        {!videoUrl
-          ? "No video available"
-          : error
-            ? "Failed to load video"
-            : "Loading video..."}
+        {!videoUrl ? (
+          "No video available"
+        ) : error ? (
+          "Failed to load video"
+        ) : (
+          <Circle
+            color={Colors.general.color.grayTones.muted40}
+            size={40}
+            indeterminate={true}
+          />
+        )}
       </Text>
     </View>
   ) : (

@@ -51,7 +51,7 @@ export default function InfoModal() {
             <TabViewComponent.View>
               <TabViewComponent.TabItem tab-name="Guide">
                 <GuideTab
-                  videoUrl="https://nexus.devinside.tech/repository/binary-data/video/00011201-3-4-Sit-up_Waist.mp4" //TODO: replace with real URL
+                  videoUrl="https://cdn.devinside.tech/75351201-Medicine-Ball-Slam-(VERSION-2)-(male)_Waist_.mp4" //TODO: replace with real URL
                   description="Example description"
                 />
               </TabViewComponent.TabItem>
