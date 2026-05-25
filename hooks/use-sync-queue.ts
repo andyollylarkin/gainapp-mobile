@@ -3,8 +3,8 @@ import { addExerciseSet } from "@/logic/api/add-exercise-set";
 import { addSuperset } from "@/logic/api/add-superset";
 import { deleteExercise } from "@/logic/api/delete-exercise";
 import { deleteExerciseSet } from "@/logic/api/delete-exercise-set";
-import { completeExerciseSet } from "@/logic/api/update-exercise-set";
 import { getWorkoutByWeekday } from "@/logic/api/exercises-by-weekday";
+import { completeExerciseSet } from "@/logic/api/update-exercise-set";
 import {
   PendingSyncActionType,
   useExcerciseStore,
@@ -13,7 +13,7 @@ import { Day, DayEnum } from "@/types";
 import { useEffect, useRef } from "react";
 import useApiReached from "./use-api-reached";
 
-function isUuid(value: string): boolean {
+function isServerTrayId(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     value,
   );
@@ -23,208 +23,147 @@ async function runAction(
   type: PendingSyncActionType,
   payload: Record<string, unknown>,
 ): Promise<unknown> {
-  if (type === "addExerciseSet") return addExerciseSet(payload as any);
-  if (type === "updateExerciseSetParams")
-    return completeExerciseSet(payload as any);
-  if (type === "completeExerciseSet")
-    return completeExerciseSet(payload as any);
-  if (type === "deleteExerciseSet") {
-    const id = typeof payload.id === "string" ? payload.id : "";
-    if (!id) throw new Error("Invalid payload for deleteExerciseSet");
-    return deleteExerciseSet(id);
+  switch (type) {
+    case "addExerciseSet":
+      return addExerciseSet(payload as never);
+    case "updateExerciseSetParams":
+    case "completeExerciseSet":
+      return completeExerciseSet(payload as never);
+    case "deleteExerciseSet": {
+      const id = typeof payload.id === "string" ? payload.id : "";
+      if (!id) throw new Error("deleteExerciseSet: missing id");
+      return deleteExerciseSet(id);
+    }
+    case "addExercise":
+      return addExercise(payload as never);
+    case "addSuperset":
+      return addSuperset(payload as never);
+    case "deleteExercise":
+      return deleteExercise(payload as never);
+    default:
+      throw new Error(`Unknown sync action type: ${type}`);
   }
-  if (type === "addExercise") return addExercise(payload as any);
-  if (type === "addSuperset") return addSuperset(payload as any);
-  if (type === "deleteExercise") return deleteExercise(payload as any);
 }
 
-function getServerSetId(result: unknown): string {
-  const id = (result as { id?: unknown } | undefined)?.id;
-
-  return typeof id === "string" ? id : "";
-}
-
-function getServerTrayId(result: unknown): string {
-  const trayId = (result as { trayId?: unknown } | undefined)?.trayId;
-
-  return typeof trayId === "string" ? trayId : "";
-}
-
-function getServerWorkoutDayExerciseId(result: unknown): string {
-  const workoutDayExerciseId = (
-    result as { workoutDayExerciseId?: unknown } | undefined
-  )?.workoutDayExerciseId;
-
-  return typeof workoutDayExerciseId === "string" ? workoutDayExerciseId : "";
-}
-
-function getServerTrayIds(result: unknown): string[] {
-  const candidate = (result as { trayIds?: unknown } | undefined)?.trayIds;
-  if (!Array.isArray(candidate)) return [];
-  return candidate.filter((val): val is string => typeof val === "string");
-}
-
-function getServerWorkoutDayExerciseIds(result: unknown): string[] {
-  const candidate =
-    (result as { workoutDayExerciseIds?: unknown } | undefined)
-      ?.workoutDayExerciseIds ??
-    (result as { workoutDayExerciseId?: unknown } | undefined)
-      ?.workoutDayExerciseId;
-
-  if (Array.isArray(candidate)) {
-    return candidate.filter((val): val is string => typeof val === "string");
+async function refetchAndMerge(dayKey: string) {
+  try {
+    const fresh = await getWorkoutByWeekday(
+      Day.fromString(dayKey as keyof typeof DayEnum),
+    );
+    useExcerciseStore.getState().mergeWorkoutFromApi(dayKey as DayEnum, fresh);
+  } catch {
+    // Refetch is best-effort
   }
-
-  if (typeof candidate === "string") {
-    return [candidate];
-  }
-
-  return [];
 }
 
-// Hook that periodically checks for pending sync actions and tries to execute them when the API is reachable.
 export function useSyncQueue() {
+  const isApiReached = useApiReached();
+  const isSyncing = useRef(false);
+
   const pendingSyncActions = useExcerciseStore((s) => s.pendingSyncActions);
   const removePendingSyncAction = useExcerciseStore(
     (s) => s.removePendingSyncAction,
   );
   const replaceSetId = useExcerciseStore((s) => s.replaceSetId);
   const replaceTrayId = useExcerciseStore((s) => s.replaceTrayId);
-  const isSyncing = useRef(false);
-  const { isReached, stopWatching } = useApiReached();
 
   useEffect(() => {
+    if (!isApiReached || pendingSyncActions.length === 0 || isSyncing.current)
+      return;
+
     async function flush() {
-      if (isSyncing.current || pendingSyncActions.length === 0) return;
-
       isSyncing.current = true;
-
       try {
-        for (const queuedAction of pendingSyncActions) {
-          const latestAction = useExcerciseStore
+        for (const snapshot of pendingSyncActions) {
+          const action = useExcerciseStore
             .getState()
-            .pendingSyncActions.find((a) => a.id === queuedAction.id);
+            .pendingSyncActions.find((a) => a.id === snapshot.id);
+          if (!action) continue;
 
-          if (!latestAction) continue;
-
-          const action = latestAction;
+          // addExerciseSet needs a real server workoutDayExerciseId — skip until
+          // the parent addExercise/addSuperset has been synced first.
+          if (action.type === "addExerciseSet") {
+            const wdeId =
+              typeof action.payload.workoutDayExerciseId === "string"
+                ? action.payload.workoutDayExerciseId
+                : "";
+            if (!isServerTrayId(wdeId)) continue;
+          }
 
           try {
-            if (action.type === "addExerciseSet") {
-              const workoutDayExerciseId =
-                typeof action.payload.workoutDayExerciseId === "string"
-                  ? action.payload.workoutDayExerciseId
-                  : "";
-
-              if (!isUuid(workoutDayExerciseId)) {
-                continue;
-              }
-            }
-
             const result = await runAction(action.type, action.payload);
 
             if (action.type === "addExerciseSet") {
               const tempId =
                 typeof action.payload.id === "string" ? action.payload.id : "";
-              const serverId = getServerSetId(result);
+              const res = result as Record<string, unknown>;
+              const serverId = typeof res?.id === "string" ? res.id : "";
               if (tempId && serverId && tempId !== serverId) {
                 replaceSetId(tempId, serverId, action.id);
               }
+              removePendingSyncAction(action.id);
+              continue;
             }
 
             if (action.type === "addExercise") {
-              const tempTrayId =
+              const tempId =
                 typeof action.payload.trayId === "string"
                   ? action.payload.trayId
                   : "";
-              const serverTrayId = getServerTrayId(result);
-              const serverWorkoutDayExerciseId =
-                getServerWorkoutDayExerciseId(result);
-              if (tempTrayId && serverTrayId && tempTrayId !== serverTrayId) {
-                replaceTrayId(
-                  tempTrayId,
-                  serverTrayId,
-                  serverWorkoutDayExerciseId || undefined,
-                );
+              const res = result as Record<string, unknown>;
+              const serverId =
+                typeof res?.trayId === "string" ? res.trayId : "";
+              const serverWdeId =
+                typeof res?.workoutDayExerciseId === "string"
+                  ? res.workoutDayExerciseId
+                  : undefined;
+              if (tempId && serverId && tempId !== serverId) {
+                replaceTrayId(tempId, serverId, serverWdeId);
               }
-              const day = typeof action.payload.day === "string"
-                ? action.payload.day as keyof typeof DayEnum
-                : null;
-              if (day) {
-                try {
-                  const freshWorkout = await getWorkoutByWeekday(Day.fromString(day));
-                  useExcerciseStore.getState().setWorkoutByWeekdayForDay(day as DayEnum, freshWorkout);
-                } catch (e) {
-                  console.warn("Failed to refetch workout after addExercise", e);
-                }
-              }
+              removePendingSyncAction(action.id);
+              const dayKey =
+                typeof action.payload.day === "string" ? action.payload.day : null;
+              if (dayKey) await refetchAndMerge(dayKey);
+              continue;
             }
 
             if (action.type === "addSuperset") {
-              const tempTrayIds = Array.isArray(action.payload.exercises)
-                ? action.payload.exercises
+              const tempIds = Array.isArray(action.payload.exercises)
+                ? (action.payload.exercises as Record<string, unknown>[])
                     .map((ex) =>
-                      typeof (ex as { trayId?: unknown }).trayId === "string"
-                        ? (ex as { trayId: string }).trayId
-                        : "",
+                      typeof ex.trayId === "string" ? ex.trayId : "",
                     )
-                    .filter((id) => id !== "")
+                    .filter(Boolean)
                 : [];
-
-              const serverTrayIds = getServerTrayIds(result);
-              const serverWorkoutDayExerciseIds =
-                getServerWorkoutDayExerciseIds(result);
-
-              if (
-                serverTrayIds.length > 0 &&
-                serverTrayIds.length === tempTrayIds.length
-              ) {
-                tempTrayIds.forEach((tempId, idx) => {
-                  const serverId = serverTrayIds[idx];
+              const res = result as Record<string, unknown>;
+              const serverIds = Array.isArray(res?.trayIds)
+                ? (res.trayIds as unknown[]).filter(
+                    (v): v is string => typeof v === "string",
+                  )
+                : [];
+              const serverWdeIds = Array.isArray(res?.workoutDayExerciseIds)
+                ? (res.workoutDayExerciseIds as unknown[]).filter(
+                    (v): v is string => typeof v === "string",
+                  )
+                : [];
+              if (serverIds.length === tempIds.length) {
+                tempIds.forEach((tempId, i) => {
+                  const serverId = serverIds[i];
                   if (tempId && serverId && tempId !== serverId) {
-                    replaceTrayId(
-                      tempId,
-                      serverId,
-                      serverWorkoutDayExerciseIds[idx],
-                    );
+                    replaceTrayId(tempId, serverId, serverWdeIds[i]);
                   }
                 });
-              } else {
-                const singleServerId = getServerTrayId(result);
-                const singleWorkoutDayExerciseId =
-                  getServerWorkoutDayExerciseId(result) ||
-                  serverWorkoutDayExerciseIds[0];
-
-                if (tempTrayIds.length === 1 && singleServerId) {
-                  replaceTrayId(
-                    tempTrayIds[0],
-                    singleServerId,
-                    singleWorkoutDayExerciseId || undefined,
-                  );
-                }
               }
-              const supersetDay = typeof action.payload.day === "string"
-                ? action.payload.day as keyof typeof DayEnum
-                : null;
-              if (supersetDay) {
-                try {
-                  const freshWorkout = await getWorkoutByWeekday(Day.fromString(supersetDay));
-                  useExcerciseStore.getState().setWorkoutByWeekdayForDay(supersetDay as DayEnum, freshWorkout);
-                } catch (e) {
-                  console.warn("Failed to refetch workout after addSuperset", e);
-                }
-              }
+              removePendingSyncAction(action.id);
+              const dayKey =
+                typeof action.payload.day === "string" ? action.payload.day : null;
+              if (dayKey) await refetchAndMerge(dayKey);
+              continue;
             }
 
             removePendingSyncAction(action.id);
           } catch (e) {
-            console.warn(
-              "Sync action failed:",
-              action.type,
-              e,
-              "payload: ",
-              action.payload,
-            );
+            console.warn(`[SyncQueue] ${action.type} failed:`, e);
           }
         }
       } finally {
@@ -232,13 +171,12 @@ export function useSyncQueue() {
       }
     }
 
-    if (isReached) flush();
+    flush();
   }, [
+    isApiReached,
     pendingSyncActions,
-    isReached,
-    stopWatching,
+    removePendingSyncAction,
     replaceSetId,
     replaceTrayId,
-    removePendingSyncAction,
   ]);
 }

@@ -1,25 +1,26 @@
-import { useState } from "react";
-import useNetworkConnected from "./use-network-connected";
 import apiDataFetchAvailable from "@/utils/data-fetch-available";
+import { useEffect, useRef, useState } from "react";
 
-export default function useApiReached(): {
-  isReached: boolean;
-  stopWatching: () => void;
-} {
-  const [apiReached, setApiReached] = useState<boolean>(true);
-  const { isConnected, stopWatching: stopWatchingNetwork } =
-    useNetworkConnected();
+export default function useApiReached(): boolean {
+  const [isReached, setIsReached] = useState(true);
+  const mountedRef = useRef(true);
 
-  const interval = setInterval(async () => {
-    const available = await apiDataFetchAvailable();
-    setApiReached(available && isConnected);
-  }, 5000);
+  useEffect(() => {
+    mountedRef.current = true;
 
-  return {
-    isReached: apiReached,
-    stopWatching: () => {
+    async function check() {
+      const available = await apiDataFetchAvailable();
+      if (mountedRef.current) setIsReached(available);
+    }
+
+    check();
+    const interval = setInterval(check, 5000);
+
+    return () => {
+      mountedRef.current = false;
       clearInterval(interval);
-      stopWatchingNetwork();
-    },
-  };
+    };
+  }, []);
+
+  return isReached;
 }

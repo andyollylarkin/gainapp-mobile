@@ -1,25 +1,28 @@
-import { getWorkoutByWeekday, WorkoutByWeekdayResponse } from "@/logic/api/exercises-by-weekday";
-import useApiReached from "@/hooks/use-api-reached";
+import {
+  getWorkoutByWeekday,
+  WorkoutByWeekdayResponse,
+} from "@/logic/api/exercises-by-weekday";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { Day, DayEnum } from "@/types";
 import { useCallback, useEffect, useState } from "react";
+import useApiReached from "./use-api-reached";
 
 export function useWorkoutData(day: Day): {
   workout: WorkoutByWeekdayResponse | null;
   isLoading: boolean;
 } {
-  const dayKey = day.name;
+  const dayKey = day.name as DayEnum;
+
   const workout = useExcerciseStore(
     useCallback((s) => s.workoutByWeekdayByDay[dayKey] ?? null, [dayKey]),
   );
-  const setWorkoutByWeekdayForDay = useExcerciseStore(
-    (s) => s.setWorkoutByWeekdayForDay,
-  );
-  const { isReached: isApiReached } = useApiReached();
+  const mergeWorkoutFromApi = useExcerciseStore((s) => s.mergeWorkoutFromApi);
+  const isApiReached = useApiReached();
+
   const [isLoading, setIsLoading] = useState(() => workout === null);
 
   useEffect(() => {
-    let isActive = true;
+    let active = true;
 
     async function load() {
       if (!useExcerciseStore.persist.hasHydrated()) {
@@ -30,34 +33,36 @@ export function useWorkoutData(day: Day): {
           });
         });
       }
+      if (!active) return;
 
-      if (!isActive) return;
+      // Show local data immediately — no spinner if we already have something
+      if (useExcerciseStore.getState().workoutByWeekdayByDay[dayKey]) {
+        setIsLoading(false);
+      }
 
-      // If API is unreachable, use whatever is in local storage cache
       if (!isApiReached) {
         setIsLoading(false);
         return;
       }
 
-      // API is reachable — always fetch fresh data from API
       try {
-        const response = await getWorkoutByWeekday(
+        const fresh = await getWorkoutByWeekday(
           Day.fromString(dayKey as keyof typeof DayEnum),
         );
-        if (!isActive) return;
-        setWorkoutByWeekdayForDay(dayKey, response);
-      } catch (e) {
-        console.warn("Failed to load workout data", e);
+        if (!active) return;
+        mergeWorkoutFromApi(dayKey, fresh);
+      } catch {
+        // API unavailable, local data remains
       } finally {
-        if (isActive) setIsLoading(false);
+        if (active) setIsLoading(false);
       }
     }
 
     load();
     return () => {
-      isActive = false;
+      active = false;
     };
-  }, [dayKey, setWorkoutByWeekdayForDay, isApiReached]);
+  }, [dayKey, isApiReached, mergeWorkoutFromApi]);
 
   return { workout, isLoading };
 }
