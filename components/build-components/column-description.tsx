@@ -1,23 +1,30 @@
 import { Colors, typography } from "@/constants/theme";
+import { KgOrLbs, useSettingsStore } from "@/store/excercise-settings-store";
 import { MaxFourNonEmptyArray } from "@/types";
 import { StyleSheet, Text, View } from "react-native";
 
-type description = "Set" | "Previous" | "kg" | "Reps";
+type description = "Set" | "Previous" | KgOrLbs | "Reps";
 
 export interface ColumnDescriptionProps {
   items: MaxFourNonEmptyArray<description>;
 }
 export default function ColumnDescription({ items }: ColumnDescriptionProps) {
+  const measurementUnit = useSettingsStore((state) => state.measurementUnit);
   const hasFourthItem = items.length === 4;
+
+  const displayItems = [...items] as MaxFourNonEmptyArray<description>;
+  if ((displayItems[2] as string).toLowerCase() === "kg" || (displayItems[2] as string).toLowerCase() === "lbs") {
+    displayItems[2] = (measurementUnit === "kg" ? "Kg" : "Lbs") as KgOrLbs;
+  }
 
   return (
     <View style={styles.container}>
       <View style={[styles.partContainer, styles.leftPartContainer]}>
         <View style={styles.setSlot}>
-          {items[0] && <Text style={styles.itemText}>{items[0]}</Text>}
+          {displayItems[0] && <Text style={styles.itemText}>{displayItems[0]}</Text>}
         </View>
         <View style={styles.historySlot}>
-          {items[1] && <Text style={styles.itemText}>{items[1]}</Text>}
+          {displayItems[1] && <Text style={styles.itemText}>{displayItems[1]}</Text>}
         </View>
       </View>
       <View style={[styles.partContainer, styles.rightPartContainer]}>
@@ -25,16 +32,16 @@ export default function ColumnDescription({ items }: ColumnDescriptionProps) {
           {hasFourthItem ? (
             <>
               <View style={styles.inputHalfSlot}>
-                {items[2] && <Text style={styles.itemText}>{items[2]}</Text>}
+                {displayItems[2] && <Text style={styles.itemText}>{displayItems[2]}</Text>}
               </View>
               <View style={styles.inputDelimiterSpacer} />
               <View style={styles.inputHalfSlot}>
-                {items[3] && <Text style={styles.itemText}>{items[3]}</Text>}
+                {displayItems[3] && <Text style={styles.itemText}>{displayItems[3]}</Text>}
               </View>
             </>
           ) : (
             <View style={styles.inputCenterSlot}>
-              {items[2] && <Text style={styles.itemText}>{items[2]}</Text>}
+              {displayItems[2] && <Text style={styles.itemText}>{displayItems[2]}</Text>}
             </View>
           )}
         </View>

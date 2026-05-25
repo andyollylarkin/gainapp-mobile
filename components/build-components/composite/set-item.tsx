@@ -19,6 +19,8 @@ import CheckGray from "../check-gray";
 import CheckGreen from "../check-green";
 import SetNumberWarpup from "../set-number-warpup";
 import TwoField from "../two-field";
+import { useSettingsStore } from "@/store/excercise-settings-store";
+import { KgToLbs } from "@/utils/kg_to_lbs";
 
 export type SetState = "pr_record" | "done" | "progress" | "current";
 
@@ -132,6 +134,8 @@ export default function SetItem(props: SetItemProps) {
     transform: [{ scale: scale.value }],
   }));
 
+  const { measurementUnit } = useSettingsStore();
+
   return (
     <Animated.View
       style={[
@@ -180,8 +184,16 @@ export default function SetItem(props: SetItemProps) {
               defaultValue={"0"}
               delimiter="x"
               delimiterColor={state.inputFieldDelimiterColor}
-              firstFieldValue={props.input.field1}
-              secondFieldValue={props.input.field2}
+              firstFieldValue={
+                measurementUnit === "lbs" && props.input.field1
+                  ? String(Math.floor(KgToLbs(props.input.field1)))
+                  : props.input.field1
+              }
+              secondFieldValue={
+                measurementUnit === "lbs" && props.input.field2
+                  ? String(Math.floor(KgToLbs(props.input.field2)))
+                  : (props.input.field2 as string)
+              }
               fieldColor={state.inputFieldColor}
               textColor={state.inputFieldTextColor}
               selectColor={state.selectColor}

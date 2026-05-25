@@ -12,6 +12,7 @@ import {
 import { Day, DayEnum } from "@/types";
 import { useEffect, useRef } from "react";
 import useApiReached from "./use-api-reached";
+import { KgOrLbs, useSettingsStore } from "@/store/excercise-settings-store";
 
 function isServerTrayId(value: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
@@ -45,10 +46,11 @@ async function runAction(
   }
 }
 
-async function refetchAndMerge(dayKey: string) {
+async function refetchAndMerge(dayKey: string, measurementUnit: KgOrLbs) {
   try {
     const fresh = await getWorkoutByWeekday(
       Day.fromString(dayKey as keyof typeof DayEnum),
+      measurementUnit,
     );
     useExcerciseStore.getState().mergeWorkoutFromApi(dayKey as DayEnum, fresh);
   } catch {
@@ -66,6 +68,7 @@ export function useSyncQueue() {
   );
   const replaceSetId = useExcerciseStore((s) => s.replaceSetId);
   const replaceTrayId = useExcerciseStore((s) => s.replaceTrayId);
+  const { measurementUnit } = useSettingsStore();
 
   useEffect(() => {
     if (!isApiReached || pendingSyncActions.length === 0 || isSyncing.current)
@@ -122,8 +125,10 @@ export function useSyncQueue() {
               }
               removePendingSyncAction(action.id);
               const dayKey =
-                typeof action.payload.day === "string" ? action.payload.day : null;
-              if (dayKey) await refetchAndMerge(dayKey);
+                typeof action.payload.day === "string"
+                  ? action.payload.day
+                  : null;
+              if (dayKey) await refetchAndMerge(dayKey, measurementUnit);
               continue;
             }
 
@@ -156,8 +161,10 @@ export function useSyncQueue() {
               }
               removePendingSyncAction(action.id);
               const dayKey =
-                typeof action.payload.day === "string" ? action.payload.day : null;
-              if (dayKey) await refetchAndMerge(dayKey);
+                typeof action.payload.day === "string"
+                  ? action.payload.day
+                  : null;
+              if (dayKey) await refetchAndMerge(dayKey, measurementUnit);
               continue;
             }
 
@@ -178,5 +185,6 @@ export function useSyncQueue() {
     removePendingSyncAction,
     replaceSetId,
     replaceTrayId,
+    measurementUnit,
   ]);
 }

@@ -1,5 +1,6 @@
 import config from "@/config";
 import { WorkoutOverviewDescription } from "@/logic/api/ex-description";
+import { KgOrLbs, useSettingsStore } from "@/store/excercise-settings-store";
 import { Day } from "@/types";
 
 const FIXED_USER_ID = "bebf5efa-ea6e-4025-adb3-edcf0b7c5155";
@@ -27,7 +28,7 @@ export interface WorkoutWeekdayTray {
     title: string;
   };
   description: {
-    items: ["Set", "Previous", "kg", "Reps"];
+    items: ["Set", "Previous", KgOrLbs, "Reps"];
   };
   history: WorkoutWeekdaySetHistory;
   sets: WorkoutWeekdaySet[];
@@ -52,13 +53,13 @@ function pickString(
 
 function normalizeWorkoutByWeekdayResponse(
   raw: unknown,
+  measurementUnit: KgOrLbs,
 ): WorkoutByWeekdayResponse {
   const response = raw as {
     description?: WorkoutOverviewDescription;
     isRestDay?: boolean;
     trays?: unknown;
   };
-
   const normalizedTrays: WorkoutWeekdayTray[] = Array.isArray(response.trays)
     ? response.trays.map((trayRaw) => {
         const trayObj = (trayRaw ?? {}) as Record<string, unknown>;
@@ -78,10 +79,10 @@ function normalizeWorkoutByWeekdayResponse(
           id,
           workoutDayExerciseId,
           description: {
-            items: ["Set", "Previous", "kg", "Reps"] as [
+            items: [
               "Set",
               "Previous",
-              "kg",
+              measurementUnit === "kg" ? ("Kg" as KgOrLbs) : ("Lbs" as KgOrLbs),
               "Reps",
             ],
           },
@@ -98,6 +99,7 @@ function normalizeWorkoutByWeekdayResponse(
 
 export async function getWorkoutByWeekday(
   day: Day,
+  measurementUnit: KgOrLbs,
 ): Promise<WorkoutByWeekdayResponse> {
   const url = `${config.apiBaseUrlDev}/api/users/${FIXED_USER_ID}/workouts/weekday/${Day.toNumber(day)}`;
 
@@ -114,5 +116,5 @@ export async function getWorkoutByWeekday(
 
   const js = await response.json();
 
-  return normalizeWorkoutByWeekdayResponse(js);
+  return normalizeWorkoutByWeekdayResponse(js, measurementUnit);
 }

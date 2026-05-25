@@ -7,6 +7,7 @@ import { DayEnum } from "@/types";
 import { safeStateStorage } from "@/utils/safe-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { KgOrLbs } from "./excercise-settings-store";
 
 export type PendingSyncActionType =
   | "addExerciseSet"
@@ -74,7 +75,10 @@ function appendAction(
 
   if (type === "addExerciseSet" || type === "deleteExerciseSet") {
     const id = str(payload.id);
-    if (id && actions.some((a) => a.type === type && str(a.payload.id) === id)) {
+    if (
+      id &&
+      actions.some((a) => a.type === type && str(a.payload.id) === id)
+    ) {
       return actions;
     }
   }
@@ -91,7 +95,8 @@ function appendAction(
         if (a.type !== "completeExerciseSet") return false;
         const aWde = str(a.payload.workoutDayExerciseId);
         const aSrc = str(
-          (a.payload.metrics as Record<string, unknown> | undefined)?.sourceSetId,
+          (a.payload.metrics as Record<string, unknown> | undefined)
+            ?.sourceSetId,
         );
         const aNum = num(a.payload.setNumber, -1);
         const aKey = aSrc ? `${aWde}:${aSrc}` : `${aWde}:${aNum}`;
@@ -155,13 +160,25 @@ interface ExcerciseStore {
   workoutByWeekdayByDay: Partial<Record<DayEnum, WorkoutByWeekdayResponse>>;
   pendingSyncActions: PendingSyncAction[];
 
-  setWorkoutOverviewForDay: (day: DayEnum, overview: WorkoutOverviewResponse) => void;
+  setWorkoutOverviewForDay: (
+    day: DayEnum,
+    overview: WorkoutOverviewResponse,
+  ) => void;
   getWorkoutOverviewForDay: (day: DayEnum) => WorkoutOverviewResponse | null;
-  setWorkoutByWeekdayForDay: (day: DayEnum, workout: WorkoutByWeekdayResponse) => void;
+  setWorkoutByWeekdayForDay: (
+    day: DayEnum,
+    workout: WorkoutByWeekdayResponse,
+  ) => void;
   getWorkoutByWeekdayForDay: (day: DayEnum) => WorkoutByWeekdayResponse | null;
-  mergeWorkoutFromApi: (day: DayEnum, apiWorkout: WorkoutByWeekdayResponse) => void;
+  mergeWorkoutFromApi: (
+    day: DayEnum,
+    apiWorkout: WorkoutByWeekdayResponse,
+  ) => void;
 
-  enqueueSyncAction: (type: PendingSyncActionType, payload: Record<string, unknown>) => void;
+  enqueueSyncAction: (
+    type: PendingSyncActionType,
+    payload: Record<string, unknown>,
+  ) => void;
 
   queueAddExerciseSet: (payload: Record<string, unknown>) => void;
   queueUpdateExerciseSetParams: (payload: Record<string, unknown>) => void;
@@ -175,16 +192,38 @@ interface ExcerciseStore {
   ) => void;
   queueAddExercise: (
     day: DayEnum,
-    exercise: { id: string | number; name: string; equipment: string; category?: string },
+    exercise: {
+      id: string | number;
+      name: string;
+      equipment: string;
+      category?: string;
+    },
   ) => void;
   queueAddSuperset: (
     day: DayEnum,
-    exercises: { id: string | number; name: string; equipment: string; category?: string }[],
+    exercises: {
+      id: string | number;
+      name: string;
+      equipment: string;
+      category?: string;
+    }[],
   ) => void;
-  queueDeleteExercise: (day: DayEnum, trayId: string, workoutDayExerciseId?: string) => void;
+  queueDeleteExercise: (
+    day: DayEnum,
+    trayId: string,
+    workoutDayExerciseId?: string,
+  ) => void;
 
-  replaceSetId: (tempId: string, serverId: string, currentActionId: string) => void;
-  replaceTrayId: (tempId: string, trayId: string, workoutDayExerciseId?: string) => void;
+  replaceSetId: (
+    tempId: string,
+    serverId: string,
+    currentActionId: string,
+  ) => void;
+  replaceTrayId: (
+    tempId: string,
+    trayId: string,
+    workoutDayExerciseId?: string,
+  ) => void;
 
   removePendingSyncAction: (id: string) => void;
   clearPendingSyncActions: () => void;
@@ -199,7 +238,10 @@ export const useExcerciseStore = create<ExcerciseStore>()(
 
       setWorkoutOverviewForDay: (day, overview) =>
         set((state) => ({
-          workoutOverviewByDay: { ...state.workoutOverviewByDay, [day]: overview },
+          workoutOverviewByDay: {
+            ...state.workoutOverviewByDay,
+            [day]: overview,
+          },
         })),
 
       getWorkoutOverviewForDay: (day) =>
@@ -207,7 +249,10 @@ export const useExcerciseStore = create<ExcerciseStore>()(
 
       setWorkoutByWeekdayForDay: (day, workout) =>
         set((state) => ({
-          workoutByWeekdayByDay: { ...state.workoutByWeekdayByDay, [day]: workout },
+          workoutByWeekdayByDay: {
+            ...state.workoutByWeekdayByDay,
+            [day]: workout,
+          },
         })),
 
       getWorkoutByWeekdayForDay: (day) =>
@@ -241,7 +286,9 @@ export const useExcerciseStore = create<ExcerciseStore>()(
             state.pendingSyncActions.flatMap((a) => {
               if (a.type === "addExercise") return [str(a.payload.trayId)];
               if (a.type === "addSuperset") {
-                const exs = a.payload.exercises as { trayId?: string }[] | undefined;
+                const exs = a.payload.exercises as
+                  | { trayId?: string }[]
+                  | undefined;
                 return exs?.map((ex) => str(ex.trayId)) ?? [];
               }
               return [];
@@ -250,11 +297,12 @@ export const useExcerciseStore = create<ExcerciseStore>()(
 
           const traysWithPendingSets = new Set(
             state.pendingSyncActions
-              .filter((a) =>
-                a.type === "addExerciseSet" ||
-                a.type === "updateExerciseSetParams" ||
-                a.type === "completeExerciseSet" ||
-                a.type === "deleteExerciseSet",
+              .filter(
+                (a) =>
+                  a.type === "addExerciseSet" ||
+                  a.type === "updateExerciseSetParams" ||
+                  a.type === "completeExerciseSet" ||
+                  a.type === "deleteExerciseSet",
               )
               .map((a) => str(a.payload.workoutDayExerciseId))
               .filter(Boolean),
@@ -293,7 +341,11 @@ export const useExcerciseStore = create<ExcerciseStore>()(
 
       enqueueSyncAction: (type, payload) =>
         set((state) => ({
-          pendingSyncActions: appendAction(state.pendingSyncActions, type, payload),
+          pendingSyncActions: appendAction(
+            state.pendingSyncActions,
+            type,
+            payload,
+          ),
         })),
 
       queueAddExerciseSet: (payload) => {
@@ -345,7 +397,9 @@ export const useExcerciseStore = create<ExcerciseStore>()(
             (tray) => ({
               ...tray,
               sets: tray.sets.map((s) =>
-                s.setNumber === setNumber ? { ...s, parameter1, parameter2 } : s,
+                s.setNumber === setNumber
+                  ? { ...s, parameter1, parameter2 }
+                  : s,
               ),
             }),
           ),
@@ -389,11 +443,15 @@ export const useExcerciseStore = create<ExcerciseStore>()(
               pendingSyncActions: state.pendingSyncActions.filter((a) => {
                 const aId = str(a.payload.id);
                 const aSrc = str(
-                  (a.payload.metrics as Record<string, unknown> | undefined)?.sourceSetId,
+                  (a.payload.metrics as Record<string, unknown> | undefined)
+                    ?.sourceSetId,
                 );
                 return aId !== setId && aSrc !== setId;
               }),
-              workoutByWeekdayByDay: patchDeleteSet(state.workoutByWeekdayByDay, setId),
+              workoutByWeekdayByDay: patchDeleteSet(
+                state.workoutByWeekdayByDay,
+                setId,
+              ),
             };
           }
 
@@ -402,7 +460,10 @@ export const useExcerciseStore = create<ExcerciseStore>()(
               ...state.pendingSyncActions,
               makePendingAction("deleteExerciseSet", payload),
             ],
-            workoutByWeekdayByDay: patchDeleteSet(state.workoutByWeekdayByDay, setId),
+            workoutByWeekdayByDay: patchDeleteSet(
+              state.workoutByWeekdayByDay,
+              setId,
+            ),
           };
         }),
 
@@ -422,7 +483,7 @@ export const useExcerciseStore = create<ExcerciseStore>()(
               items: ["Set", "Previous", "kg", "Reps"] as [
                 "Set",
                 "Previous",
-                "kg",
+                KgOrLbs,
                 "Reps",
               ],
             },
@@ -522,20 +583,22 @@ export const useExcerciseStore = create<ExcerciseStore>()(
       replaceSetId: (tempId, serverId, currentActionId) =>
         set((state) => ({
           workoutByWeekdayByDay: Object.fromEntries(
-            Object.entries(state.workoutByWeekdayByDay).map(([day, workout]) => [
-              day,
-              workout
-                ? {
-                    ...workout,
-                    trays: workout.trays.map((tray) => ({
-                      ...tray,
-                      sets: tray.sets.map((s) =>
-                        s.id === tempId ? { ...s, id: serverId } : s,
-                      ),
-                    })),
-                  }
-                : workout,
-            ]),
+            Object.entries(state.workoutByWeekdayByDay).map(
+              ([day, workout]) => [
+                day,
+                workout
+                  ? {
+                      ...workout,
+                      trays: workout.trays.map((tray) => ({
+                        ...tray,
+                        sets: tray.sets.map((s) =>
+                          s.id === tempId ? { ...s, id: serverId } : s,
+                        ),
+                      })),
+                    }
+                  : workout,
+              ],
+            ),
           ),
           pendingSyncActions: state.pendingSyncActions.map((action) => {
             if (action.id === currentActionId) return action;
@@ -552,26 +615,28 @@ export const useExcerciseStore = create<ExcerciseStore>()(
       replaceTrayId: (tempId, trayId, workoutDayExerciseId) =>
         set((state) => ({
           workoutByWeekdayByDay: Object.fromEntries(
-            Object.entries(state.workoutByWeekdayByDay).map(([day, workout]) => [
-              day,
-              workout
-                ? {
-                    ...workout,
-                    trays: workout.trays.map((tray) =>
-                      tray.id === tempId
-                        ? {
-                            ...tray,
-                            id: trayId,
-                            workoutDayExerciseId:
-                              workoutDayExerciseId ??
-                              tray.workoutDayExerciseId ??
-                              trayId,
-                          }
-                        : tray,
-                    ),
-                  }
-                : workout,
-            ]),
+            Object.entries(state.workoutByWeekdayByDay).map(
+              ([day, workout]) => [
+                day,
+                workout
+                  ? {
+                      ...workout,
+                      trays: workout.trays.map((tray) =>
+                        tray.id === tempId
+                          ? {
+                              ...tray,
+                              id: trayId,
+                              workoutDayExerciseId:
+                                workoutDayExerciseId ??
+                                tray.workoutDayExerciseId ??
+                                trayId,
+                            }
+                          : tray,
+                      ),
+                    }
+                  : workout,
+              ],
+            ),
           ),
           pendingSyncActions: state.pendingSyncActions.map((action) => {
             const next = { ...action.payload };
@@ -585,7 +650,9 @@ export const useExcerciseStore = create<ExcerciseStore>()(
 
       removePendingSyncAction: (id) =>
         set((state) => ({
-          pendingSyncActions: state.pendingSyncActions.filter((a) => a.id !== id),
+          pendingSyncActions: state.pendingSyncActions.filter(
+            (a) => a.id !== id,
+          ),
         })),
 
       clearPendingSyncActions: () => set({ pendingSyncActions: [] }),
