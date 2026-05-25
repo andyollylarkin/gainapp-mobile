@@ -3,10 +3,20 @@ import { useVideoPlayer, VideoView } from "expo-video";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
-export default function VideoPlayer({ videoUrl }: { videoUrl?: string }) {
-  const player = useVideoPlayer(videoUrl || "", (playerInstance) => {
-    playerInstance.loop = true;
-  });
+export default function VideoPlayer({
+  videoUrl,
+  useCaching = true,
+}: {
+  videoUrl?: string;
+  useCaching?: boolean;
+}) {
+  const player = useVideoPlayer(
+    { uri: videoUrl, useCaching: useCaching },
+    (playerInstance) => {
+      playerInstance.loop = true;
+      playerInstance.muted = true;
+    },
+  );
 
   const [isReady, setIsReady] = useState(false);
   const [error, setError] = useState(false);
