@@ -5,18 +5,22 @@ import Accordion from "@/components/parts/accordion";
 import TextButton from "@/components/parts/text-button";
 import { Colors } from "@/constants/theme";
 import { WorkoutWeekdaySet } from "@/logic/api/exercises-by-weekday";
+import { useExerciseSettings } from "@/store/excercise-settings-store";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { DayEnum } from "@/types";
 import * as Crypto from "expo-crypto";
-import React, { RefObject, useCallback, useMemo } from "react";
+import React, { RefObject, useCallback, useMemo, useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import ColumnDescription, {
   ColumnDescriptionProps,
 } from "../column-description";
 import ExcerciseTitle, { ExcerciseTitleProps } from "../excercise-title";
 import HideableNote from "../hidden-note";
+import AdjustTimerModal from "./adjust-timer-modal";
+import Modal from "./modal";
 import { SetItemProps, SetState } from "./set-item";
 import SwipeableSet from "./swipable-set";
+import { timeToString } from "@/utils/timer-to-string";
 
 export interface ExcerciseTrayProps {
   title: ExcerciseTitleProps;
@@ -231,6 +235,9 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
       props.onInputBlur,
     ],
   );
+  const [timerModalOpen, setTimerModalOpen] = useState<boolean>(false);
+  const { incrementRestTime, restTime, decrementRestTime } =
+    useExerciseSettings();
 
   return (
     <View style={styles.container}>
@@ -239,6 +246,25 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
           setIsExpanded((current) => !current);
         }}
       >
+        <Modal.Container visible={timerModalOpen}>
+          <AdjustTimerModal
+            currentValue={restTime}
+            openState={timerModalOpen}
+            setClose={() => setTimerModalOpen(false)}
+            title="Adjust rest timer"
+            exerciseTitle="Barbell Bench Press"
+            caption="Rest 1:30–2:00 min between sets for maximum muscle growth. Take your time if needed"
+            onIncrease={() => {
+              incrementRestTime(30);
+            }}
+            onDecrease={() => {
+              decrementRestTime(30);
+            }}
+            onDone={() => setTimerModalOpen(false)}
+            step={30}
+            image={null}
+          />
+        </Modal.Container>
         <ExcerciseTitle
           {...props.title}
           id={props.id}
@@ -269,9 +295,10 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
                   width={20}
                 />
               }
-              text={"2min 30s"}
+              text={timeToString(restTime)}
               bgColor={Colors.general.color.darkTones.bgMiddle}
               textColor={Colors.general.color.grayTones.muted50}
+              onPressIn={() => setTimerModalOpen(true)}
             />
           </View>
           <View style={styles.buttons}>
