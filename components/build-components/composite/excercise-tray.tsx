@@ -9,12 +9,7 @@ import { useExerciseSettings } from "@/store/excercise-settings-store";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { DayEnum } from "@/types";
 import * as Crypto from "expo-crypto";
-import React, {
-  RefObject,
-  useCallback,
-  useMemo,
-  useState,
-} from "react";
+import React, { RefObject, useCallback, useMemo, useState } from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import ColumnDescription, {
   ColumnDescriptionProps,
@@ -92,11 +87,20 @@ function toSetItemProps(
   set: WorkoutWeekdaySet,
   index: number,
   trayId: string,
+  allSets: WorkoutWeekdaySet[],
 ): TrayExercise {
+  let excerciseOrder: "W" | number;
+  if (set.isWarmup) {
+    excerciseOrder = "W";
+  } else {
+    excerciseOrder = allSets
+      .slice(0, index + 1)
+      .filter((s) => !s.isWarmup).length;
+  }
   return {
     id: set.id,
     history: set.history,
-    excerciseOrder: index === 0 ? "W" : index,
+    excerciseOrder,
     maxInputValue: 500,
     initialState: (set.completed ? "done" : "progress") as SetState,
     input: { field1: String(set.parameter1), field2: String(set.parameter2) },
@@ -123,7 +127,7 @@ const ExerciseRow = React.memo(function ExerciseRow(props: ExerciseRowProps) {
       <SwipeableSet
         onInputFocus={props.onInputFocus}
         onInputBlur={props.onInputBlur}
-        disabledSwipe={index === 0 || activeIndex > index}
+        disabledSwipe={activeIndex > index}
         onSwipeEnd={() => {
           onExcerciseRemove?.(excercise, excercise.id);
         }}
@@ -158,7 +162,7 @@ const ExerciseRow = React.memo(function ExerciseRow(props: ExerciseRowProps) {
             setNumber: index + 1,
           });
         }}
-        excerciseOrder={index === 0 ? "W" : index}
+        excerciseOrder={excercise.excerciseOrder}
       />
     </View>
   );
@@ -205,7 +209,7 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
   const workoutDayExerciseId = tray?.workoutDayExerciseId ?? props.id;
 
   const setItems = useMemo(
-    () => sets.map((set, index) => toSetItemProps(set, index, props.id)),
+    () => sets.map((set, index) => toSetItemProps(set, index, props.id, sets)),
     [sets, props.id],
   );
 

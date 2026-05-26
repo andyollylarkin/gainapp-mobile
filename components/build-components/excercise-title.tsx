@@ -1,7 +1,5 @@
 import { Colors, typography } from "@/constants/theme";
-import {
-  useSettingsStore
-} from "@/store/excercise-settings-store";
+import { useSettingsStore } from "@/store/excercise-settings-store";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { useContextMenu } from "@/store/menu-store";
 import { DayEnum } from "@/types";
@@ -47,9 +45,18 @@ function ContextMenu(props: {
   iconsColor: string;
   day: DayEnum;
 }) {
+  const tray = useExcerciseStore(
+    (state) =>
+      state.workoutByWeekdayByDay[props.day]?.trays.find(
+        (t) => t.id === props.id,
+      ) ?? null,
+  );
   const contextMenuNote = useContextMenu<string, TextInput>(props.id);
   const queueDeleteExercise = useExcerciseStore(
     (state) => state.queueDeleteExercise,
+  );
+  const queueAddExerciseSet = useExcerciseStore(
+    (state) => state.queueAddExerciseSet,
   );
 
   const contextMenuAdjust = useContextMenu<boolean>(props.id);
@@ -68,7 +75,26 @@ function ContextMenu(props: {
     {
       text: "Add Warm-Up Set",
       icon: PlusIcon,
-      onPress: () => console.log("Add Warm-Up Set"),
+      onPress: () => {
+        const lastSet = tray?.sets[tray.sets.length - 1];
+        const parameter1 = lastSet?.parameter1 ?? 0;
+        const parameter2 = lastSet?.parameter2 ?? 0;
+        const newSetId = `exercise-${Date.now()}-${Math.random()}`;
+
+        queueAddExerciseSet({
+          workoutDayExerciseId:
+            props.workoutDayExerciseId ??
+            tray?.workoutDayExerciseId ??
+            props.id,
+          id: newSetId,
+          parameter1,
+          parameter2,
+          isWarmup: true,
+          metrics: { field1: parameter1, field2: parameter2 },
+          completed: false,
+          restSecondsActual: null,
+        });
+      },
     },
     {
       text: "Adjust Increment",

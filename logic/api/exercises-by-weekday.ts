@@ -17,6 +17,7 @@ export interface WorkoutWeekdaySet {
   parameter1: number;
   parameter2: number;
   completed: boolean;
+  isWarmup?: boolean;
   history: WorkoutWeekdaySetHistory;
 }
 

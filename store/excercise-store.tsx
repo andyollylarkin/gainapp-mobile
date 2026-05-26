@@ -354,30 +354,32 @@ export const useExcerciseStore = create<ExcerciseStore>()(
         const id = str(payload.id) || `local-set-${Date.now()}`;
         const parameter1 = num(payload.parameter1);
         const parameter2 = num(payload.parameter2);
+        const isWarmup = payload.isWarmup === true;
         set((state) => ({
           workoutByWeekdayByDay: patchTray(
             state.workoutByWeekdayByDay,
             workoutDayExerciseId,
             (tray) => {
               if (tray.sets.some((s) => s.id === id)) return tray;
-              const lastHistory = tray.sets[tray.sets.length - 1]?.history;
+              const newSet = {
+                id,
+                setNumber: tray.sets.length + 1,
+                parameter1,
+                parameter2,
+                completed: false,
+                isWarmup,
+                history: tray.sets[tray.sets.length - 1]?.history ?? {
+                  firstText: 0,
+                  secondText: 0,
+                  delimiter: "x",
+                },
+              };
+              const nextSets = isWarmup
+                ? [newSet, ...tray.sets]
+                : [...tray.sets, newSet];
               return {
                 ...tray,
-                sets: [
-                  ...tray.sets,
-                  {
-                    id,
-                    setNumber: tray.sets.length + 1,
-                    parameter1,
-                    parameter2,
-                    completed: false,
-                    history: lastHistory ?? {
-                      firstText: 0,
-                      secondText: 0,
-                      delimiter: "x",
-                    },
-                  },
-                ],
+                sets: nextSets.map((s, i) => ({ ...s, setNumber: i + 1 })),
               };
             },
           ),

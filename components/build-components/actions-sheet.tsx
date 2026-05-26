@@ -28,6 +28,7 @@ export interface ActionsSheetItem {
   icon?: ComponentType<IconProps>;
   onPress: () => void;
   destructive?: boolean;
+  disabled?: boolean;
 }
 
 interface ActionsSheetProps {
@@ -106,7 +107,7 @@ export default function ActionsSheet({
     ]).start();
   };
 
-  const closeMenu = (onComplete?: () => void) => {
+  const closeMenu = (onComplete?: unknown) => {
     Animated.parallel([
       Animated.timing(overlayOpacity, {
         toValue: 0,
@@ -134,7 +135,9 @@ export default function ActionsSheet({
       }),
     ]).start(() => {
       setOpen(false);
-      setTimeout(() => onComplete?.(), 50);
+      if (typeof onComplete === "function") {
+        setTimeout(() => onComplete(), 50);
+      }
     });
   };
 
@@ -176,7 +179,7 @@ export default function ActionsSheet({
         transparent
         visible={open}
         animationType="none"
-        onRequestClose={closeMenu}
+        onRequestClose={() => closeMenu()}
       >
         <View style={StyleSheet.absoluteFill}>
           <Animated.View
@@ -185,7 +188,10 @@ export default function ActionsSheet({
             <View style={styles.overlayTint} />
           </Animated.View>
 
-          <Pressable style={StyleSheet.absoluteFill} onPress={closeMenu} />
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={() => closeMenu()}
+          />
 
           <Animated.View
             style={[
@@ -241,7 +247,12 @@ export default function ActionsSheet({
                       <View key={`${item.text}-${index}`}>
                         <ScaledPressable scaleDuration={100} scaleTo={0.97}>
                           <Pressable
-                            onPress={() => onActionPress(item)}
+                            onPress={() => {
+                              if (item.disabled) {
+                                return;
+                              }
+                              onActionPress(item);
+                            }}
                             style={[
                               styles.menuItem,
                               {
@@ -256,9 +267,11 @@ export default function ActionsSheet({
                                 thickness={1}
                                 height={24}
                                 color={
-                                  item.destructive
-                                    ? "#FF383C"
-                                    : "rgba(255,255,255,0.92)"
+                                  item?.disabled
+                                    ? Colors.general.color.grayTones.muted40
+                                    : item.destructive
+                                      ? "#FF383C"
+                                      : "rgba(255,255,255,0.92)"
                                 }
                               />
                             ) : null}
@@ -267,6 +280,11 @@ export default function ActionsSheet({
                                 styles.menuItemText,
                                 item.destructive &&
                                   styles.menuItemTextDestructive,
+                                {
+                                  color: item?.disabled
+                                    ? Colors.general.color.grayTones.muted40
+                                    : Colors.general.color.grayTones.main,
+                                },
                               ]}
                             >
                               {item.text}
