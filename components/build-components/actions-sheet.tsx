@@ -106,7 +106,7 @@ export default function ActionsSheet({
     ]).start();
   };
 
-  const closeMenu = () => {
+  const closeMenu = (onComplete?: () => void) => {
     Animated.parallel([
       Animated.timing(overlayOpacity, {
         toValue: 0,
@@ -132,7 +132,10 @@ export default function ActionsSheet({
         easing: Easing.in(Easing.quad),
         useNativeDriver: true,
       }),
-    ]).start(() => setOpen(false));
+    ]).start(() => {
+      setOpen(false);
+      setTimeout(() => onComplete?.(), 50);
+    });
   };
 
   const openMenu = () => {
@@ -144,8 +147,7 @@ export default function ActionsSheet({
   };
 
   const onActionPress = (action: ActionsSheetItem) => {
-    closeMenu();
-    action.onPress();
+    closeMenu(() => action.onPress());
   };
 
   const { width: screenWidth, height: screenHeight } = Dimensions.get("window");

@@ -1,5 +1,7 @@
 import { Colors, typography } from "@/constants/theme";
-import { useSettingsStore } from "@/store/excercise-settings-store";
+import {
+  useSettingsStore
+} from "@/store/excercise-settings-store";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { useContextMenu } from "@/store/menu-store";
 import { DayEnum } from "@/types";
@@ -50,6 +52,8 @@ function ContextMenu(props: {
     (state) => state.queueDeleteExercise,
   );
 
+  const contextMenuAdjust = useContextMenu<boolean>(props.id);
+
   const { measurementUnit, setMeasurementUnit } = useSettingsStore();
 
   const menuItems: ActionsSheetItem[] = [
@@ -69,7 +73,9 @@ function ContextMenu(props: {
     {
       text: "Adjust Increment",
       icon: UpArrowIcon,
-      onPress: () => console.log("Adjust Increment"),
+      onPress: () => {
+        contextMenuAdjust.setValue(true);
+      },
     },
     {
       text: measurementUnit === "kg" ? "Switch to Lbs" : "Switch to Kg",

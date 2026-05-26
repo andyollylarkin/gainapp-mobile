@@ -9,7 +9,12 @@ import { useExerciseSettings } from "@/store/excercise-settings-store";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { DayEnum } from "@/types";
 import * as Crypto from "expo-crypto";
-import React, { RefObject, useCallback, useMemo, useState } from "react";
+import React, {
+  RefObject,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import ColumnDescription, {
   ColumnDescriptionProps,
@@ -21,6 +26,8 @@ import Modal from "./modal";
 import { SetItemProps, SetState } from "./set-item";
 import SwipeableSet from "./swipable-set";
 import { timeToString } from "@/utils/timer-to-string";
+import AdjustLbsModal from "./adjust-lbs-modal";
+import { useContextMenu } from "@/store/menu-store";
 
 export interface ExcerciseTrayProps {
   title: ExcerciseTitleProps;
@@ -235,36 +242,60 @@ export default function ExcerciseTray(props: ExcerciseTrayProps) {
       props.onInputBlur,
     ],
   );
+
   const [timerModalOpen, setTimerModalOpen] = useState<boolean>(false);
-  const { incrementRestTime, restTime, decrementRestTime } =
-    useExerciseSettings();
+  const {
+    incrementIncrement,
+    incrementRestTime,
+    increment,
+    restTime,
+    decrementIncrement,
+    decrementRestTime,
+  } = useExerciseSettings();
+
+  const contextMenuAdjust = useContextMenu<boolean>(props.id);
+  const lbsModalOpen = contextMenuAdjust.value === true;
+  const closeLbsModal = () => contextMenuAdjust.setValue(false);
 
   return (
     <View style={styles.container}>
+      <Modal.Container visible={lbsModalOpen || timerModalOpen}>
+        <AdjustLbsModal
+          openState={lbsModalOpen}
+          currentValue={increment}
+          setClose={closeLbsModal}
+          title="Adjust increment"
+          exerciseTitle="Barbell Bench Press"
+          step={1}
+          onIncrease={() => incrementIncrement(1)}
+          onDecrease={() => decrementIncrement(1)}
+          onDone={closeLbsModal}
+          image={null}
+          caption={""}
+        />
+        <AdjustTimerModal
+          currentValue={restTime}
+          openState={timerModalOpen}
+          setClose={() => setTimerModalOpen(false)}
+          title="Adjust rest timer"
+          exerciseTitle="Barbell Bench Press"
+          caption="Rest 1:30–2:00 min between sets for maximum muscle growth. Take your time if needed"
+          onIncrease={() => {
+            incrementRestTime(15);
+          }}
+          onDecrease={() => {
+            decrementRestTime(15);
+          }}
+          onDone={() => setTimerModalOpen(false)}
+          step={15}
+          image={null}
+        />
+      </Modal.Container>
       <Pressable
         onPress={() => {
           setIsExpanded((current) => !current);
         }}
       >
-        <Modal.Container visible={timerModalOpen}>
-          <AdjustTimerModal
-            currentValue={restTime}
-            openState={timerModalOpen}
-            setClose={() => setTimerModalOpen(false)}
-            title="Adjust rest timer"
-            exerciseTitle="Barbell Bench Press"
-            caption="Rest 1:30–2:00 min between sets for maximum muscle growth. Take your time if needed"
-            onIncrease={() => {
-              incrementRestTime(30);
-            }}
-            onDecrease={() => {
-              decrementRestTime(30);
-            }}
-            onDone={() => setTimerModalOpen(false)}
-            step={30}
-            image={null}
-          />
-        </Modal.Container>
         <ExcerciseTitle
           {...props.title}
           id={props.id}
