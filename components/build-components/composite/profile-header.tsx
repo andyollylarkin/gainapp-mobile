@@ -50,8 +50,22 @@ export default function ProfileHeader({
               maxHeight: 30,
               borderRadius: 15,
               backgroundColor: Colors.general.color.grayTones.muted30,
+              overflow: "hidden",
+              justifyContent: "center",
+              display: "flex",
+              alignItems: "center",
             }}
-          />
+          >
+            <Text
+              style={{
+                ...typography.mediumL,
+                color: Colors.general.color.grayTones.main,
+                textAlign: "center",
+              }}
+            >
+              {userName.charAt(0).toUpperCase()}
+            </Text>
+          </View>
         )}
         <Text
           style={{
