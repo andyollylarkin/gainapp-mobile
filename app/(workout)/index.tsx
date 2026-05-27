@@ -19,6 +19,7 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import DonutChart from "@/components/parts/donut-chat";
 
 const SNAP_ITEM_HEIGHT = 86;
 const ITEM_GAP = 2;
@@ -85,7 +86,6 @@ export default function HomeScreen() {
   const snapOffsets = items.map(
     (_, index) => index * snapStep + (contentTopOffset - 8),
   );
-
 
   return (
     <View
@@ -173,7 +173,7 @@ export default function HomeScreen() {
                   : "Go to next workout"
               }
               onHoldEnd={() => {
-                if (currentDay.equals(currentDaySelected)) {
+                if (!currentDay.equals(currentDaySelected)) {
                   router.push(
                     `/(modals)/excercise?id=${items[0]?.id}&day=${currentDaySelected.name}`,
                   );

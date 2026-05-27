@@ -1,6 +1,7 @@
 import ScaledPressable from "@/components/animated/scaled-pressable";
 import BarChartInfo from "@/components/build-components/composite/bar-chart-info";
 import ChartInfo from "@/components/build-components/composite/chart-info";
+import MealBox from "@/components/build-components/composite/meal-box";
 import ProfileHeader from "@/components/build-components/composite/profile-header";
 import StatsInfo, {
   StatsInfoProps,
@@ -61,6 +62,7 @@ export default function StatsScreen() {
           }
           items={progressItems}
         />
+        <MealBox caloriesToEat={2600} carbs={250} proteins={140} fat={60} />
         <BarChartInfo
           weeklyGoal={3}
           weekStreak={3}
@@ -77,7 +79,7 @@ export default function StatsScreen() {
             { y: 1, x: 6 },
           ]}
         />
-        <View style={styles.workoutContainer}>
+        {/* <View style={styles.workoutContainer}>
           <View style={styles.workoutSubContainer}>
             <View>
               <Text
@@ -108,7 +110,7 @@ export default function StatsScreen() {
               { y: 6, x: new Date("2026-02-05") },
             ]}
           />
-        </View>
+        </View> */}
       </View>
     </ScrollView>
   );
