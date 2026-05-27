@@ -1,19 +1,23 @@
 import SettingsIcon from "@/components/icons/settings";
-import ShareIcon from "@/components/icons/share";
 import { Colors, typography } from "@/constants/theme";
-import { Pressable, Text, View } from "react-native";
+import { useState } from "react";
+import { Pressable, Text, View, Image } from "react-native";
 
 interface ProfileHeaderProps {
   onSharePress?: () => void;
   onSettingsPress?: () => void;
   userName?: string;
+  avatarUrl?: string;
 }
 
 export default function ProfileHeader({
   onSharePress,
   onSettingsPress,
   userName = "Unknown",
+  avatarUrl,
 }: ProfileHeaderProps) {
+  const [imageLoadError, setImageLoadError] = useState<boolean>(false);
+
   return (
     <View
       style={{
@@ -25,16 +29,30 @@ export default function ProfileHeader({
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-        <View
-          style={{
-            width: 30,
-            aspectRatio: 1,
-            maxWidth: 30,
-            maxHeight: 30,
-            borderRadius: 15,
-            backgroundColor: Colors.general.color.grayTones.muted30,
-          }}
-        ></View>
+        {avatarUrl && !imageLoadError ? (
+          <Image
+            src={avatarUrl}
+            onError={() => setImageLoadError(true)}
+            style={{
+              width: 30,
+              aspectRatio: 1,
+              maxWidth: 30,
+              maxHeight: 30,
+              borderRadius: 15,
+            }}
+          />
+        ) : (
+          <View
+            style={{
+              width: 30,
+              aspectRatio: 1,
+              maxWidth: 30,
+              maxHeight: 30,
+              borderRadius: 15,
+              backgroundColor: Colors.general.color.grayTones.muted30,
+            }}
+          />
+        )}
         <Text
           style={{
             ...typography.mediumXL,
@@ -45,18 +63,18 @@ export default function ProfileHeader({
         </Text>
       </View>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-        <Pressable onPress={onSharePress}>
+        {/* <Pressable onPress={onSharePress}>
           <ShareIcon
             width={30}
             height={30}
             color={Colors.general.color.grayTones.main}
           />
-        </Pressable>
+        </Pressable> */}
         <Pressable onPress={onSettingsPress}>
           <SettingsIcon
             width={30}
             height={30}
-            color={Colors.general.color.grayTones.main}
+            color={Colors.general.color.grayTones.muted40}
           />
         </Pressable>
       </View>
