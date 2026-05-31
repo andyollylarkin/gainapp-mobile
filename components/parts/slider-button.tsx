@@ -25,7 +25,7 @@ export interface SliderButtonProps<T extends string> {
   disabled?: boolean;
   textColor: ColorValue;
   text: T;
-  fullWidth?: boolean; // 👈 добавленный пропс
+  fullWidth?: boolean;
 }
 
 export default function SliderButton<T extends string>(

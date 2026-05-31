@@ -6,6 +6,7 @@ import { Pressable, Text, View, Image } from "react-native";
 interface ProfileHeaderProps {
   onSharePress?: () => void;
   onSettingsPress?: () => void;
+  onAvatarPress?: () => void;
   userName?: string;
   avatarUrl?: string;
 }
@@ -13,6 +14,7 @@ interface ProfileHeaderProps {
 export default function ProfileHeader({
   onSharePress,
   onSettingsPress,
+  onAvatarPress,
   userName = "Unknown",
   avatarUrl,
 }: ProfileHeaderProps) {
@@ -29,44 +31,46 @@ export default function ProfileHeader({
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-        {avatarUrl && !imageLoadError ? (
-          <Image
-            src={avatarUrl}
-            onError={() => setImageLoadError(true)}
-            style={{
-              width: 30,
-              aspectRatio: 1,
-              maxWidth: 30,
-              maxHeight: 30,
-              borderRadius: 15,
-            }}
-          />
-        ) : (
-          <View
-            style={{
-              width: 30,
-              aspectRatio: 1,
-              maxWidth: 30,
-              maxHeight: 30,
-              borderRadius: 15,
-              backgroundColor: Colors.general.color.grayTones.muted30,
-              overflow: "hidden",
-              justifyContent: "center",
-              display: "flex",
-              alignItems: "center",
-            }}
-          >
-            <Text
+        <Pressable onPress={onAvatarPress}>
+          {avatarUrl && !imageLoadError ? (
+            <Image
+              src={avatarUrl}
+              onError={() => setImageLoadError(true)}
               style={{
-                ...typography.mediumL,
-                color: Colors.general.color.grayTones.main,
-                textAlign: "center",
+                width: 30,
+                aspectRatio: 1,
+                maxWidth: 30,
+                maxHeight: 30,
+                borderRadius: 15,
+              }}
+            />
+          ) : (
+            <View
+              style={{
+                width: 30,
+                aspectRatio: 1,
+                maxWidth: 30,
+                maxHeight: 30,
+                borderRadius: 15,
+                backgroundColor: Colors.general.color.grayTones.muted30,
+                overflow: "hidden",
+                justifyContent: "center",
+                display: "flex",
+                alignItems: "center",
               }}
             >
-              {userName.charAt(0).toUpperCase()}
-            </Text>
-          </View>
-        )}
+              <Text
+                style={{
+                  ...typography.mediumL,
+                  color: Colors.general.color.grayTones.main,
+                  textAlign: "center",
+                }}
+              >
+                {userName.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+          )}
+        </Pressable>
         <Text
           style={{
             ...typography.mediumXL,

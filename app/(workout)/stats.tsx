@@ -9,6 +9,7 @@ import StatsInfo, {
 import PlusIcon from "@/components/icons/plus";
 import Circle from "@/components/parts/circle";
 import { Colors, typography } from "@/constants/theme";
+import { useGoogleAuth } from "@/hooks/use-google-auth";
 import React, { useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -39,6 +40,7 @@ export default function StatsScreen() {
     },
   ]);
 
+  const { user, signIn, signOut, isSignedIn } = useGoogleAuth();
   const currentWeek = 4;
   return (
     <ScrollView
@@ -50,7 +52,11 @@ export default function StatsScreen() {
     >
       <View style={styles.items}>
         <View style={{ marginBottom: 12 }}>
-          <ProfileHeader />
+          <ProfileHeader
+            userName={user?.name ?? "Unknown"}
+            avatarUrl={user?.avatarUrl ?? undefined}
+            onAvatarPress={isSignedIn ? signOut : signIn}
+          />
         </View>
         <StatsInfo
           title="Weekly Progress"
