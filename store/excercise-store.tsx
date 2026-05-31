@@ -16,7 +16,8 @@ export type PendingSyncActionType =
   | "deleteExerciseSet"
   | "addExercise"
   | "addSuperset"
-  | "deleteExercise";
+  | "deleteExercise"
+  | "replaceExercise";
 
 export interface PendingSyncAction {
   id: string;
@@ -213,6 +214,16 @@ interface ExcerciseStore {
     trayId: string,
     workoutDayExerciseId?: string,
   ) => void;
+  queueReplaceExercise: (
+    day: DayEnum,
+    trayId: string,
+    exercise: {
+      id: string | number;
+      name: string;
+      equipment: string;
+      category?: string;
+    },
+  ) => void;
 
   replaceSetId: (
     tempId: string,
@@ -262,6 +273,7 @@ export const useExcerciseStore = create<ExcerciseStore>()(
       // - Trays pending delete: filtered out (don't re-add from API)
       // - Trays pending add: kept as-is (not on server yet)
       // - Trays with pending set mutations: local version wins (it's ahead)
+      // - Trays with pending replace: local version wins (title not on server yet)
       // - All other trays: API version wins
       mergeWorkoutFromApi: (day, apiWorkout) =>
         set((state) => {
@@ -308,11 +320,29 @@ export const useExcerciseStore = create<ExcerciseStore>()(
               .filter(Boolean),
           );
 
+          const pendingReplaceTrayIds = new Set(
+            state.pendingSyncActions
+              .filter((a) => a.type === "replaceExercise")
+              .map((a) => str(a.payload.trayId))
+              .filter(Boolean),
+          );
+
           const mergedTrays: WorkoutWeekdayTray[] = apiWorkout.trays
             .filter((t) => !pendingDeleteIds.has(t.id))
             .map((apiTray) => {
               const effectiveId = apiTray.workoutDayExerciseId ?? apiTray.id;
               if (traysWithPendingSets.has(effectiveId)) {
+                const localTray = local.trays.find(
+                  (t) =>
+                    t.id === apiTray.id ||
+                    t.workoutDayExerciseId === effectiveId,
+                );
+                return localTray ?? apiTray;
+              }
+              if (
+                pendingReplaceTrayIds.has(effectiveId) ||
+                pendingReplaceTrayIds.has(apiTray.id)
+              ) {
                 const localTray = local.trays.find(
                   (t) =>
                     t.id === apiTray.id ||
@@ -576,6 +606,47 @@ export const useExcerciseStore = create<ExcerciseStore>()(
               [day]: {
                 ...workout,
                 trays: workout.trays.filter((t) => t.id !== trayId),
+              },
+            },
+          };
+        });
+      },
+
+      queueReplaceExercise: (day, trayId, exercise) => {
+        const resolvedId =
+          get()
+            .getWorkoutByWeekdayForDay(day)
+            ?.trays.find((t) => t.id === trayId)?.workoutDayExerciseId ||
+          trayId;
+
+        get().enqueueSyncAction("replaceExercise", {
+          day,
+          trayId: resolvedId,
+          exerciseId: exercise.id,
+          name: exercise.name,
+          equipment: exercise.equipment,
+          category: exercise.category,
+        });
+
+        set((state) => {
+          const workout = state.workoutByWeekdayByDay[day];
+          if (!workout) return state;
+          return {
+            workoutByWeekdayByDay: {
+              ...state.workoutByWeekdayByDay,
+              [day]: {
+                ...workout,
+                trays: workout.trays.map((t) =>
+                  t.id === trayId
+                    ? {
+                        ...t,
+                        title: {
+                          type: String(exercise.equipment),
+                          title: String(exercise.name),
+                        },
+                      }
+                    : t,
+                ),
               },
             },
           };

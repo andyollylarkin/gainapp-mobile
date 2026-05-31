@@ -7,8 +7,9 @@ export default function SelectButtons(props: {
   selectedExercises: Exercise[];
   onAddToWorkout?: (exercises: Exercise[]) => void;
   onAddSuperset?: (exercises: Exercise[]) => void;
+  mode?: "add" | "replace";
 }) {
-  const { selectedExercises } = props;
+  const { selectedExercises, mode = "add" } = props;
   return (
     <View
       style={{
@@ -54,7 +55,11 @@ export default function SelectButtons(props: {
             holdDuration={0}
             disabled={selectedExercises.length === 0}
             holdOverlayColor={Colors.general.color.grayTones.main}
-            text={`Add exercise ${selectedExercises.length > 0 ? `(${selectedExercises.length})` : ""}`}
+            text={
+              mode === "replace"
+                ? "Replace exercise"
+                : `Add exercise ${selectedExercises.length > 0 ? `(${selectedExercises.length})` : ""}`
+            }
             icon={<></>}
             onHoldStart={function (): void {
               if (selectedExercises.length === 0) {

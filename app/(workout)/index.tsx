@@ -173,7 +173,7 @@ export default function HomeScreen() {
                   : "Go to next workout"
               }
               onHoldEnd={() => {
-                if (!currentDay.equals(currentDaySelected)) {
+                if (currentDay.equals(currentDaySelected)) {
                   router.push(
                     `/(modals)/excercise?id=${items[0]?.id}&day=${currentDaySelected.name}`,
                   );

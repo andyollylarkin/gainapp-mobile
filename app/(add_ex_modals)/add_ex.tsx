@@ -96,7 +96,9 @@ const TEST_EX: Exercise[] = [
 ];
 
 export default function AddExerciseModal() {
-  const params: { day: DayEnum; trayId: string } = useLocalSearchParams();
+  const params: { day: DayEnum; trayId: string; mode?: string } =
+    useLocalSearchParams();
+  const isReplaceMode = params.mode === "replace";
   const insets = useSafeAreaInsets();
   const modalHeaderOverlayHeight = insets.top + 22;
   const [searchValue, setSearchValue] = useState<string>("");
@@ -111,10 +113,25 @@ export default function AddExerciseModal() {
 
   const queueAddExercise = useExcerciseStore((state) => state.queueAddExercise);
   const queueAddSuperset = useExcerciseStore((state) => state.queueAddSuperset);
+  const queueReplaceExercise = useExcerciseStore(
+    (state) => state.queueReplaceExercise,
+  );
 
   const handleAddToWorkout = useCallback(
     (exercises: Exercise[]) => {
       if (exercises.length === 0) return;
+
+      if (isReplaceMode) {
+        const ex = exercises[0];
+        queueReplaceExercise(params.day, params.trayId, {
+          id: ex.id,
+          name: ex.name,
+          equipment: ex.equipment,
+          category: ex.category ?? undefined,
+        });
+        router.back();
+        return;
+      }
 
       console.log(
         "[ADD_EX] Adding exercises to day:",
@@ -123,7 +140,6 @@ export default function AddExerciseModal() {
         exercises.map((e) => e.name),
       );
 
-      // Add each exercise individually using queueAddExercise
       exercises.forEach((ex) => {
         queueAddExercise(params.day, {
           id: ex.id,
@@ -143,7 +159,7 @@ export default function AddExerciseModal() {
 
       router.back();
     },
-    [queueAddExercise, params.day],
+    [queueAddExercise, queueReplaceExercise, params.day, params.trayId, isReplaceMode],
   );
 
   const handleAddSuperset = useCallback(
@@ -157,7 +173,6 @@ export default function AddExerciseModal() {
         exercises.map((e) => e.name),
       );
 
-      // Add all exercises as a superset using queueAddSuperset
       queueAddSuperset(
         params.day,
         exercises.map((ex) => ({
@@ -185,6 +200,7 @@ export default function AddExerciseModal() {
         selectedExercises={selectedExercises}
         onAddToWorkout={handleAddToWorkout}
         onAddSuperset={handleAddSuperset}
+        mode={isReplaceMode ? "replace" : "add"}
       />
       <ScrollView
         style={{ flex: 1 }}
@@ -212,7 +228,7 @@ export default function AddExerciseModal() {
               marginBottom: 24,
             }}
           >
-            Add Exercises
+            {isReplaceMode ? "Replace Exercise" : "Add Exercises"}
           </Text>
           <View
             style={{
@@ -291,8 +307,13 @@ export default function AddExerciseModal() {
               ex.equipment === equipmentSelected;
             return matchesSearch && matchesMuscleGroup && matchesEquipment;
           })}
+          singleSelect={isReplaceMode}
           onExerciseSelect={(exercise) => {
-            setSelectedExercises((curr) => [...curr, exercise]);
+            if (isReplaceMode) {
+              setSelectedExercises([exercise]);
+            } else {
+              setSelectedExercises((curr) => [...curr, exercise]);
+            }
           }}
           onExerciseDeselect={(exercise) => {
             setSelectedExercises((curr) =>

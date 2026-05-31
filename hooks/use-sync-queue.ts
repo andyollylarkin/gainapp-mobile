@@ -4,6 +4,7 @@ import { addSuperset } from "@/logic/api/add-superset";
 import { deleteExercise } from "@/logic/api/delete-exercise";
 import { deleteExerciseSet } from "@/logic/api/delete-exercise-set";
 import { getWorkoutByWeekday } from "@/logic/api/exercises-by-weekday";
+import { replaceExercise } from "@/logic/api/replace-exercise";
 import { completeExerciseSet } from "@/logic/api/update-exercise-set";
 import {
   PendingSyncActionType,
@@ -41,6 +42,8 @@ async function runAction(
       return addSuperset(payload as never);
     case "deleteExercise":
       return deleteExercise(payload as never);
+    case "replaceExercise":
+      return replaceExercise(payload as never);
     default:
       throw new Error(`Unknown sync action type: ${type}`);
   }
@@ -159,6 +162,16 @@ export function useSyncQueue() {
                   }
                 });
               }
+              removePendingSyncAction(action.id);
+              const dayKey =
+                typeof action.payload.day === "string"
+                  ? action.payload.day
+                  : null;
+              if (dayKey) await refetchAndMerge(dayKey, measurementUnit);
+              continue;
+            }
+
+            if (action.type === "replaceExercise") {
               removePendingSyncAction(action.id);
               const dayKey =
                 typeof action.payload.day === "string"

@@ -9,6 +9,7 @@ export default function List(props: {
   exercises: Exercise[];
   onExerciseSelect: (exercise: Exercise) => void;
   onExerciseDeselect: (exercise: Exercise) => void;
+  singleSelect?: boolean;
 }): React.ReactElement {
   const grouped = useMemo(() => {
     const sorted = [...props.exercises].sort((a, b) => {
@@ -51,20 +52,26 @@ export default function List(props: {
                   key={exercise.id}
                   exercise={exercise}
                   onCheckedChange={(isChecked) => {
-                    if (isChecked) {
+                    if (isChecked && props.singleSelect) {
+                      setChecked((prev) => {
+                        prev.forEach((id) => {
+                          const ex = props.exercises.find((e) => e.id === id);
+                          if (ex) props.onExerciseDeselect(ex);
+                        });
+                        return new Set([exercise.id]);
+                      });
                       props.onExerciseSelect(exercise);
+                    } else if (isChecked) {
+                      props.onExerciseSelect(exercise);
+                      setChecked((prev) => new Set(prev).add(exercise.id));
                     } else {
                       props.onExerciseDeselect(exercise);
-                    }
-                    setChecked((prev) => {
-                      const next = new Set(prev);
-                      if (isChecked) {
-                        next.add(exercise.id);
-                      } else {
+                      setChecked((prev) => {
+                        const next = new Set(prev);
                         next.delete(exercise.id);
-                      }
-                      return next;
-                    });
+                        return next;
+                      });
+                    }
                   }}
                 />
               ))}

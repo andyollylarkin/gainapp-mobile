@@ -3,6 +3,7 @@ import { useSettingsStore } from "@/store/excercise-settings-store";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { useContextMenu } from "@/store/menu-store";
 import { DayEnum } from "@/types";
+import { router } from "expo-router";
 import { useEffect } from "react";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import Animated, {
@@ -115,7 +116,10 @@ function ContextMenu(props: {
     {
       text: "Replace Exercise",
       icon: SwitchIcon,
-      onPress: () => console.log("Replace Exercise"),
+      onPress: () =>
+        router.push(
+          `/(add_ex_modals)/add_ex?mode=replace&day=${props.day}&trayId=${props.id}`,
+        ),
     },
     {
       text: "Delete Exercise",
