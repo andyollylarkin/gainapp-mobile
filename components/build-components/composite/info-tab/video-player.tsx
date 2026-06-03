@@ -4,6 +4,20 @@ import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { Circle } from "react-native-progress";
 
+function encodeVideoUrl(url: string | undefined): string | undefined {
+  if (!url) return url;
+  try {
+    const parsed = new URL(url);
+    parsed.pathname = parsed.pathname
+      .split("/")
+      .map((seg) => encodeURIComponent(decodeURIComponent(seg)))
+      .join("/");
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
 export default function VideoPlayer({
   videoUrl,
   useCaching = true,
@@ -12,7 +26,7 @@ export default function VideoPlayer({
   useCaching?: boolean;
 }) {
   const player = useVideoPlayer(
-    { uri: videoUrl, useCaching: useCaching },
+    { uri: encodeVideoUrl(videoUrl), useCaching: useCaching },
     (playerInstance) => {
       playerInstance.loop = true;
       playerInstance.muted = true;
@@ -32,7 +46,6 @@ export default function VideoPlayer({
   }, [videoUrl]);
 
   useEffect(() => {
-    console.log("THIS");
     const subscription = player.addListener("statusChange", (status) => {
       if (status.error) {
         console.error("Video error:", status.error);
@@ -78,9 +91,13 @@ export default function VideoPlayer({
       </Text>
     </View>
   ) : (
-    <VideoView
-      player={player}
-      style={{ width: "100%", height: 241, borderRadius: 24 }}
-    />
+    <View style={{ width: "100%", height: 241, borderRadius: 24, overflow: "hidden" }}>
+      <VideoView
+        player={player}
+        contentFit="cover"
+        nativeControls={false}
+        style={{ width: "100%", height: "100%" }}
+      />
+    </View>
   );
 }
