@@ -12,6 +12,7 @@ export interface ExcerciseItemProps {
   onClick?: (id: string) => void;
   image?: ReactElement<ImageProps>;
   id: string;
+  exerciseId?: string;
 }
 
 export default function ExcerciseItem(props: ExcerciseItemProps) {

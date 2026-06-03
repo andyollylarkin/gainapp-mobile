@@ -8,9 +8,11 @@ export default function useCurrentDay(): Day {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const currentDayIndex = new Date().getDay(); // 0 (Sunday) to 6 (Saturday)
-
-      setCurrentDay(Day.fromNumber(currentDayIndex));
+      const currentDayIndex = new Date().getDay();
+      setCurrentDay((prev) => {
+        const next = Day.fromNumber(currentDayIndex);
+        return prev.name === next.name ? prev : next;
+      });
     }, 1000);
 
     return () => clearInterval(interval);

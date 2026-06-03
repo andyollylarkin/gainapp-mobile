@@ -1,6 +1,6 @@
 import config from "@/config";
 import { WorkoutOverviewDescription } from "@/logic/api/ex-description";
-import { KgOrLbs, useSettingsStore } from "@/store/excercise-settings-store";
+import { KgOrLbs } from "@/store/excercise-settings-store";
 import { Day } from "@/types";
 
 const FIXED_USER_ID = "bebf5efa-ea6e-4025-adb3-edcf0b7c5155";
@@ -23,6 +23,7 @@ export interface WorkoutWeekdaySet {
 
 export interface WorkoutWeekdayTray {
   id: string;
+  exerciseId?: string;
   workoutDayExerciseId?: string;
   title: {
     type: string;
@@ -66,18 +67,18 @@ function normalizeWorkoutByWeekdayResponse(
         const trayObj = (trayRaw ?? {}) as Record<string, unknown>;
 
         const id = pickString(trayObj, ["id", "trayId", "tray_id"]) ?? "";
+        const exerciseId = pickString(trayObj, ["exerciseId", "exercise_id"]);
         const workoutDayExerciseId = pickString(trayObj, [
           "workoutDayExerciseId",
           "workout_day_exercise_id",
           "workoutDayExerciseID",
           "workoutDayExcerciseId",
-          "exerciseId",
-          "exercise_id",
         ]);
 
         return {
           ...(trayObj as unknown as WorkoutWeekdayTray),
           id,
+          exerciseId,
           workoutDayExerciseId,
           description: {
             items: [

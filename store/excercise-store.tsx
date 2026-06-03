@@ -165,6 +165,7 @@ interface ExcerciseStore {
     day: DayEnum,
     overview: WorkoutOverviewResponse,
   ) => void;
+  clearWorkoutOverviewForDay: (day: DayEnum) => void;
   getWorkoutOverviewForDay: (day: DayEnum) => WorkoutOverviewResponse | null;
   setWorkoutByWeekdayForDay: (
     day: DayEnum,
@@ -254,6 +255,13 @@ export const useExcerciseStore = create<ExcerciseStore>()(
             [day]: overview,
           },
         })),
+
+      clearWorkoutOverviewForDay: (day) =>
+        set((state) => {
+          const next = { ...state.workoutOverviewByDay };
+          delete next[day];
+          return { workoutOverviewByDay: next };
+        }),
 
       getWorkoutOverviewForDay: (day) =>
         get().workoutOverviewByDay[day] ?? null,
@@ -731,7 +739,7 @@ export const useExcerciseStore = create<ExcerciseStore>()(
       clearPendingSyncActions: () => set({ pendingSyncActions: [] }),
     }),
     {
-      name: "excercise-store-v3",
+      name: "excercise-store-v4",
       storage: createJSONStorage(() => safeStateStorage),
       partialize: (state: ExcerciseStore) => ({
         workoutOverviewByDay: state.workoutOverviewByDay,

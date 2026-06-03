@@ -3,6 +3,7 @@ import ExcerciseItem, {
 } from "@/components/build-components/composite/excercise-item";
 import WorkoutPageDesc from "@/components/build-components/composite/workoutpage-desc";
 import DayPicker from "@/components/build-components/day-picker";
+import GainLogo from "@/components/icons/gain-logo";
 import PlayIcon from "@/components/icons/play";
 import SliderButton from "@/components/parts/slider-button";
 import { Colors, typography } from "@/constants/theme";
@@ -13,11 +14,13 @@ import {
   getWorkoutOverviewByDay,
   WorkoutOverviewResponse,
 } from "@/logic/api/ex-description";
+import { generateAiWorkout } from "@/logic/api/generate-ai";
 import { useExcerciseStore } from "@/store/excercise-store";
 import { useDayStore } from "@/store/day-store";
+import { DayEnum } from "@/types";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DonutChart from "@/components/parts/donut-chat";
 
@@ -34,11 +37,33 @@ export default function HomeScreen() {
     null,
   );
   const [isLoadingOverview, setIsLoadingOverview] = useState(false);
-  const { getWorkoutOverviewForDay, setWorkoutOverviewForDay } =
-    useExcerciseStore();
+  const [isGeneratingWorkout, setIsGeneratingWorkout] = useState(false);
+  const getWorkoutOverviewForDay = useExcerciseStore(
+    (s) => s.getWorkoutOverviewForDay,
+  );
+  const setWorkoutOverviewForDay = useExcerciseStore(
+    (s) => s.setWorkoutOverviewForDay,
+  );
+  const clearWorkoutOverviewForDay = useExcerciseStore(
+    (s) => s.clearWorkoutOverviewForDay,
+  );
   const { workout: workoutByWeekday } = useWorkoutData(currentDaySelected);
 
   useSyncQueue();
+
+  const handleGenerateWorkout = async () => {
+    if (isGeneratingWorkout) return;
+    setIsGeneratingWorkout(true);
+    try {
+      const generated = await generateAiWorkout();
+      setOverview(generated);
+      setWorkoutOverviewForDay(currentDaySelected.name as DayEnum, generated);
+    } catch (error) {
+      console.warn("Failed to generate AI workout", error);
+    } finally {
+      setIsGeneratingWorkout(false);
+    }
+  };
 
   const contentTopOffset = insets.top + 30 + 24;
   const snapStep = SNAP_ITEM_HEIGHT + ITEM_GAP;
@@ -58,6 +83,8 @@ export default function HomeScreen() {
       .catch((error) => {
         if (!isActive) return;
         console.warn("Failed to load workout overview", error);
+        clearWorkoutOverviewForDay(currentDaySelected.name);
+        setOverview(null);
       })
       .finally(() => {
         if (!isActive) return;
@@ -67,7 +94,7 @@ export default function HomeScreen() {
     return () => {
       isActive = false;
     };
-  }, [currentDaySelected, getWorkoutOverviewForDay, setWorkoutOverviewForDay]);
+  }, [currentDaySelected, getWorkoutOverviewForDay, setWorkoutOverviewForDay, clearWorkoutOverviewForDay]);
 
   const items: ExcerciseItemProps[] = workoutByWeekday
     ? workoutByWeekday.trays.map((tray) => ({
@@ -75,12 +102,14 @@ export default function HomeScreen() {
         sets: tray.sets.length,
         reps: tray.sets[0]?.parameter2 ?? 0,
         id: tray.id,
+        exerciseId: tray.exerciseId,
       }))
     : (overview?.exercises ?? []).map((exercise) => ({
         excerciseName: exercise.excerciseName,
         reps: exercise.reps,
         sets: exercise.sets,
         id: exercise.id,
+        exerciseId: exercise.id,
       }));
 
   const snapOffsets = items.map(
@@ -128,7 +157,13 @@ export default function HomeScreen() {
           <RestDayContent />
         ) : overview ? (
           <WorkoutContent items={items} description={overview?.description} />
-        ) : null}
+        ) : (
+          <EmptyWorkoutContent
+            isGenerating={isGeneratingWorkout}
+            onGenerate={handleGenerateWorkout}
+            day={currentDaySelected.name}
+          />
+        )}
         {overview && !overview.isRestDay && (
           <Text
             style={{
@@ -239,6 +274,93 @@ function RestDayContent() {
   );
 }
 
+function EmptyWorkoutContent({
+  isGenerating,
+  onGenerate,
+  day,
+}: {
+  isGenerating: boolean;
+  onGenerate: () => void;
+  day: string;
+}) {
+  return (
+    <View
+      style={{
+        flex: 1,
+        flexDirection: "column",
+        gap: 24,
+        justifyContent: "center",
+      }}
+    >
+      <View
+        style={{
+          flexDirection: "column",
+          gap: 6,
+          alignItems: "center",
+          alignSelf: "center",
+          maxWidth: 248,
+        }}
+      >
+        <Text
+          style={{
+            ...typography.mediumL,
+            color: Colors.general.color.grayTones.main,
+            textAlign: "center",
+          }}
+        >
+          No exercises here yet
+        </Text>
+        <Text
+          style={{
+            ...typography.regularM,
+            color: Colors.general.color.grayTones.muted40,
+            textAlign: "center",
+          }}
+          numberOfLines={2}
+        >
+          You can generate workout with Ai or add exercises manually
+        </Text>
+      </View>
+      <View style={{ gap: 12, alignItems: "center" }}>
+        <View style={{ width: "100%", maxWidth: 248 }}>
+          <SliderButton
+            color={Colors.general.color.grayTones.main}
+            textColor={Colors.general.color.darkTones.bg}
+            text={isGenerating ? "Generating..." : "Generate Workout"}
+            holdDuration={0}
+            onHoldStart={() => {}}
+            onHoldEnd={onGenerate}
+            icon={
+              <GainLogo
+                width={20}
+                height={20}
+                color={Colors.general.color.darkTones.bg}
+                secondaryColor={Colors.general.color.grayTones.main}
+              />
+            }
+            holdOverlayColor={Colors.general.color.grayTones.main}
+          />
+        </View>
+        <Pressable
+          onPress={() =>
+            router.push(`/(add_ex_modals)/add_ex?day=${day}&trayId=${""}`)
+          }
+        >
+          <Text
+            style={{
+              ...typography.mediumM,
+              color: Colors.general.color.grayTones.muted40,
+              textAlign: "center",
+            }}
+          >
+            Add exercise
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
 function WorkoutContent({
   items,
   description,
@@ -269,7 +391,10 @@ function WorkoutContent({
           key={item.id}
           {...item}
           onClick={(id) => {
-            router.push(`/(info_modals)/info?title=Barbell`);
+            const item = items.find((i) => i.id === id);
+            router.push(
+              `/(info_modals)/info?exerciseId=${item?.exerciseId ?? ""}&title=${encodeURIComponent(item?.excerciseName ?? "")}`,
+            );
           }}
           radiusTop={index === 0 ? 24 : 6}
           radiusBottom={index === len - 1 ? 24 : 6}
