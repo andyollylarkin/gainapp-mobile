@@ -3,7 +3,10 @@ import InfoTab from "@/components/build-components/composite/info-tab/info-tab";
 import StatsTab from "@/components/build-components/composite/info-tab/stats-tab";
 import TabViewComponent from "@/components/build-components/tab-view";
 import { Colors, typography } from "@/constants/theme";
-import { getExerciseInfo, ExerciseInfoResponse } from "@/logic/api/exercise-info";
+import {
+  getExerciseInfo,
+  ExerciseInfoResponse,
+} from "@/logic/api/exercise-info";
 import { useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -14,7 +17,9 @@ export default function InfoModal() {
   const insets = useSafeAreaInsets();
   const modalHeaderOverlayHeight = insets.top + 22;
 
-  const [exerciseInfo, setExerciseInfo] = useState<ExerciseInfoResponse | null>(null);
+  const [exerciseInfo, setExerciseInfo] = useState<ExerciseInfoResponse | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!params.exerciseId) return;
@@ -69,8 +74,10 @@ export default function InfoModal() {
               <TabViewComponent.TabItem tab-name="Info">
                 <InfoTab
                   muscles={{
-                    primary: exerciseInfo?.muscles.primary ?? "",
-                    secondary: exerciseInfo?.muscles.secondary ?? "",
+                    primary: (exerciseInfo?.muscles.primary ??
+                      "") as MuscleGroup,
+                    secondary: (exerciseInfo?.muscles.secondary ??
+                      "") as MuscleGroup,
                   }}
                   equipment={
                     exerciseInfo?.equipment.map((eq) => ({
