@@ -7,11 +7,12 @@ import { Colors } from "@/constants/theme";
 type OnboardingNextButtonProps = {
   isLast: boolean;
   onPress: () => void;
+  disabled?: boolean;
 };
 
-export default function OnboardingNextButton({ isLast, onPress }: OnboardingNextButtonProps) {
+export default function OnboardingNextButton({ isLast, onPress, disabled }: OnboardingNextButtonProps) {
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, disabled && styles.wrapperDisabled]}>
       <SliderButton
         fullWidth
         color={Colors.general.color.grayTones.main}
@@ -19,6 +20,7 @@ export default function OnboardingNextButton({ isLast, onPress }: OnboardingNext
         textColor={Colors.general.color.darkTones.bg}
         text={isLast ? "Start" : "Next"}
         holdDuration={0}
+        disabled={disabled}
         icon={
           <ArrowCircleIcon
             width={19}
@@ -38,5 +40,8 @@ const styles = StyleSheet.create({
     width: 129,
     alignSelf: "center",
     paddingBottom: 48,
+  },
+  wrapperDisabled: {
+    opacity: 0.35,
   },
 });

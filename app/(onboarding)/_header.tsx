@@ -15,7 +15,7 @@ export default function OnboardingHeader({ index, total, onBack }: OnboardingHea
   const insets = useSafeAreaInsets();
 
   const progressStyle = useAnimatedStyle(() => ({
-    width: withTiming(`${((index + 1) / total) * 100}%` as any, { duration: 300 }),
+    width: withTiming(`${(index / total) * 100}%` as any, { duration: 300 }),
   }));
 
   return (

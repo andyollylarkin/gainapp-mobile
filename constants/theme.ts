@@ -73,6 +73,12 @@ export const Fonts = Platform.select({
 });
 
 export const typography = StyleSheet.create({
+  mediumExtra: {
+    fontSize: 36,
+    lineHeight: 24 * 1.25,
+    fontWeight: "500",
+    fontFamily: "Inter-Medium",
+  },
   mediumXL: {
     fontSize: 24,
     lineHeight: 24 * 1.25,
