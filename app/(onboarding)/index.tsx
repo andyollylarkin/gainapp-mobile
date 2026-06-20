@@ -10,6 +10,7 @@ import OnboardingNextButton from "./_next-button";
 import Slide9 from "./screens/screen9";
 import Slide10 from "./screens/screen10";
 import Slide5 from "./screens/screen5";
+import Slide11 from "./screens/screen11";
 
 export type SlideProps = {
   onAnswer: (value: unknown) => void;
@@ -23,6 +24,11 @@ type SlideConfig = {
 
 // ─── Add new onboarding slides here ───────────────────────────────────────────
 const SLIDES: SlideConfig[] = [
+  {
+    component: function Slide0({ onAnswer, onValidChange }) {
+      return <Slide11 onAnswer={onAnswer} onValidChange={onValidChange} />;
+    },
+  },
   {
     component: function Slide1({ onAnswer, onValidChange }) {
       return <Slide5 onAnswer={onAnswer} onValidChange={onValidChange} />;
@@ -79,7 +85,11 @@ export default function OnboardingScreen() {
         onAnswer={(v) => setPendingAnswers(v as Record<string, unknown>)}
         onValidChange={setIsValid}
       />
-      <OnboardingNextButton isLast={isLast} onPress={handleNext} disabled={!isValid} />
+      <OnboardingNextButton
+        isLast={isLast}
+        onPress={handleNext}
+        disabled={!isValid}
+      />
     </View>
   );
 }
