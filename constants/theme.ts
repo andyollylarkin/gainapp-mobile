@@ -155,6 +155,12 @@ export const typography = StyleSheet.create({
     lineHeight: 20,
     fontWeight: "400",
   },
+  ibmPlexSemiBold_XL: {
+    fontFamily: "Inter-Bold",
+    fontSize: 40,
+    lineHeight: 40 * 1.25,
+    fontWeight: "400",
+  },
 });
 
 export function useAppFonts() {
@@ -164,6 +170,7 @@ export function useAppFonts() {
     "Inter-SemiBold": require("../fonts/Inter-Semibold.ttf"),
     "Inter-Bold": require("../fonts/Inter-Bold.ttf"),
     "SF-Pro": require("../fonts/SF-Pro.ttf"),
+    "IBMPlex-SemiBold": require("../fonts/IBMPlexSans-SemiBold.ttf"),
   });
 
   return fontsLoaded;

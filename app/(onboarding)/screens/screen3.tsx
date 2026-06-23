@@ -1,6 +1,5 @@
-import { Colors, typography } from "@/constants/theme";
 import { LinearGradient } from "expo-linear-gradient";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
 import type { SlideProps } from "../index";
 
 export default function Screen3({ onAnswer }: SlideProps) {
@@ -33,13 +32,6 @@ export default function Screen3({ onAnswer }: SlideProps) {
           style={styles.fadeBottom}
         />
       </View>
-
-      <View style={styles.textArea}>
-        <Text style={styles.title}>Smart progression</Text>
-        <Text style={styles.subtitle}>
-          {"Your workouts automatically adjust\nto keep you in progressive overload"}
-        </Text>
-      </View>
     </View>
   );
 }
@@ -70,6 +62,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   card: {
+    bottom: 85,
     width: "120%",
   },
   fadeTop: {
@@ -85,24 +78,5 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 120,
-  },
-  textArea: {
-    paddingHorizontal: 20,
-    paddingBottom: 24,
-    alignItems: "center",
-    gap: 12,
-  },
-  title: {
-    ...typography.mediumExtra,
-    fontSize: 40,
-    lineHeight: 48,
-    color: Colors.general.color.grayTones.main,
-    textAlign: "center",
-  },
-  subtitle: {
-    ...typography.regularM,
-    color: Colors.general.color.grayTones.muted50,
-    textAlign: "center",
-    lineHeight: 22,
   },
 });

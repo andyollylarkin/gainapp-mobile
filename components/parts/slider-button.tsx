@@ -16,7 +16,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 export interface SliderButtonProps<T extends string> {
-  icon: React.ReactElement<IconProps>;
+  icon?: React.ReactElement<IconProps>;
   holdDuration: number;
   onHoldStart: () => void;
   onHoldEnd: () => void;

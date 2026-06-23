@@ -8,26 +8,36 @@ type OnboardingNextButtonProps = {
   isLast: boolean;
   onPress: () => void;
   disabled?: boolean;
+  label?: string;
+  wide?: boolean;
+  hideIcon?: boolean;
 };
 
-export default function OnboardingNextButton({ isLast, onPress, disabled }: OnboardingNextButtonProps) {
+export default function OnboardingNextButton({
+  isLast,
+  onPress,
+  disabled,
+  label,
+  wide,
+  hideIcon,
+}: OnboardingNextButtonProps) {
   return (
-    <View style={[styles.wrapper, disabled && styles.wrapperDisabled]}>
+    <View
+      style={[
+        styles.wrapper,
+        wide && styles.wrapperWide,
+        disabled && styles.wrapperDisabled,
+      ]}
+    >
       <SliderButton
         fullWidth
         color={Colors.general.color.grayTones.main}
         holdOverlayColor={Colors.general.color.grayTones.main}
         textColor={Colors.general.color.darkTones.bg}
-        text={isLast ? "Start" : "Next"}
+        text={label ?? (isLast ? "Start" : "Next")}
         holdDuration={0}
         disabled={disabled}
-        icon={
-          <ArrowCircleIcon
-            width={19}
-            height={19}
-            color={Colors.general.color.darkTones.bg}
-          />
-        }
+        {...(!hideIcon && {})}
         onHoldStart={() => {}}
         onHoldEnd={onPress}
       />
@@ -40,6 +50,9 @@ const styles = StyleSheet.create({
     width: 129,
     alignSelf: "center",
     paddingBottom: 48,
+  },
+  wrapperWide: {
+    width: 200,
   },
   wrapperDisabled: {
     opacity: 0.35,

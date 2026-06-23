@@ -1,5 +1,4 @@
-import { Colors, typography } from "@/constants/theme";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, View } from "react-native";
 import type { SlideProps } from "../index";
 
 export default function Screen2({ onAnswer }: SlideProps) {
@@ -26,13 +25,6 @@ export default function Screen2({ onAnswer }: SlideProps) {
           style={styles.card}
           resizeMode="contain"
         />
-      </View>
-
-      <View style={styles.textArea}>
-        <Text style={styles.title}>Personal plan</Text>
-        <Text style={styles.subtitle}>
-          {"Get an AI-generated workout plan\ntailored to your goals and experience"}
-        </Text>
       </View>
     </View>
   );
@@ -62,6 +54,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   card: {
+    bottom: 130,
     width: "85%",
     height: "75%",
   },
@@ -72,24 +65,5 @@ const styles = StyleSheet.create({
     right: 0,
     width: "100%",
     height: 80,
-  },
-  textArea: {
-    paddingHorizontal: 20,
-    paddingBottom: 24,
-    alignItems: "center",
-    gap: 12,
-  },
-  title: {
-    ...typography.mediumExtra,
-    fontSize: 40,
-    lineHeight: 48,
-    color: Colors.general.color.grayTones.main,
-    textAlign: "center",
-  },
-  subtitle: {
-    ...typography.regularM,
-    color: Colors.general.color.grayTones.muted50,
-    textAlign: "center",
-    lineHeight: 22,
   },
 });
