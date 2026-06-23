@@ -156,7 +156,7 @@ export const typography = StyleSheet.create({
     fontWeight: "400",
   },
   ibmPlexSemiBold_XL: {
-    fontFamily: "Inter-Bold",
+    fontFamily: "IBMPlex-SemiBold",
     fontSize: 40,
     lineHeight: 40 * 1.25,
     fontWeight: "400",
