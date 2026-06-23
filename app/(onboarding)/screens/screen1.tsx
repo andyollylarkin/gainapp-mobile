@@ -1,15 +1,18 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { Image, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import type { SlideProps } from "../index";
+import { ImageCachable } from "@/components/image-cachable";
+const backdrop = require("../../../assets/onboarding/screen1/1.png") as number;
 
 export default function Screen1({ onAnswer }: SlideProps) {
   return (
     <View style={styles.container}>
       <View style={styles.backdropWrapper}>
-        <Image
-          source={require("../../../assets/onboarding/screen1/1.png")}
+        <ImageCachable
+          source={backdrop}
           style={styles.backdrop}
-          resizeMode="cover"
+          contentFit="cover"
+          cachePolicy="memory-disk"
         />
       </View>
 

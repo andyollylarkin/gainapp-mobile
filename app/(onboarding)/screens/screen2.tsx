@@ -1,4 +1,5 @@
-import { Image, StyleSheet, View } from "react-native";
+import { ImageCachable } from "@/components/image-cachable";
+import { StyleSheet, View } from "react-native";
 import type { SlideProps } from "../index";
 
 export default function Screen2({ onAnswer }: SlideProps) {
@@ -6,24 +7,24 @@ export default function Screen2({ onAnswer }: SlideProps) {
     <View style={styles.container}>
       <View style={styles.visualArea}>
         <View style={styles.backdropWrapper}>
-          <Image
+          <ImageCachable
             source={require("../../../assets/onboarding/screen2/1.png")}
             style={styles.backdrop}
-            resizeMode="cover"
+            contentFit="cover"
             blurRadius={4}
           />
         </View>
 
-        <Image
+        <ImageCachable
           source={require("../../../assets/onboarding/screen2/3.png")}
           style={styles.shadow}
           resizeMode="stretch"
         />
 
-        <Image
+        <ImageCachable
           source={require("../../../assets/onboarding/screen2/2.png")}
           style={styles.card}
-          resizeMode="contain"
+          contentFit="contain"
         />
       </View>
     </View>

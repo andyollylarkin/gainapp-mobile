@@ -1,25 +1,26 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { Image, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import type { SlideProps } from "../index";
+import { ImageCachable } from "@/components/image-cachable";
 
 export default function Screen3({ onAnswer }: SlideProps) {
   return (
     <View style={styles.container}>
       <View style={styles.visualArea}>
         <View style={styles.backdropWrapper}>
-          <Image
+          <ImageCachable
             source={require("../../../assets/onboarding/screen3/1.png")}
             style={styles.backdrop}
-            resizeMode="cover"
+            contentFit="cover"
             blurRadius={4}
           />
         </View>
 
         <View style={styles.cardContainer}>
-          <Image
+          <ImageCachable
             source={require("../../../assets/onboarding/screen3/2.png")}
             style={styles.card}
-            resizeMode="contain"
+            contentFit="contain"
           />
         </View>
 
@@ -64,6 +65,7 @@ const styles = StyleSheet.create({
   card: {
     bottom: 85,
     width: "120%",
+    height: 400,
   },
   fadeTop: {
     position: "absolute",
