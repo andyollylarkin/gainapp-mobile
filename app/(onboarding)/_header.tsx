@@ -19,7 +19,7 @@ export default function OnboardingHeader({ index, total, onBack }: OnboardingHea
   }));
 
   return (
-    <View style={[styles.header, { marginTop: insets.top + 20 }]}>
+    <View style={[styles.header, { top: insets.top + 20 }]}>
       <Pressable
         style={[styles.backButton, { opacity: index === 0 ? 0.3 : 1 }]}
         onPress={onBack}
@@ -41,6 +41,10 @@ export default function OnboardingHeader({ index, total, onBack }: OnboardingHea
 
 const styles = StyleSheet.create({
   header: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    zIndex: 10,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 20,
